@@ -1,0 +1,29 @@
+﻿ats:
+  app-host: ats-dev.espressif.cn
+  azure:
+    tenant-id: fe4cc778-d58f-47de-a875-5369c39ce9ef
+    client-id: 8723c061-df18-4e3c-a37f-a9b88244926e
+    oauth-config-url: https://login.microsoftonline.com/fe4cc778-d58f-47de-a875-5369c39ce9ef/v2.0/.well-known/openid-configuration
+    vault-url: https://az-vault.vault.azure.net/
+  s3:
+    bucket-name: atsxdev
+  mail:
+    username: ats_test@espressif.com
+  graph:
+    client-id: fe257103-79ed-4432-b682-fd3d0c88f9ae
+    tenant-id: 5faf27fd-3557-4294-9545-8ea74a409f39
+  nowcoder:
+    base-url: https://dapi.nowcoder.com/v1
+    api-key: fanbaoying@espressif.com
+    owner-id: "325720"
+  
+spring:
+  datasource:
+    url: jdbc:mysql://127.0.0.1:3306/ats?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true
+    username: root
+    password: Sabkabaap123
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+

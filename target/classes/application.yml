@@ -1,0 +1,143 @@
+﻿﻿server:
+  port: 8086
+
+spring:
+  application:
+    name: ats-backend
+  profiles:
+    active: ${ATS_ENV:local}
+  main:
+    lazy-initialization: true
+  servlet:
+    multipart:
+      max-file-size: 30MB
+      max-request-size: 30MB
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: Asia/Shanghai
+    property-naming-strategy: SNAKE_CASE
+    serialization:
+      write-dates-as-timestamps: false
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 5
+      idle-timeout: 300000
+      connection-timeout: 20000
+      max-lifetime: 1200000
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: none
+    properties:
+      hibernate:
+        batch_versioned_data: true
+        order_updates: true
+        order_inserts: true
+        jdbc:
+          time_zone: Asia/Shanghai
+          batch_size: 2000
+
+logging:
+  level:
+    root: INFO
+    com.deepconnect.ats: DEBUG
+    org.springframework.security: INFO
+
+rest:
+  connectTimeout: 15
+  readTimeout: 180
+  writeTimeout: 180
+  maxIdleConnections: 300
+  keepAliveDuration: 300
+
+# ---- Common ATS settings (Django settings_base.py / settings.py) ----
+ats:
+  scheduler:
+    enabled: true
+  resume-path:
+    root: resume/
+    attachment: resume/attachment
+  s3:
+    endpoint: https://443455854268.s3-control.ap-east-1.amazonaws.com
+    region: ap-east-1
+    max-pool-connections: 10
+    connect-timeout: 60
+    signature-version: s3v4
+    addressing-style: auto
+    access-key: ${ATS_S3_AK:}
+    secret-key: ${ATS_S3_SK:}
+  mail:
+    email-server: outlook.office365.com
+    client-id: ee39e7ce-a117-4803-a849-c5e3b24870f7
+    tenant-id: 5faf27fd-3557-4294-9545-8ea74a409f39
+    authority: https://login.microsoftonline.com/5faf27fd-3557-4294-9545-8ea74a409f39
+    scope: https://outlook.office365.com/.default
+    secret-key: ${ATS_MAIL_SECRET_KEY:}
+    password: ${ATS_MAIL_PASSWORD:}
+  graph:
+    app-name: ATS APP
+    endpoint: https://graph.microsoft.com/v1.0
+    scopes: https://graph.microsoft.com/.default
+    client-secret: ${ATS_GRAPH_SECRET:}
+  azure:
+    client-secret: ${ATS_AZURE_CLIENT_SECRET:}
+  nowcoder:
+    token: ${ATS_NOWCODER_TOKEN:}
+  email:
+    frequency:
+      daily-total: 200
+      generic: 10/1min
+      per-domain: 10/1min
+
+  # ---- Resume mail XPath parsing (Django MAIL_XPATH) ----
+  xpath:
+    lie-ping:
+      base-info:
+        name: '/html/body/div/table/tbody/tr/td/table[2]/tbody/tr/td/table/tbody/tr[2]/td/table[1]/tbody/tr[2]/td[2]/text()'
+        phone-number: '/html/body/div/table/tbody/tr/td/table[2]/tbody/tr/td/table/tbody/tr[2]/td/table[1]/tbody/tr[3]/td[2]/text()'
+        gender: '/html/body/div/table/tbody/tr/td/table[2]/tbody/tr/td/table/tbody/tr[2]/td/table[1]/tbody/tr[3]/td[4]/text()'
+        email: '/html/body/div/table/tbody/tr/td/table[2]/tbody/tr/td/table/tbody/tr[2]/td/table[1]/tbody/tr[4]/td[2]/div/text()'
+        age: '/html/body/div/table/tbody/tr/td/table[2]/tbody/tr/td/table/tbody/tr[2]/td/table[1]/tbody/tr[4]/td[4]/text()'
+        education-level: '/html/body/div/table/tbody/tr/td/table[2]/tbody/tr/td/table/tbody/tr[2]/td/table[1]/tbody/tr[5]/td[2]/text()'
+        employment-status: '/html/body/div/table/tbody/tr/td/table[2]/tbody/tr/td/table/tbody/tr[2]/td/table[1]/tbody/tr[5]/td[4]/text()'
+        self-assessment: '//tr/td/h2[contains(text(), "自我评价")]/../../following-sibling::tr/td/p/text()'
+        expected-salary: '/html/body/div/table/tbody/tr/td/table[2]/tbody/tr/td/table/tbody/tr[2]/td/table[1]/tbody/tr[15]/td[2]/text()'
+        expected-work-locations: '/html/body/div/table/tbody/tr/td/table[2]/tbody/tr/td/table/tbody/tr[2]/td/table[1]/tbody/tr[18]/td[2]/text()'
+        applied-position: '/html/body/div/table/tbody/tr/td/table[2]/tbody/tr/td/table/tbody/tr[1]/td/h3/text()'
+        notes: '//tr/td/div/p/a[contains(text(), "联系目标人选") and position() = 1]/@href'
+      work-experience:
+        time-interval: './td[1]/text()'
+        company: './td[2]/h3[1]/text()'
+        major-achievement: './/td[2]/p[contains(text(), "- 职责业绩")]/following-sibling::p[1]/text()'
+        title: './td[2]/h3[2]/text()'
+      project-experience:
+        time-interval: './td[1]/text()'
+        project-name: './td[2]/h3/text()'
+        project-role: './/td[2]/p[contains(text(), "- 项目职务")]/text()'
+        belongs-company: './/td[2]/p[contains(text(), "- 所在公司")]/text()'
+        project-desc: './/td[2]/p[contains(text(), "- 项目简介")]/following-sibling::p[1]/text()'
+        project-responsibility: './/td[2]/p[contains(text(), "- 项目职责")]/following-sibling::p[1]/text()'
+        major-achievement: './/td[2]/p[contains(text(), "- 项目业绩")]/following-sibling::p[1]/text()'
+      edu-experience:
+        time-interval: './td[1]/text()'
+        university: './/td[2]/h3/text()'
+        major: './/td[2]/p[contains(text(), "- 专业")]/text()'
+        degree: './/td[2]/p[contains(text(), "- 学历")]/text()'
+      key-node:
+        work-experience-tr: '//tr/td/h2[contains(text(), "工作经历")]/../..'
+        project-experience-tr: '//tr/td/h2[contains(text(), "项目经历")]/../..'
+        edu-experience-tr: '//tr/td/h2[contains(text(), "教育经历")]/../..'
+        self-assessment-tr: '//tr/td/h2[contains(text(), "自我评价")]/../..'
+    linkedin:
+      current-residence-path: '//td[@class="text-xs font-regular text-cool-gray-70 pt-0.25"]/text()'
+      screening-questions-skills-path: '//tr[@data-test-id="screening-questions-skills"]/td/table/tbody/tr/td/text()'
+      work-experiences:
+        current-experience: '//tr[@data-test-id="screening-questions-current-experience"]/td/table/tbody/tr/td/text()'
+        past-experience: '//tr[@data-test-id="screening-questions-past-experience"]/td/table/tbody/tr/td/text()'
+      screening-qualifications:
+        root-path: '//tr[@data-test-id="screening-questions-qualifications"]/td/table/tbody/tr/td/table/tbody/tr'
+        qa-path: './td/table/tbody/tr'
+        question-path: './td/span/text()'
+        answer-path: './td[contains(@style,"#282828")]/text()'
