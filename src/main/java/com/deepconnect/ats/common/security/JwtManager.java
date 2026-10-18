@@ -19,6 +19,7 @@ import com.deepconnect.ats.auth.dto.RolesPermissionsPair;
 import com.deepconnect.ats.auth.service.LoggedInUserDetailsService;
 import com.deepconnect.ats.common.enums.JwtType;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 
@@ -49,7 +50,7 @@ public class JwtManager {
     }
 
     public String generateToken(JwtType jwtType, LoggedInUserDetails userDetails) {
-        RolesPermissionsPair rolePermissions = LoggedInUserDetailsService.getRolePermissionsCodes(userDetails.getAuthorities());
+        RolesPermissionsPair rolePermissions = userDetails.getRolePermissionsCodes(authoritiesRolePrefix);
         return generateToken(jwtType, userDetails.getUserId(), userDetails.getEmail(), 
                 userDetails.isDeactivated(), userDetails.isLocked(), rolePermissions.roleCodes(), rolePermissions.permissionCodes());
     }
@@ -110,13 +111,13 @@ public class JwtManager {
         Set<SimpleGrantedAuthority> authorities = new HashSet<>();
 
         // Extract Roles (Note that roles have the prefix "ROLE_" while permisions don't have any)
-        Set<String> roles = claims.get(rolesFieldName, Set.class);
+        ArrayList<String> roles = claims.get(rolesFieldName, ArrayList.class);
         if (roles != null) {
             roles.forEach(role -> authorities.add(new SimpleGrantedAuthority(role)));
         }
 
         // Extract Permissions
-        Set<String> permissions = claims.get(permissionsFieldName, Set.class);
+        ArrayList<String> permissions = claims.get(permissionsFieldName, ArrayList.class);
         if (permissions != null) {
             permissions.forEach(permission -> authorities.add(new SimpleGrantedAuthority(permission)));
         }

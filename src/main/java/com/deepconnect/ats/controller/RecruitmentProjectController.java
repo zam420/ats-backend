@@ -37,13 +37,13 @@ public class RecruitmentProjectController {
         return ApiResult.success(true);
     }
 
-    @PreAuthorize("hasAnyRole('sa','hrd','proa','hrr','hrrc')")
+    @PreAuthorize("hasAuthority('rps')")
     @GetMapping("/listProjectSummary")
     public ApiResult<List<RecruitmentProject>> listProjectSummary() {
         return ApiResult.success(projectService.listActive());
     }
 
-    @PreAuthorize("hasAnyRole('sa','hrd','proa','hrr','hrrc')")
+    @PreAuthorize("hasAuthority('rps')")
     @GetMapping("/listProject")
     public ApiResult<AtsPageRsp<RecruitmentProject>> listProject(AtsPageQuery query) {
         return ApiResult.success(projectService.listProject(query));

@@ -1,7 +1,6 @@
 package com.deepconnect.ats.auth.service;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -15,7 +14,6 @@ import org.springframework.stereotype.Service;
 
 import com.deepconnect.ats.service.UserService;
 import com.deepconnect.ats.auth.dto.LoggedInUserDetails;
-import com.deepconnect.ats.auth.dto.RolesPermissionsPair;
 import com.deepconnect.ats.common.exception.UnauthorizedException;
 import com.deepconnect.ats.model.User;
 import com.deepconnect.ats.rbac.model.Role;
@@ -27,7 +25,7 @@ import lombok.RequiredArgsConstructor;
 public class LoggedInUserDetailsService implements UserDetailsService {
 
     @Value("${jwt.authoritiesRolePrefix}")
-    private static String authoritiesRolePrefix;
+    private String authoritiesRolePrefix;
     
     private final UserService userService;
 
@@ -57,21 +55,4 @@ public class LoggedInUserDetailsService implements UserDetailsService {
         }
         return new LoggedInUserDetails(user, authorities);
     }
-
-    public static RolesPermissionsPair getRolePermissionsCodes(Collection<? extends GrantedAuthority> authorities) {
-        Set<String> roleCodes = new HashSet<>();
-        Set<String> permissionCodes = new HashSet<>();
-        for (GrantedAuthority authority : authorities) {
-            if (authority.getAuthority().startsWith(authoritiesRolePrefix)) {
-                roleCodes.add(authority.getAuthority());
-            } else {
-                permissionCodes.add(authority.getAuthority());
-            }
-        }
-        return new RolesPermissionsPair(roleCodes, permissionCodes);
-    }
-
-
-    
-
 }

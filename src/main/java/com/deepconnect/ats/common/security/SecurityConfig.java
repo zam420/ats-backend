@@ -79,8 +79,8 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
         //config.setAllowedOriginPatterns(Collections.singletonList("*"));
-        //config.addAllowedOrigin("http://localhost:3000");     // local React dev server
-        config.addAllowedOrigin("https://another-frontend.com"); // add more if needed
+        config.addAllowedOrigin("http://localhost:3001");     // local React dev server
+        //config.addAllowedOrigin("https://another-frontend.com"); // add more if needed
         config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "Accept", "X-Requested-With"));
         config.setAllowCredentials(true);

@@ -1,11 +1,11 @@
 package com.deepconnect.ats.controller;
 
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.beans.factory.annotation.Value;
 
 import com.deepconnect.ats.auth.dto.LoggedInUserDetails;
 import com.deepconnect.ats.auth.dto.RolesPermissionsPair;
 import com.deepconnect.ats.auth.service.AuthService;
-import com.deepconnect.ats.auth.service.LoggedInUserDetailsService;
 import com.deepconnect.ats.common.exception.InternalServerException;
 import com.deepconnect.ats.dto.ApiResult;
 import com.deepconnect.ats.dto.AtsPageQuery;
@@ -31,6 +31,9 @@ public class UserController {
 
     private final UserService userService;
 
+    @Value("${jwt.authoritiesRolePrefix}")
+    private String authoritiesRolePrefix;
+    
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/getUserInfo")
     public ApiResult<UserInfoRsp> getUserInfo() {
@@ -40,7 +43,7 @@ public class UserController {
         }
         User user = userService.getById(userDetails.getUserId());
         UserInfoRsp rsp = UserInfoRsp.from(user);
-        RolesPermissionsPair rolesPermissionsPair = LoggedInUserDetailsService.getRolePermissionsCodes(userDetails.getAuthorities());
+        RolesPermissionsPair rolesPermissionsPair = userDetails.getRolePermissionsCodes(authoritiesRolePrefix);
         rsp.setRoles(rolesPermissionsPair.roleCodes());
         rsp.setPermissions(rolesPermissionsPair.permissionCodes());
         rsp.setNotifications(userService.getNotifications(userDetails.getUserId(), false));

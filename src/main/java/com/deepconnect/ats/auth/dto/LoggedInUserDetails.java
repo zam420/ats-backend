@@ -4,6 +4,9 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import com.deepconnect.ats.model.User;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
+
 import lombok.Data;
 
 @Data 
@@ -66,6 +69,17 @@ public class LoggedInUserDetails implements UserDetails {
         return true;
     }
 
-    
+    public RolesPermissionsPair getRolePermissionsCodes(String authoritiesRolePrefix) {
+        Set<String> roleCodes = new HashSet<>();
+        Set<String> permissionCodes = new HashSet<>();
+        for (GrantedAuthority authority : this.authorities) {
+            if (authority.getAuthority().startsWith(authoritiesRolePrefix)) {
+                roleCodes.add(authority.getAuthority());
+            } else {
+                permissionCodes.add(authority.getAuthority());
+            }
+        }
+        return new RolesPermissionsPair(roleCodes, permissionCodes);
+    }
 
 }
