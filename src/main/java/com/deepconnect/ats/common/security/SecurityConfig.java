@@ -21,7 +21,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import com.deepconnect.ats.service.auth.LoggedInUserDetailsService;
+import com.deepconnect.ats.auth.service.LoggedInUserDetailsService;
 
 import java.util.Arrays;
 

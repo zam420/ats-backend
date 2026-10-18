@@ -1,5 +1,10 @@
 package com.deepconnect.ats.service;
 
+import com.deepconnect.ats.auth.dto.ActivationReq;
+import com.deepconnect.ats.auth.dto.ForgotPasswordReq;
+import com.deepconnect.ats.auth.dto.RegisterReq;
+import com.deepconnect.ats.auth.dto.ResetPasswordReq;
+import com.deepconnect.ats.auth.service.RefreshTokenService;
 import com.deepconnect.ats.common.constant.enums.CommonStatus;
 import com.deepconnect.ats.common.email.EmailContent;
 import com.deepconnect.ats.common.email.EmailLocalizationService;
@@ -15,14 +20,16 @@ import com.deepconnect.ats.dto.AtsPageQuery;
 import com.deepconnect.ats.dto.AtsPageRsp;
 import com.deepconnect.ats.dto.SaveUserReq;
 import com.deepconnect.ats.dto.UserSummary;
-import com.deepconnect.ats.dto.auth.ActivationReq;
-import com.deepconnect.ats.dto.auth.ForgotPasswordReq;
-import com.deepconnect.ats.dto.auth.ResetPasswordReq;
-import com.deepconnect.ats.dto.auth.RegisterReq;
 import com.deepconnect.ats.model.*;
+import com.deepconnect.ats.rbac.model.Role;
+import com.deepconnect.ats.rbac.service.RoleService;
 import com.deepconnect.ats.repository.*;
-import com.deepconnect.ats.service.userrole.service.UserRoleConfigService;
-import com.deepconnect.ats.service.auth.RefreshTokenService;
+import com.deepconnect.ats.rbac.model.UserRole;
+import com.deepconnect.ats.rbac.model.RolePermission;
+import com.deepconnect.ats.rbac.repo.UserRoleRepository;
+import com.deepconnect.ats.rbac.repo.RolePermissionRepository;
+import com.deepconnect.ats.rbac.service.UserRoleConfigService;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -64,9 +71,9 @@ public class UserService {
     private final EmailLocalizationService emailLocalizationService;
     private final EmailService emailService;
     private final UserRoleConfigService userRoleConfigService;
+    private final RoleService roleService;
 
     private final UserRepository userRepository;
-    private final RoleRepository roleRepository;
     private final UserRoleRepository userRoleRepository;
     private final RolePermissionRepository rolePermissionRepository;
     private final UserSettingsRepository userSettingsRepository;
@@ -238,7 +245,7 @@ public class UserService {
         Set<UserRole> userRoles = userRoleRepository.findByUserId(userId);
         if (userRoles.isEmpty()) return new HashSet<>();
         Set<Long> roleIds = userRoles.stream().map(UserRole::getRoleId).collect(Collectors.toSet());
-        return new HashSet<>(roleRepository.findAllById(roleIds));
+        return new HashSet<>(roleService.findAllById(roleIds));
     }
 
     public Set<String> getPermissionCodesByRoleIds(Set<Long> roleIds) {
@@ -256,7 +263,7 @@ public class UserService {
     }
 
     public List<UserSummary> listByRole(String roleCode) {
-        Role role = roleRepository.findByCode(roleCode).orElse(null);
+        Role role = roleService.findByCode(roleCode).orElse(null);
         if (role == null) return new ArrayList<>();
         Set<UserRole> userRoles = userRoleRepository.findByRoleId(role.getId());
         Set<Long> userIds = userRoles.stream().map(UserRole::getUserId).collect(Collectors.toSet());

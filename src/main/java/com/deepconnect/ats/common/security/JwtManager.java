@@ -14,10 +14,10 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
 
+import com.deepconnect.ats.auth.dto.LoggedInUserDetails;
+import com.deepconnect.ats.auth.dto.RolesPermissionsPair;
+import com.deepconnect.ats.auth.service.LoggedInUserDetailsService;
 import com.deepconnect.ats.common.enums.JwtType;
-import com.deepconnect.ats.dto.auth.LoggedInUserDetails;
-import com.deepconnect.ats.dto.auth.RolesPermissionsPair;
-import com.deepconnect.ats.service.auth.LoggedInUserDetailsService;
 
 import java.util.Collection;
 import java.util.Date;

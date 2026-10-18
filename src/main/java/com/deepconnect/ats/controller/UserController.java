@@ -1,6 +1,11 @@
 package com.deepconnect.ats.controller;
 
 import org.springframework.security.access.prepost.PreAuthorize;
+
+import com.deepconnect.ats.auth.dto.LoggedInUserDetails;
+import com.deepconnect.ats.auth.dto.RolesPermissionsPair;
+import com.deepconnect.ats.auth.service.AuthService;
+import com.deepconnect.ats.auth.service.LoggedInUserDetailsService;
 import com.deepconnect.ats.common.exception.InternalServerException;
 import com.deepconnect.ats.dto.ApiResult;
 import com.deepconnect.ats.dto.AtsPageQuery;
@@ -9,12 +14,8 @@ import com.deepconnect.ats.dto.ChangeUserStatusReq;
 import com.deepconnect.ats.dto.SaveUserReq;
 import com.deepconnect.ats.dto.UserInfoRsp;
 import com.deepconnect.ats.dto.UserSummary;
-import com.deepconnect.ats.dto.auth.LoggedInUserDetails;
-import com.deepconnect.ats.dto.auth.RolesPermissionsPair;
 import com.deepconnect.ats.model.User;
 import com.deepconnect.ats.service.UserService;
-import com.deepconnect.ats.service.auth.AuthService;
-import com.deepconnect.ats.service.auth.LoggedInUserDetailsService;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;

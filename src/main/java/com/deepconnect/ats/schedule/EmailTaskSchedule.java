@@ -3,16 +3,17 @@ package com.deepconnect.ats.schedule;
 import com.deepconnect.ats.common.constant.enums.NotificationType;
 import com.deepconnect.ats.model.AtsEmailRecord;
 import com.deepconnect.ats.model.Notification;
-import com.deepconnect.ats.model.Role;
 import com.deepconnect.ats.model.User;
-import com.deepconnect.ats.model.UserRole;
+import com.deepconnect.ats.rbac.model.Role;
+import com.deepconnect.ats.rbac.service.RoleService;
 import com.deepconnect.ats.repository.AtsEmailRecordRepository;
 import com.deepconnect.ats.repository.NotificationRepository;
-import com.deepconnect.ats.repository.RoleRepository;
 import com.deepconnect.ats.repository.TaskRecordRepository;
 import com.deepconnect.ats.repository.UserRepository;
-import com.deepconnect.ats.repository.UserRoleRepository;
 import com.deepconnect.ats.service.mail.MailService;
+import com.deepconnect.ats.rbac.model.UserRole;
+import com.deepconnect.ats.rbac.repo.UserRoleRepository;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -38,10 +39,11 @@ public class EmailTaskSchedule {
     private final TaskRecordRepository taskRecordRepository;
     private final AtsEmailRecordRepository emailRepository;
     private final MailService mailService;
-    private final RoleRepository roleRepository;
+    private final RoleService roleService;
     private final UserRoleRepository userRoleRepository;
     private final UserRepository userRepository;
     private final NotificationRepository notificationRepository;
+
 
     @Scheduled(cron = "0 */5 * * * *", zone = SchedulerConfig.ZONE)
     @Transactional
@@ -77,7 +79,7 @@ public class EmailTaskSchedule {
     private List<User> failureRecipients() {
         List<User> users = new ArrayList<>();
         for (String roleCode : List.of("sa", "hrd")) {
-            Role role = roleRepository.findByCode(roleCode).orElse(null);
+            Role role = roleService.findByCode(roleCode).orElse(null);
             if (role == null) continue;
             for (UserRole userRole : userRoleRepository.findByRoleId(role.getId())) {
                 userRepository.findById(userRole.getUserId()).ifPresent(users::add);

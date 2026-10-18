@@ -17,6 +17,7 @@ SET FOREIGN_KEY_CHECKS = 0;
 -- Model: ats.web.user.models.user_model.User
 CREATE TABLE `ats_user` (
   `id` bigint NOT NULL AUTO_INCREMENT,
+  `public_id` varchar(12) NOT NULL,
   `email` varchar(50) NOT NULL,
   `phone` varchar(64) DEFAULT NULL,
   `password` varchar(256) DEFAULT NULL,
@@ -38,8 +39,7 @@ CREATE TABLE `ats_user` (
   `locked_by_user_id` bigint DEFAULT NULL,
   `locked_by_user_name` varchar(255) DEFAULT NULL,
   `locked_date_time` datetime(6) DEFAULT NULL,
-  `modified_date_time` datetime(6) DEFAULT NULL,
-  `public_id` varchar(12) NOT NULL,
+  `modified_date_time` datetime(6) DEFAULT NULL
   PRIMARY KEY (`id`),
   UNIQUE KEY `email` (`email`),
   KEY `FK550x3vphiuy87lc3f31nq6pbk` (`locked_by_user_id`),
@@ -51,6 +51,7 @@ CREATE TABLE `ats_user` (
 -- Model: ats.web.user.models.role_model.Role
 CREATE TABLE IF NOT EXISTS `ats`.`ats_role` (
   `id` bigint NOT NULL AUTO_INCREMENT,
+  `public_id` varchar(12) NOT NULL,
   `code` varchar(32) NOT NULL,
   `name` varchar(256) NOT NULL,
   PRIMARY KEY (`id`),
@@ -61,6 +62,7 @@ CREATE TABLE IF NOT EXISTS `ats`.`ats_role` (
 -- Model: ats.web.user.models.permission_model.Permission
 CREATE TABLE IF NOT EXISTS `ats`.`ats_permission` (
   `id` bigint NOT NULL AUTO_INCREMENT,
+  `public_id` varchar(12) NOT NULL,
   `code` varchar(32) NOT NULL,
   `name` varchar(256) NOT NULL,
   PRIMARY KEY (`id`),
@@ -71,6 +73,7 @@ CREATE TABLE IF NOT EXISTS `ats`.`ats_permission` (
 -- Model: ats.web.user.models.user_role_model.UserRole
 CREATE TABLE IF NOT EXISTS `ats`.`ats_user_role` (
   `id` bigint NOT NULL AUTO_INCREMENT,
+  `public_id` varchar(12) NOT NULL,
   `user_id` bigint NOT NULL,
   `role_id` bigint NOT NULL,
   `role_code` varchar(32) NOT NULL,

@@ -1,11 +1,11 @@
 package com.deepconnect.ats.service;
 
+import com.deepconnect.ats.auth.service.AuthService;
 import com.deepconnect.ats.common.exception.InternalServerException;
 import com.deepconnect.ats.dto.AtsPageQuery;
 import com.deepconnect.ats.dto.AtsPageRsp;
 import com.deepconnect.ats.model.RecruitmentProject;
 import com.deepconnect.ats.repository.RecruitmentProjectRepository;
-import com.deepconnect.ats.service.auth.AuthService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

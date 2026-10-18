@@ -1,11 +1,11 @@
 package com.deepconnect.ats.service;
 
+import com.deepconnect.ats.auth.service.AuthService;
 import com.deepconnect.ats.dto.AtsPageQuery;
 import com.deepconnect.ats.dto.AtsPageRsp;
 import com.deepconnect.ats.dto.SaveTalentReq;
 import com.deepconnect.ats.model.TalentPool;
 import com.deepconnect.ats.repository.TalentPoolRepository;
-import com.deepconnect.ats.service.auth.AuthService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

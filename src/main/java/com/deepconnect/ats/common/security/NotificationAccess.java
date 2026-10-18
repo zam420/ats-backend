@@ -3,8 +3,8 @@ package com.deepconnect.ats.common.security;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import com.deepconnect.ats.auth.service.AuthService;
 import com.deepconnect.ats.repository.NotificationRepository;
-import com.deepconnect.ats.service.auth.AuthService;
 
 import java.util.Map;
 

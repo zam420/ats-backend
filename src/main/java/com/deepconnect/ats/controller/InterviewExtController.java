@@ -1,9 +1,10 @@
 package com.deepconnect.ats.controller;
 
 import org.springframework.security.access.prepost.PreAuthorize;
+
+import com.deepconnect.ats.auth.service.AuthService;
 import com.deepconnect.ats.common.exception.InternalServerException;
 import com.deepconnect.ats.dto.ApiResult;
-import com.deepconnect.ats.service.auth.AuthService;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;

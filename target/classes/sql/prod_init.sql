@@ -2,48 +2,27 @@
 INSERT INTO ats.ats_user(id, public_id, first_name, last_name, email, phone, password, type, status, join_date) VALUES (1, 'V1StGXR8_Z5j', 'ATS System', 'System', 'ats@espressif.com', NULL, NULL, 2, 0, NOW());
 
 # Users
-insert into ats.ats_user(id, public_id, first_name, last_name, email, type, status, join_date) values (2, 'V1StGXR8_Z5k', 'Admin', 'User', 'ats_admin@fsworkpaper.ai', 0, 0, current_time);
-insert into ats.ats_user(id, public_id, first_name, last_name, email, type, status, join_date) values (3, 'V1StGXR8_Z5l', 'HRD 1', 'User', 'hrd1@fsworkpaper.ai', 0, 0, current_time);
-insert into ats.ats_user(id, public_id, first_name, last_name, email, type, status, join_date) values (4, 'V1StGXR8_Z5m', 'Project Admin 1', 'User', 'pr_admin1@fsworkpaper.ai', 0, 0, current_time);
-insert into ats.ats_user(id, public_id, first_name, last_name, email, type, status, join_date) values (5, 'V1StGXR8_Z5n', 'Rec 1', 'User', 'ats_rec1@fsworkpaper.ai', 0, 0, current_time);
-insert into ats.ats_user(id, public_id, first_name, last_name, email, type, status, join_date) values (6, 'V1StGXR8_Z5o', 'Rec 2', 'User', 'ats_rec2@fsworkpaper.ai', 0, 0, current_time);
-insert into ats.ats_user(id, public_id, first_name, last_name, email, type, status, join_date) values (7, 'V1StGXR8_Z5p', 'Project Admin 2', 'User', 'pr_admin2@fsworkpaper.ai', 0, 0, current_time);
-insert into ats.ats_user(id, public_id, first_name, last_name, email, type, status, join_date) values (8, 'V1StGXR8_Z5q', 'Rec 3', 'User', 'ats_rec3@fsworkpaper.ai', 0, 0, current_time);
-insert into ats.ats_user(id, public_id, first_name, last_name, email, type, status, join_date) values (9, 'V1StGXR8_Z5r', 'Rec Coordinator 1', 'User', 'ats_rec_coord1@fsworkpaper.ai', 0, 0, current_time);
-insert into ats.ats_user(id, public_id, first_name, last_name, email, type, status, join_date) values (10, 'V1StGXR8_Z5s', 'Rec Coordinator 2', 'User', 'ats_rec_coord2@fsworkpaper.ai', 0, 0, current_time);
-insert into ats.ats_user(id, public_id, first_name, last_name, email, type, status, join_date) values (11, 'V1StGXR8_Z5t', 'HRD 2', 'User', 'hrd2@fsworkpaper.ai', 0, 0, current_time);
-insert into ats.ats_user(id, public_id, first_name, last_name, email, type, status, join_date) values (12, 'V1StGXR8_Z5u', 'Rec 4', 'User', 'ats_rec4@fsworkpaper.ai', 0, 0, current_time);
-insert into ats.ats_user(id, public_id, first_name, last_name, email, type, status, join_date) values (13, 'V1StGXR8_Z5v', 'Rec 5', 'User', 'ats_rec5@fsworkpaper.ai', 0, 0, current_time);
+insert into ats.ats_user(id, public_id, first_name, last_name, email, type, status, join_date) values (2, 'TnStGXR8_Z5k', 'Admin', 'User', 'ats_admin@fsworkpaper.ai', 0, 0, current_time);
+insert into ats.ats_user(id, public_id, first_name, last_name, email, type, status, join_date) values (3, 'k5StGXR8_uqP', 'HRD 1', 'User', 'hrd1@fsworkpaper.ai', 0, 0, current_time);
+insert into ats.ats_user(id, public_id, first_name, last_name, email, type, status, join_date) values (4, 'V2InXR8_Z5n', 'Rec 1', 'User', 'ats_rec1@fsworkpaper.ai', 0, 0, current_time);
+insert into ats.ats_user(id, public_id, first_name, last_name, email, type, status, join_date) values (5, 'V1StGXR8_Z5o', 'Rec 2', 'User', 'ats_rec2@fsworkpaper.ai', 0, 0, current_time);
+insert into ats.ats_user(id, public_id, first_name, last_name, email, type, status, join_date) values (6, 'V1StGXR8_Z5t', 'HRD 2', 'User', 'hrd2@fsworkpaper.ai', 0, 0, current_time);
+insert into ats.ats_user(id, public_id, first_name, last_name, email, type, status, join_date) values (7, 'V1StGXR8_Z5u', 'Rec 4', 'User', 'ats_rec4@fsworkpaper.ai', 0, 0, current_time);
 
 # User Roles
-insert into ats.ats_user_role(user_id, role_id, role_code) values (2, 1, 'sa');
-insert into ats.ats_user_role(user_id, role_id, role_code) values (2, 7, 'itv');
-insert into ats.ats_user_role(user_id, role_id, role_code) values (3, 2, 'hrd');
-insert into ats.ats_user_role(user_id, role_id, role_code) values (3, 7, 'itv');
-insert into ats.ats_user_role(user_id, role_id, role_code) values (4, 3, 'proa');
-insert into ats.ats_user_role(user_id, role_id, role_code) values (4, 4, 'hrr');
-insert into ats.ats_user_role(user_id, role_id, role_code) values (4, 7, 'itv');
-insert into ats.ats_user_role(user_id, role_id, role_code) values (5, 4, 'hrr');
-insert into ats.ats_user_role(user_id, role_id, role_code) values (5, 7, 'itv');
-insert into ats.ats_user_role(user_id, role_id, role_code) values (6, 4, 'hrr');
-insert into ats.ats_user_role(user_id, role_id, role_code) values (6, 7, 'itv');
-insert into ats.ats_user_role(user_id, role_id, role_code) values (7, 3, 'proa');
-insert into ats.ats_user_role(user_id, role_id, role_code) values (7, 4, 'hrr');
-insert into ats.ats_user_role(user_id, role_id, role_code) values (7, 7, 'itv');
-insert into ats.ats_user_role(user_id, role_id, role_code) values (8, 4, 'hrr');
-insert into ats.ats_user_role(user_id, role_id, role_code) values (8, 7, 'itv');
-insert into ats.ats_user_role(user_id, role_id, role_code) values (9, 5, 'hrrc');
-insert into ats.ats_user_role(user_id, role_id, role_code) values (9, 7, 'itv');
-insert into ats.ats_user_role(user_id, role_id, role_code) values (10, 5, 'hrrc');
-insert into ats.ats_user_role(user_id, role_id, role_code) values (10, 7, 'itv');
-insert into ats.ats_user_role(user_id, role_id, role_code) values (11, 2, 'hrd');
-insert into ats.ats_user_role(user_id, role_id, role_code) values (11, 3, 'proa');
-insert into ats.ats_user_role(user_id, role_id, role_code) values (11, 7, 'itv');
-insert into ats.ats_user_role(user_id, role_id, role_code) values (12, 4, 'hrr');
-insert into ats.ats_user_role(user_id, role_id, role_code) values (12, 7, 'itv');
-insert into ats.ats_user_role(user_id, role_id, role_code) values (13, 4, 'hrr');
-insert into ats.ats_user_role(user_id, role_id, role_code) values (13, 7, 'itv');
-
+insert into ats.ats_user_role(user_id, public_id, role_id, role_code) values (2, 'TnStGXR8_Z5a', 1, 'sa');
+insert into ats.ats_user_role(user_id, public_id, role_id, role_code) values (2, 'TnStGXR8_Z5b', 7, 'itv');
+insert into ats.ats_user_role(user_id, public_id, role_id, role_code) values (3, 'TnStGXR8_Z5c', 2, 'hrd');
+insert into ats.ats_user_role(user_id, public_id, role_id, role_code) values (3, 'TnStGXR8_Z5d', 7, 'itv');
+insert into ats.ats_user_role(user_id, public_id, role_id, role_code) values (4, 'TnStGXR8_Z5h', 4, 'hrr');
+insert into ats.ats_user_role(user_id, public_id, role_id, role_code) values (4, 'TnStGXR8_Z5i', 7, 'itv');
+insert into ats.ats_user_role(user_id, public_id, role_id, role_code) values (5, 'TnStGXR8_Z5j', 4, 'hrr');
+insert into ats.ats_user_role(user_id, public_id, role_id, role_code) values (5, 'TnStGXR8_Z5k', 7, 'itv');
+insert into ats.ats_user_role(user_id, public_id, role_id, role_code) values (6, 'TnStGXR8_Z5q', 2, 'hrd');
+insert into ats.ats_user_role(user_id, public_id, role_id, role_code) values (6, 'TnStGXR8_Z5r', 3, 'proa');
+insert into ats.ats_user_role(user_id, public_id, role_id, role_code) values (6, 'TnStGXR8_Z5s', 7, 'itv');
+insert into ats.ats_user_role(user_id, public_id, role_id, role_code) values (7, 'TnStGXR8_Z5t', 4, 'hrr');
+insert into ats.ats_user_role(user_id, public_id, role_id, role_code) values (7, 'TnStGXR8_Z5u', 7, 'itv');
 
 
 -- Add System Tasks
@@ -51,10 +30,7 @@ INSERT INTO `ats`.`ats_task_record` (`task_id`, `record`, `sub_id`) VALUES ('ema
 INSERT INTO `ats`.`ats_task_record` (`task_id`, `record`, `sub_id`) VALUES ('email_resume_parser', NOW(), 'campus@espressif.com');
 INSERT INTO `ats`.`ats_task_record` (`task_id`, `record`, `sub_id`) VALUES ('email_resume_parser', NOW(), 'campus.in@espressif.com');
 INSERT INTO `ats`.`ats_task_record` (`task_id`, `record`, `sub_id`) VALUES ('email_resume_parser', NOW(), 'recruit.in@espressif.com');
-INSERT INTO `ats`.`ats_task_record` (`task_id`, `record`, `sub_id`) VALUES ('email_resume_parser', NOW(), 'recruit.sgpr@espressif.com');
 INSERT INTO `ats`.`ats_task_record` (`task_id`, `record`, `sub_id`) VALUES ('email_resume_parser', NOW(), 'recruit.cz@espressif.com');
-INSERT INTO `ats`.`ats_task_record` (`task_id`, `record`, `sub_id`) VALUES ('email_resume_parser', NOW(), 'recruit.br@espressif.com');
-INSERT INTO `ats`.`ats_task_record` (`task_id`, `record`, `sub_id`) VALUES ('email_resume_parser', NOW(), 'recruit.jp@espressif.com');
 INSERT INTO `ats`.`ats_task_record` (`task_id`, `record`, `sub_id`) VALUES ('resume_duplication_schedule', NOW(), NULL);
 INSERT INTO `ats`.`ats_task_record` (`task_id`, `record`, `sub_id`) VALUES ('interview_meeting_rsp_handler_task', NOW(), NULL);
 INSERT INTO `ats`.`ats_task_record` (`task_id`, `record`, `sub_id`) VALUES ('exam_update_nowcoder_schedule', NOW(), NULL);

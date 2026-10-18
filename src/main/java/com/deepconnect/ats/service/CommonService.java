@@ -1,12 +1,12 @@
 package com.deepconnect.ats.service;
 
+import com.deepconnect.ats.auth.service.AuthService;
 import com.deepconnect.ats.model.TableButtonConfig;
 import com.deepconnect.ats.model.TableHeaderConfig;
 import com.deepconnect.ats.model.Tag;
 import com.deepconnect.ats.repository.TableButtonConfigRepository;
 import com.deepconnect.ats.repository.TableHeaderConfigRepository;
 import com.deepconnect.ats.repository.TagRepository;
-import com.deepconnect.ats.service.auth.AuthService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

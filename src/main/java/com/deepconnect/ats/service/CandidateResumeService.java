@@ -1,11 +1,11 @@
 package com.deepconnect.ats.service;
 
+import com.deepconnect.ats.auth.service.AuthService;
 import com.deepconnect.ats.common.constant.enums.ResumeOperationType;
 import com.deepconnect.ats.common.exception.InternalServerException;
 import com.deepconnect.ats.dto.*;
 import com.deepconnect.ats.model.*;
 import com.deepconnect.ats.repository.*;
-import com.deepconnect.ats.service.auth.AuthService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

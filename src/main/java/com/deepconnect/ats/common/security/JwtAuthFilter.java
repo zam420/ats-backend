@@ -1,10 +1,10 @@
 package com.deepconnect.ats.common.security;
 import com.deepconnect.ats.common.enums.JwtType;
+import com.deepconnect.ats.auth.dto.LoggedInUserDetails;
 import com.deepconnect.ats.common.enums.CustomExceptionType;
 import com.deepconnect.ats.common.exception.CustomException;
 import com.deepconnect.ats.common.exception.GlobalExceptionHandler;
 import org.springframework.http.HttpStatus;
-import com.deepconnect.ats.dto.auth.LoggedInUserDetails;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

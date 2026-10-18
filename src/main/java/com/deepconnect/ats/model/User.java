@@ -1,5 +1,7 @@
 package com.deepconnect.ats.model;
 
+import com.deepconnect.ats.common.model.BaseEntity;
+import com.deepconnect.ats.company.model.Company;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
@@ -117,6 +119,13 @@ public class User extends BaseEntity {
 
     @Column(name = "lockedByUserId", nullable = true)
     private Long lockedByUserId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "companyId", referencedColumnName = "id", insertable = false, updatable = false)
+    private Company company; // The company associated with the corporate users. Null for candidates
+
+    @Column(name = "companyId", nullable = true)
+    private Long companyId; // The company associated with the corporate users. Null for candidates
 
     @Column(nullable = true)
     private String lockedByUserName; // Denormalized for quick access

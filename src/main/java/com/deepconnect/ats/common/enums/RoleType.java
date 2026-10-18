@@ -6,9 +6,9 @@ import lombok.Getter;
 
 @Getter
 public enum RoleType {
-    ADMIN(1L, "sa", "Admin"),
-    INTERVIEWER(7L, "itv", "Interviewer"),
-    CANDIDATE(8L, "cdt", "Candidate"),
+    ADMIN(1L, "sa", "System Admin"),
+    INTERVIEWER(6L, "itv", "Interviewer"),
+    CANDIDATE(7L, "cdt", "Candidate"),
     ;
 
     private final Long id;
