@@ -18,6 +18,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Slf4j
@@ -48,7 +49,7 @@ public class InterviewProcessService {
         return interviewProcessRepository.findByPublicId(publicId).map(InterviewProcessDetailsRes::from);
     }
 
-    private String save(InterviewProcess interviewProcess, InterviewProcessReq req) {
+    private String save(InterviewProcess interviewProcess, InterviewProcessReq req, boolean saveRounds) {
         interviewProcess.setModifiedById(AuthService.getLoggedInUserId());
         interviewProcess.setName(req.getName());
         interviewProcess.setNotes(req.getNotes());
@@ -60,7 +61,7 @@ public class InterviewProcessService {
 
         interviewProcess = interviewProcessRepository.save(interviewProcess);
 
-        if (req.getRounds() != null) {
+        if (saveRounds && req.getRounds() != null) {
             for (InterviewProcessRound roundTemplate : req.getRounds()) {
                 roundTemplate.setIptId(interviewProcess.getId());
                 roundTemplate.setInterviewProcess(interviewProcess);
@@ -77,7 +78,7 @@ public class InterviewProcessService {
         Long currentUserId = AuthService.getLoggedInUserId();
         InterviewProcess interviewProcess = new InterviewProcess();
         interviewProcess.setCreatedById(currentUserId);
-        return this.save(interviewProcess, req);
+        return this.save(interviewProcess, req, true);
     }
 
     @Transactional
@@ -88,7 +89,36 @@ public class InterviewProcessService {
         InterviewProcess interviewProcess = interviewProcessRepository.findByPublicId(req.getId())
                 .orElseThrow(() -> new InternalServerException("Interview Process not found: " + req.getId()));
 
-        return this.save(interviewProcess, req);
+        boolean roundsChanged = !roundsEqual(interviewProcess.getRounds(), req.getRounds());
+        if (roundsChanged) {
+            interviewProcessRoundRepository.deleteByInterviewProcessId(interviewProcess.getId());
+        }
+
+        return this.save(interviewProcess, req, roundsChanged);
+    }
+
+    private static boolean roundsEqual(List<InterviewProcessRound> existing, List<InterviewProcessRound> incoming) {
+        List<InterviewProcessRound> a = existing == null ? List.of() : existing;
+        List<InterviewProcessRound> b = incoming == null ? List.of() : incoming;
+        if (a.size() != b.size())
+            return false;
+        for (int i = 0; i < a.size(); i++) {
+            InterviewProcessRound x = a.get(i);
+            InterviewProcessRound y = b.get(i);
+            if (!Objects.equals(x.getOrder(), y.getOrder())
+                    || !Objects.equals(x.getRoundType(), y.getRoundType())) {
+                return false;
+            }
+            List<String> xi = x.getInterviewers() == null ? List.of() : x.getInterviewers();
+            List<String> yi = y.getInterviewers() == null ? List.of() : y.getInterviewers();
+            if (xi.size() != yi.size())
+                return false;
+            for (int j = 0; j < xi.size(); j++) {
+                if (!Objects.equals(String.valueOf(xi.get(j)), String.valueOf(yi.get(j))))
+                    return false;
+            }
+        }
+        return true;
     }
 
     @Transactional
