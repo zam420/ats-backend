@@ -4,13 +4,13 @@ import com.deepconnect.ats.auth.service.AuthService;
 import com.deepconnect.ats.common.exception.InternalServerException;
 import com.deepconnect.ats.interviewprocess.dto.InterviewProcessReq;
 import com.deepconnect.ats.interviewprocess.model.InterviewProcess;
-import com.deepconnect.ats.interviewprocess.model.InterviewProcessRound;
 import com.deepconnect.ats.interviewprocess.repo.InterviewProcessRepository;
-import com.deepconnect.ats.interviewprocess.repo.InterviewProcessRoundRepository;
 import com.deepconnect.ats.dto.AtsPageQueryWithStatus;
 import com.deepconnect.ats.dto.AtsPageRsp;
 import com.deepconnect.ats.interviewprocess.dto.InterviewProcessRes;
 import com.deepconnect.ats.interviewprocess.dto.InterviewProcessDetailsRes;
+import com.deepconnect.ats.interviewprocess.model.InterviewProcessRound;
+import com.deepconnect.ats.interviewprocess.repo.InterviewProcessRoundRepository;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -51,21 +51,25 @@ public class InterviewProcessService {
     private String save(InterviewProcess interviewProcess, InterviewProcessReq req) {
         interviewProcess.setModifiedById(AuthService.getLoggedInUserId());
         interviewProcess.setName(req.getName());
-        if (req.getWorkLocation() != null) interviewProcess.setWorkLocation(req.getWorkLocation());
-        if (req.getNotes() != null) interviewProcess.setNotes(req.getNotes());
-        if (req.getStatus() != null) interviewProcess.setStatus(req.getStatus());
-        else if (req.getStatus() == null) interviewProcess.setStatus(0);
+        interviewProcess.setNotes(req.getNotes());
+        interviewProcess.setWorkLocation(req.getWorkLocation());
+        if (req.getStatus() == null) 
+            interviewProcess.setStatus(0);
+        else
+            interviewProcess.setStatus(req.getStatus());
 
-        InterviewProcess saved = interviewProcessRepository.save(interviewProcess);
+        interviewProcess = interviewProcessRepository.save(interviewProcess);
 
         if (req.getRounds() != null) {
             for (InterviewProcessRound roundTemplate : req.getRounds()) {
-                roundTemplate.setIptId(saved.getId());
+                roundTemplate.setIptId(interviewProcess.getId());
+                roundTemplate.setInterviewProcess(interviewProcess);
+                roundTemplate.setInterviewProcessId(interviewProcess.getId());
                 interviewProcessRoundRepository.save(roundTemplate);
             }
         }
 
-        return saved.getPublicId();
+        return interviewProcess.getPublicId();
     }
 
     @Transactional

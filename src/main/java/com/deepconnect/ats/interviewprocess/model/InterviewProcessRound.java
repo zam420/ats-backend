@@ -43,5 +43,5 @@ public class InterviewProcessRound {
     private InterviewProcess interviewProcess;
 
     @Column(name = "interviewProcess", nullable = false)
-    private Integer interviewProcessId;
+    private Long interviewProcessId;
 }
