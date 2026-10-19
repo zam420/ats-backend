@@ -4,11 +4,9 @@ import lombok.Getter;
 
 @Getter
 public enum InterviewRoundType {
-    WRITTEN_EXAM_ROUND(0, "Online Written Test", CandidateStatusCodes.WRITTEN_EXAM),
-    UNIDIRECTIONAL_VIDEO_ROUND(1, "Video Interview", CandidateStatusCodes.UNIDIRECTIONAL_VIDEO_INTERVIEW),
     HR_ROUND(2, "HR Interview", CandidateStatusCodes.HR_INTERVIEW),
     PROFESSIONAL_ROUND(3, "Professional Interview", CandidateStatusCodes.PROFESSIONAL_INTERVIEW),
-    CEO_ROUND(4, "CEO Interview", CandidateStatusCodes.CEO_INTERVIEW);
+    C_LEVEL_ROUND(4, "C-Level Interview", CandidateStatusCodes.C_LEVEL_INTERVIEW);
 
     private final int value;
     private final String displayName;

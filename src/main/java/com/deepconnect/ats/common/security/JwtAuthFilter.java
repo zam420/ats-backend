@@ -38,7 +38,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 // Locked/unactivated state comes from the token claims (no DB call). It can lag by up to the
                 // token lifetime; /auth/refresh and login always re-read it from the DB.
                 // Unactivated accounts may only call /auth/** (activate, refresh, logout).
-                boolean blockedPath = !request.getServletPath().startsWith("/auth/");
+                boolean blockedPath = !request.getServletPath().startsWith("/api/auth/");
                 CustomException blocked = null;
                 if (userDetails.isLocked()) {
                     blocked = new CustomException(CustomExceptionType.AUTH_ACCOUNT_LOCKED, HttpStatus.FORBIDDEN);

@@ -85,7 +85,7 @@ public class CandidateStatusCalculator {
             case CandidateStatusCodes.PROFESSIONAL_INTERVIEW:
                 subStatus = CandidateSubStatus.TECH_ITV_PENDING;
                 break;
-            case CandidateStatusCodes.CEO_INTERVIEW:
+            case CandidateStatusCodes.C_LEVEL_INTERVIEW:
                 subStatus = CandidateSubStatus.CEO_ITV_PENDING;
                 break;
             case CandidateStatusCodes.OFFER_MANAGEMENT:
@@ -128,7 +128,7 @@ public class CandidateStatusCalculator {
         return switch (round) {
             case HR_ROUND -> CandidateSubStatus.HR_ITV_SCHEDULED;
             case PROFESSIONAL_ROUND -> CandidateSubStatus.TECH_ITV_SCHEDULED;
-            case CEO_ROUND -> CandidateSubStatus.CEO_ITV_SCHEDULED;
+            case C_LEVEL_ROUND -> CandidateSubStatus.CEO_ITV_SCHEDULED;
             default -> null;
         };
     }
@@ -137,7 +137,7 @@ public class CandidateStatusCalculator {
         return switch (round) {
             case HR_ROUND -> CandidateSubStatus.HR_ITV_FEEDBACK_PENDING;
             case PROFESSIONAL_ROUND -> CandidateSubStatus.TECH_ITV_FEEDBACK_PENDING;
-            case CEO_ROUND -> CandidateSubStatus.CEO_ITV_FEEDBACK_PENDING;
+            case C_LEVEL_ROUND -> CandidateSubStatus.CEO_ITV_FEEDBACK_PENDING;
             default -> null;
         };
     }
@@ -146,7 +146,7 @@ public class CandidateStatusCalculator {
         return switch (round) {
             case HR_ROUND -> CandidateSubStatus.HR_ITV_FEEDBACK_RECEIVED;
             case PROFESSIONAL_ROUND -> CandidateSubStatus.TECH_ITV_FEEDBACK_RECEIVED;
-            case CEO_ROUND -> CandidateSubStatus.CEO_ITV_FEEDBACK_RECEIVED;
+            case C_LEVEL_ROUND -> CandidateSubStatus.CEO_ITV_FEEDBACK_RECEIVED;
             default -> null;
         };
     }

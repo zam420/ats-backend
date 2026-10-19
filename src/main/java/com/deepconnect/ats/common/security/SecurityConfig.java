@@ -31,7 +31,8 @@ import java.util.Arrays;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private static final String[] PUBLIC_URLS = {"/auth/register", "/auth/login", "/auth/refresh", "/auth/activate", "/auth/logingoogle", "/error"};
+    private static final String[] PUBLIC_URLS = {
+        "/api/auth/register", "/api/auth/login", "/api/auth/refresh", "/api/auth/activate", "/api/auth/logingoogle", "/error"};
 
     private final JwtAuthFilter jwtAuthFilter;
     private final LoggedInUserDetailsService userDetailsService;

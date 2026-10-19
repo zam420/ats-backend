@@ -78,7 +78,7 @@ public class UserController {
         return ApiResult.success(true);
     }
 
-    @PreAuthorize("hasAnyRole('sa','hrd','proa','hrr','hrrc')")
+    @PreAuthorize("hasAuthority('aus')")
     @GetMapping("/getUserFor")
     public ApiResult<List<UserSummary>> getUserFor(@RequestParam(name = "for", required = false) Integer useFor) {
         return ApiResult.success(userService.listActiveUsers());

@@ -5,7 +5,7 @@ import com.deepconnect.ats.model.CandidateResume;
 import com.deepconnect.ats.model.CandidateWorkExperience;
 import com.deepconnect.ats.model.JobPosition;
 import com.deepconnect.ats.repository.JobPositionRepository;
-import com.deepconnect.ats.repository.RecruitmentProjectRepository;
+import com.deepconnect.ats.recruitmentproject.repo.RecruitmentProjectRepository;
 import com.deepconnect.ats.service.mail.ResumeEmail;
 import org.jsoup.nodes.Document;
 import org.springframework.beans.factory.annotation.Value;

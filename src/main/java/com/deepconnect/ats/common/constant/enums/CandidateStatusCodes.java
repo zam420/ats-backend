@@ -12,7 +12,7 @@ public final class CandidateStatusCodes {
     public static final int WRITTEN_EXAM = 3;
     public static final int HR_INTERVIEW = 4;
     public static final int PROFESSIONAL_INTERVIEW = 5;
-    public static final int CEO_INTERVIEW = 6;
+    public static final int C_LEVEL_INTERVIEW = 6;
     public static final int OFFER_MANAGEMENT = 7;
     public static final int ONBOARDING_MANAGEMENT = 8;
 

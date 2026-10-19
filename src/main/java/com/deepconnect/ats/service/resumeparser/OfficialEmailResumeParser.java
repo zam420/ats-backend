@@ -4,7 +4,7 @@ import com.deepconnect.ats.common.exception.InternalServerException;
 import com.deepconnect.ats.model.CandidateEducationHistory;
 import com.deepconnect.ats.model.CandidateResume;
 import com.deepconnect.ats.repository.JobPositionRepository;
-import com.deepconnect.ats.repository.RecruitmentProjectRepository;
+import com.deepconnect.ats.recruitmentproject.repo.RecruitmentProjectRepository;
 import com.deepconnect.ats.service.mail.ResumeEmail;
 import org.springframework.stereotype.Component;
 

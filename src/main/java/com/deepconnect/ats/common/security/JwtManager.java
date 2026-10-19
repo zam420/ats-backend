@@ -16,7 +16,6 @@ import org.springframework.stereotype.Component;
 
 import com.deepconnect.ats.auth.dto.LoggedInUserDetails;
 import com.deepconnect.ats.auth.dto.RolesPermissionsPair;
-import com.deepconnect.ats.auth.service.LoggedInUserDetailsService;
 import com.deepconnect.ats.common.enums.JwtType;
 
 import java.util.ArrayList;

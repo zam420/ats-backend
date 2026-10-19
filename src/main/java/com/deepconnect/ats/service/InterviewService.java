@@ -8,13 +8,11 @@ import com.deepconnect.ats.repository.*;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Slf4j
 @Service
@@ -25,64 +23,6 @@ public class InterviewService {
     private final InterviewRoundRepository interviewRoundRepository;
     private final InterviewCandidateRepository interviewCandidateRepository;
     private final InterviewFeedbackRepository interviewFeedbackRepository;
-    private final InterviewProcessTemplateRepository processTemplateRepository;
-    private final InterviewRoundTemplateRepository roundTemplateRepository;
-
-    // Process Templates
-    public AtsPageRsp<InterviewProcessTemplate> pageProcessTemplates(AtsPageQuery query) {
-        Page<InterviewProcessTemplate> page = processTemplateRepository.findAll(query.toPageable());
-        return AtsPageRsp.of(page);
-    }
-
-    public List<InterviewProcessTemplate> listProcessTemplates() {
-        return processTemplateRepository.findByStatus(0);
-    }
-
-    public Optional<InterviewProcessTemplate> getProcessTemplateById(Long id) {
-        return processTemplateRepository.findById(id);
-    }
-
-    @Transactional
-    public Long saveProcessTemplate(ProcessTemplateReq req) {
-        Long currentUserId = AuthService.getLoggedInUserId();
-        if (currentUserId == null) currentUserId = 1L;
-
-        InterviewProcessTemplate template;
-        if (req.getId() != null) {
-            template = processTemplateRepository.findById(req.getId())
-                    .orElseThrow(() -> new InternalServerException("Process template not found: " + req.getId()));
-            template.setModifiedById(currentUserId);
-        } else {
-            template = new InterviewProcessTemplate();
-            template.setCreatedById(currentUserId);
-            template.setModifiedById(currentUserId);
-        }
-
-        if (req.getName() != null) template.setName(req.getName());
-        if (req.getWorkLocation() != null) template.setWorkLocation(req.getWorkLocation());
-        if (req.getNotes() != null) template.setNotes(req.getNotes());
-        if (req.getStatus() != null) template.setStatus(req.getStatus());
-        else if (template.getStatus() == null) template.setStatus(0);
-
-        InterviewProcessTemplate saved = processTemplateRepository.save(template);
-
-        if (req.getRounds() != null) {
-            for (InterviewRoundTemplate round : req.getRounds()) {
-                round.setIptId(saved.getId());
-                roundTemplateRepository.save(round);
-            }
-        }
-
-        return saved.getId();
-    }
-
-    @Transactional
-    public void toggleProcessTemplateStatus(Long id, Integer status) {
-        InterviewProcessTemplate template = processTemplateRepository.findById(id)
-                .orElseThrow(() -> new InternalServerException("Template not found: " + id));
-        template.setStatus(status);
-        processTemplateRepository.save(template);
-    }
 
     // Interviews
     @Transactional
