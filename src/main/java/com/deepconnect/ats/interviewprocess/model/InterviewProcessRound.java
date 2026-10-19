@@ -5,6 +5,8 @@ import lombok.*;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
+import com.deepconnect.ats.common.model.BaseEntity;
+
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
 import java.util.List;
@@ -18,18 +20,14 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class InterviewProcessRound {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+public class InterviewProcessRound extends BaseEntity {
 
     @Column(name = "round_type", nullable = false)
     private Integer roundType;
 
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "json")
-    private List<Long> interviewers;
+    private List<String> interviewers;
 
     @Column(name = "`order`", nullable = false)
     private Integer order;

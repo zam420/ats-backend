@@ -5,7 +5,6 @@ import lombok.Data;
 import java.util.List;
 
 import com.deepconnect.ats.interviewprocess.model.InterviewProcess;
-import com.deepconnect.ats.interviewprocess.model.InterviewProcessRound;
 
 @Data
 public class InterviewProcessDetailsRes {
@@ -14,7 +13,7 @@ public class InterviewProcessDetailsRes {
     private Integer workLocation;
     private String notes;
     private Integer status;
-    private List<InterviewProcessRound> rounds;
+    private List<InterviewProcessRoundRes> rounds;
 
     public static InterviewProcessDetailsRes from(InterviewProcess entity) {
         if(entity == null)
@@ -25,11 +24,10 @@ public class InterviewProcessDetailsRes {
         res.setWorkLocation(entity.getWorkLocation());
         res.setNotes(entity.getNotes());
         res.setStatus(entity.getStatus());
-        //res.setRounds(entity.getRounds());
         res.setRounds(
         entity.getRounds() == null
             ? List.of()
-            : entity.getRounds().stream().toList()
+            : entity.getRounds().stream().map(InterviewProcessRoundRes::from).toList()
     );
         return res;
     }

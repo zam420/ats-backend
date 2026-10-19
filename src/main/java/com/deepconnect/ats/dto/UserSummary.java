@@ -11,14 +11,14 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserSummary {
-    private Long id;
+    private String id;
     private String name;
     private String email;
 
     public static UserSummary from(User user) {
         if (user == null) return null;
         return UserSummary.builder()
-                .id(user.getId())
+                .id(user.getPublicId())
                 .name(user.getFullName())
                 .email(user.getEmail())
                 .build();
