@@ -262,11 +262,15 @@ public class UserService {
         return rolePermissions.stream().map(RolePermission::getPermissionCode).distinct().collect(Collectors.toSet());
     }
 
+    // roleCode may be a comma-separated list; users in any of the roles are returned
     public List<UserSummary> listByRole(String roleCode) {
-        Role role = roleService.findByCode(roleCode).orElse(null);
-        if (role == null) return new ArrayList<>();
-        Set<UserRole> userRoles = userRoleRepository.findByRoleId(role.getId());
-        Set<Long> userIds = userRoles.stream().map(UserRole::getUserId).collect(Collectors.toSet());
+        Set<Long> userIds = new HashSet<>();
+        for (String code : roleCode.split(",")) {
+            Role role = roleService.findByCode(code.trim()).orElse(null);
+            if (role == null) continue;
+            userRoleRepository.findByRoleId(role.getId()).forEach(ur -> userIds.add(ur.getUserId()));
+        }
+        if (userIds.isEmpty()) return new ArrayList<>();
         return userRepository.findByIdIn(userIds).stream()
                 .filter(u -> CommonStatus.ACTIVE.getValue().equals(u.getStatus()))
                 .map(UserSummary::from)
@@ -275,6 +279,7 @@ public class UserService {
 
     public List<UserSummary> listActiveUsers() {
         return userRepository.findByStatus(CommonStatus.ACTIVE.getValue()).stream()
+        .filter(user -> user.getType() == 0)//return only corporate users
                 .map(UserSummary::from)
                 .collect(Collectors.toList());
     }

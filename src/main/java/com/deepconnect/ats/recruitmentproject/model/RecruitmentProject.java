@@ -1,10 +1,14 @@
 package com.deepconnect.ats.recruitmentproject.model;
 
+import java.util.List;
+
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
+import com.deepconnect.ats.common.model.OperatableBaseEntity;
+
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
-
-import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "ats_recruitment_project")
@@ -13,11 +17,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class RecruitmentProject {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+public class RecruitmentProject extends OperatableBaseEntity {
 
     @Column(nullable = false, unique = true, length = 50)
     private String name;
@@ -26,13 +26,8 @@ public class RecruitmentProject {
     @Builder.Default
     private Integer status = 0;
 
-    @Column(name = "work_location", nullable = false)
-    private Integer workLocation;
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(columnDefinition = "json", nullable = true)
+    private List<String> projectOwners;
 
-    @CreationTimestamp
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
-
-    @Column(name = "created_by_id", nullable = false)
-    private Long createdById;
 }

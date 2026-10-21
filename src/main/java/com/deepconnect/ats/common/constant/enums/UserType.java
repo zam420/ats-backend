@@ -6,8 +6,8 @@ import lombok.Getter;
 
 @Getter
 public enum UserType implements BaseEnum {
-    ESP_USER(0, "Espressif Employee"),
-    CANDIDATE(1, "Candidate User"),
+    CORPORATE_USER(0, "Corporate User"),
+    CANDIDATE(1, "Candidate"),
     VIRTUAL_USER(2, "System Virtual User");
 
     @JsonValue

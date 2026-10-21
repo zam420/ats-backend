@@ -29,28 +29,8 @@ public class InterviewProcessService {
     private final InterviewProcessRepository interviewProcessRepository;
     private final InterviewProcessRoundRepository interviewProcessRoundRepository;
 
-    public AtsPageRsp<InterviewProcessRes> getAllByPage(AtsPageQueryWithStatus query) {
-        Page<InterviewProcess> page;
-        if(query.getStatus() == null) {
-            page = interviewProcessRepository.findAll(query.toPageable());
-        } else {
-            page = interviewProcessRepository.findByStatus(query.getStatus(), query.toPageable());
-        }
-        return AtsPageRsp.of(page.map(InterviewProcessRes::from));
-    }
-
-    public List<InterviewProcessRes> getAllActive() {
-        List<InterviewProcess> entities = interviewProcessRepository.findByStatus(0);
-        return InterviewProcessRes.fromList(entities);
-    }
-
-    @Transactional(readOnly = true)
-    public Optional<InterviewProcessDetailsRes> findByPublicId(String publicId) {
-        return interviewProcessRepository.findByPublicId(publicId).map(InterviewProcessDetailsRes::from);
-    }
-
     private String save(InterviewProcess interviewProcess, InterviewProcessReq req, boolean saveRounds) {
-        interviewProcess.setModifiedById(AuthService.getLoggedInUserId());
+        interviewProcess.setModifiedByUserId(AuthService.getLoggedInUserId());
         interviewProcess.setName(req.getName());
         interviewProcess.setNotes(req.getNotes());
         interviewProcess.setWorkLocation(req.getWorkLocation());
@@ -77,7 +57,7 @@ public class InterviewProcessService {
     public String create(InterviewProcessReq req) {
         Long currentUserId = AuthService.getLoggedInUserId();
         InterviewProcess interviewProcess = new InterviewProcess();
-        interviewProcess.setCreatedById(currentUserId);
+        interviewProcess.setCreatedByUserId(currentUserId);
         return this.save(interviewProcess, req, true);
     }
 
@@ -127,6 +107,21 @@ public class InterviewProcessService {
                 .orElseThrow(() -> new InternalServerException("Interview Process not found: " + publicId));
         template.setStatus(status);
         interviewProcessRepository.save(template);
+    }
+
+    @Transactional(readOnly = true)
+    public Optional<InterviewProcessDetailsRes> findByPublicId(String publicId) {
+        return interviewProcessRepository.findByPublicId(publicId).map(InterviewProcessDetailsRes::from);
+    }
+
+    public AtsPageRsp<InterviewProcessRes> getAllByPage(AtsPageQueryWithStatus query) {
+        Page<InterviewProcess> page;
+        if(query.getStatus() == null) {
+            page = interviewProcessRepository.findAll(query.toPageable());
+        } else {
+            page = interviewProcessRepository.findByStatus(query.getStatus(), query.toPageable());
+        }
+        return AtsPageRsp.of(page.map(InterviewProcessRes::from));
     }
 
 }

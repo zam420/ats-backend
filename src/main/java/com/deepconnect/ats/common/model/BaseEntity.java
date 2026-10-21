@@ -6,7 +6,9 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.MappedSuperclass;
 import jakarta.persistence.PrePersist;
+import lombok.Data;
 
+@Data 
 @MappedSuperclass
 public abstract class BaseEntity {
 
@@ -24,11 +26,4 @@ public abstract class BaseEntity {
         }
     }
 
-    public Long getId() {
-        return id;
-    }
-
-    public String getPublicId() {
-        return publicId;
-    }
 }

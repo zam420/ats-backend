@@ -2,10 +2,11 @@ package com.deepconnect.ats.recruitmentproject.service;
 
 import com.deepconnect.ats.auth.service.AuthService;
 import com.deepconnect.ats.common.exception.InternalServerException;
-import com.deepconnect.ats.dto.AtsPageQuery;
+import com.deepconnect.ats.dto.AtsPageQueryWithStatus;
 import com.deepconnect.ats.dto.AtsPageRsp;
 import com.deepconnect.ats.recruitmentproject.model.RecruitmentProject;
 import com.deepconnect.ats.recruitmentproject.repo.RecruitmentProjectRepository;
+import com.deepconnect.ats.recruitmentproject.dto.RecruitmentProjectReqRes;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,45 +28,60 @@ public class RecruitmentProjectService {
         return projectRepository.findAll();
     }
 
-    public List<RecruitmentProject> listActive() {
-        return projectRepository.findByStatus(0);
-    }
-
-    public AtsPageRsp<RecruitmentProject> listProject(AtsPageQuery query) {
-        Page<RecruitmentProject> page = projectRepository.findAll(query.toPageable());
-        return AtsPageRsp.of(page);
+    public AtsPageRsp<RecruitmentProjectReqRes> getAllByPage(AtsPageQueryWithStatus query) {
+        Page<RecruitmentProject> page;
+        if(query.getStatus() == null) {
+            page = projectRepository.findAll(query.toPageable());
+        } else {
+            page = projectRepository.findByStatus(query.getStatus(), query.toPageable());
+        }
+        return AtsPageRsp.of(page.map(RecruitmentProjectReqRes::from));
     }
 
     public Optional<RecruitmentProject> getById(Long id) {
         return projectRepository.findById(id);
     }
 
-    @Transactional
-    public Long saveProject(RecruitmentProject req) {
-        Long currentUserId = AuthService.getLoggedInUserId();
-        if (currentUserId == null) currentUserId = 1L;
+    private String save(RecruitmentProject recruitmentProject, RecruitmentProjectReqRes req) {
+        recruitmentProject.setModifiedByUserId(AuthService.getLoggedInUserId());
+        recruitmentProject.setName(req.getName());
+        recruitmentProject.setProjectOwners(req.getProjectOwners());
+        if (req.getStatus() == null) 
+            recruitmentProject.setStatus(0);
+        else
+            recruitmentProject.setStatus(req.getStatus());
 
-        RecruitmentProject project;
-        if (req.getId() != null) {
-            project = projectRepository.findById(req.getId())
-                    .orElseThrow(() -> new InternalServerException("Project not found: " + req.getId()));
-        } else {
-            project = new RecruitmentProject();
-            project.setCreatedById(currentUserId);
-        }
-
-        if (req.getName() != null) project.setName(req.getName());
-        if (req.getStatus() != null) project.setStatus(req.getStatus());
-        if (req.getWorkLocation() != null) project.setWorkLocation(req.getWorkLocation());
-
-        return projectRepository.save(project).getId();
+        return projectRepository.save(recruitmentProject).getPublicId();
     }
 
     @Transactional
-    public void inactiveProject(Long projectId) {
-        RecruitmentProject project = projectRepository.findById(projectId)
-                .orElseThrow(() -> new InternalServerException("Project not found: " + projectId));
-        project.setStatus(1); // 1 = inactive
+    public String create(RecruitmentProjectReqRes req) {
+        RecruitmentProject recruitmentProject = new RecruitmentProject();
+        recruitmentProject.setCreatedByUserId(AuthService.getLoggedInUserId());
+        return this.save(recruitmentProject, req);
+    }
+
+    @Transactional
+    public String update(RecruitmentProjectReqRes req) {
+        if (req.getId() == null)
+            throw new InternalServerException("Invalid Project Id: " + req.getId());
+
+        RecruitmentProject existingProject = projectRepository.findByPublicId(req.getId())
+                .orElseThrow(() -> new InternalServerException("Project not found: " + req.getId()));
+
+        return this.save(existingProject, req);
+    }
+
+    @Transactional
+    public void deactivate(String publicId, Integer status) {
+        RecruitmentProject project = projectRepository.findByPublicId(publicId)
+                .orElseThrow(() -> new InternalServerException("Project not found: " + publicId));
+        project.setStatus(status);
         projectRepository.save(project);
     }
+
+    // @Transactional(readOnly = true)
+    // public Optional<InterviewProcessDetailsRes> findByPublicId(String publicId) {
+    //     return interviewProcessRepository.findByPublicId(publicId).map(InterviewProcessDetailsRes::from);
+    // }
 }

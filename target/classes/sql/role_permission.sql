@@ -10,7 +10,7 @@ INSERT INTO `ats_role` (`id`, `public_id`, `code`, `name`) VALUES(6, 'V1StPos8_Z
 
 -- recruitment
 -- recruitment project
-INSERT INTO `ats_permission`(`id`, `public_id`, `code`, `name`) VALUES(1,'V1StGXR8_Z5s','rpm','recruitment project menu');
+INSERT INTO `ats_permission`(`id`, `public_id`, `code`, `name`) VALUES(1,'V1StGXR8_Z5s','rpm','D menu');
 INSERT INTO `ats_permission`(`id`, `public_id`, `code`, `name`) VALUES(2,'V3mGXR8_Z5l','rpe','recruitment project edit'); -- permission to recruitment project`s create,update,delete
 INSERT INTO `ats_permission`(`id`, `public_id`, `code`, `name`) VALUES(3,'V1QUGRR8_Z5a','rps','recruitment project search');
 -- job position
@@ -81,11 +81,11 @@ INSERT INTO `ats_permission`(`id`, `public_id`, `code`, `name`) VALUES(55,'3NStG
 
 -- role-permission
 -- HR Admin
-INSERT INTO `ats_role_permission`(`role_id`, `permission_id`, `permission_code`) VALUES(2,1,'rpm');#not available to HR Recruiter
-INSERT INTO `ats_role_permission`(`role_id`, `permission_id`, `permission_code`) VALUES(2,2,'rpe');#not available to HR Recruiter
+INSERT INTO `ats_role_permission`(`role_id`, `permission_id`, `permission_code`) VALUES(2,1,'rpm');#not available to HR Recruiter-Recruitment project menu
+INSERT INTO `ats_role_permission`(`role_id`, `permission_id`, `permission_code`) VALUES(2,2,'rpe');#not available to HR Recruiter-Recruitment project edit
 INSERT INTO `ats_role_permission`(`role_id`, `permission_id`, `permission_code`) VALUES(2,3,'rps');
 INSERT INTO `ats_role_permission`(`role_id`, `permission_id`, `permission_code`) VALUES(2,4,'jpm');
-INSERT INTO `ats_role_permission`(`role_id`, `permission_id`, `permission_code`) VALUES(2,5,'jpc');#not available to HR Recruiter
+INSERT INTO `ats_role_permission`(`role_id`, `permission_id`, `permission_code`) VALUES(2,5,'jpc');#not available to HR Recruiter-Job position create
 INSERT INTO `ats_role_permission`(`role_id`, `permission_id`, `permission_code`) VALUES(2,6,'jpe');
 INSERT INTO `ats_role_permission`(`role_id`, `permission_id`, `permission_code`) VALUES(2,7,'jps');
 INSERT INTO `ats_role_permission`(`role_id`, `permission_id`, `permission_code`) VALUES(2,8,'tpm');
@@ -104,12 +104,12 @@ INSERT INTO `ats_role_permission`(`role_id`, `permission_id`, `permission_code`)
 INSERT INTO `ats_role_permission`(`role_id`, `permission_id`, `permission_code`) VALUES(2,23,'rdht');
 INSERT INTO `ats_role_permission`(`role_id`, `permission_id`, `permission_code`) VALUES(2,24,'stm');
 INSERT INTO `ats_role_permission`(`role_id`, `permission_id`, `permission_code`) VALUES(2,25,'etm');
-INSERT INTO `ats_role_permission`(`role_id`, `permission_id`, `permission_code`) VALUES(2,26,'etc');#not available to HR Recruiter
-INSERT INTO `ats_role_permission`(`role_id`, `permission_id`, `permission_code`) VALUES(2,27,'ete');#not available to HR Recruiter
+INSERT INTO `ats_role_permission`(`role_id`, `permission_id`, `permission_code`) VALUES(2,26,'etc');#not available to HR Recruiter - email template create
+INSERT INTO `ats_role_permission`(`role_id`, `permission_id`, `permission_code`) VALUES(2,27,'ete');#not available to HR Recruiter - email template edit
 INSERT INTO `ats_role_permission`(`role_id`, `permission_id`, `permission_code`) VALUES(2,28,'ets');
-INSERT INTO `ats_role_permission`(`role_id`, `permission_id`, `permission_code`) VALUES(2,29,'iptm');#not available to HR Recru
-INSERT INTO `ats_role_permission`(`role_id`, `permission_id`, `permission_code`) VALUES(2,30,'iptc');#not available to HR Recruiter
-INSERT INTO `ats_role_permission`(`role_id`, `permission_id`, `permission_code`) VALUES(2,31,'ipte');#not available to HR Recruiter
+INSERT INTO `ats_role_permission`(`role_id`, `permission_id`, `permission_code`) VALUES(2,29,'iptm');#not available to HR Recruiter - interview process template menu
+INSERT INTO `ats_role_permission`(`role_id`, `permission_id`, `permission_code`) VALUES(2,30,'iptc');#not available to HR Recruiter - interview process template create
+INSERT INTO `ats_role_permission`(`role_id`, `permission_id`, `permission_code`) VALUES(2,31,'ipte');#not available to HR Recruiter - interview process template edit
 INSERT INTO `ats_role_permission`(`role_id`, `permission_id`, `permission_code`) VALUES(2,32,'ipts');
 INSERT INTO `ats_role_permission`(`role_id`, `permission_id`, `permission_code`) VALUES(2,33,'ic');
 INSERT INTO `ats_role_permission`(`role_id`, `permission_id`, `permission_code`) VALUES(2,34,'is');
@@ -124,13 +124,13 @@ INSERT INTO `ats_role_permission`(`role_id`, `permission_id`, `permission_code`)
 INSERT INTO `ats_role_permission`(`role_id`, `permission_id`, `permission_code`) VALUES(2,45,'wtfe');
 INSERT INTO `ats_role_permission`(`role_id`, `permission_id`, `permission_code`) VALUES(2,46,'wthrf');
 INSERT INTO `ats_role_permission`(`role_id`, `permission_id`, `permission_code`) VALUES(2,48,'aus');
-INSERT INTO `ats_role_permission`(`role_id`, `permission_id`, `permission_code`) VALUES(2,49,'uc');#not available to HR Recruiter
-INSERT INTO `ats_role_permission`(`role_id`, `permission_id`, `permission_code`) VALUES(2,50,'ue');#not available to HR Recruiter
-INSERT INTO `ats_role_permission`(`role_id`, `permission_id`, `permission_code`) VALUES(2,51,'umm');#not available to HR Recruiter
-INSERT INTO `ats_role_permission`(`role_id`, `permission_id`, `permission_code`) VALUES(2,52,'tmm');#not available to HR Recruiter
+INSERT INTO `ats_role_permission`(`role_id`, `permission_id`, `permission_code`) VALUES(2,49,'uc');#not available to HR Recruiter - user create
+INSERT INTO `ats_role_permission`(`role_id`, `permission_id`, `permission_code`) VALUES(2,50,'ue');#not available to HR Recruiter - user edit
+INSERT INTO `ats_role_permission`(`role_id`, `permission_id`, `permission_code`) VALUES(2,51,'umm');#not available to HR Recruiter - user manage
+INSERT INTO `ats_role_permission`(`role_id`, `permission_id`, `permission_code`) VALUES(2,52,'tmm');#not available to HR Recruiter - tag manage
 INSERT INTO `ats_role_permission`(`role_id`, `permission_id`, `permission_code`) VALUES(2,53,'ats');
-INSERT INTO `ats_role_permission`(`role_id`, `permission_id`, `permission_code`) VALUES(2,54,'te');#not available to HR Recruiter
-INSERT INTO `ats_role_permission`(`role_id`, `permission_id`, `permission_code`) VALUES(2,55,'td');#not available to HR Recruiter
+INSERT INTO `ats_role_permission`(`role_id`, `permission_id`, `permission_code`) VALUES(2,54,'te');#not available to HR Recruiter - tag edit
+INSERT INTO `ats_role_permission`(`role_id`, `permission_id`, `permission_code`) VALUES(2,55,'td');#not available to HR Recruiter - tag delete
 
 
 -- HR Recruiters
@@ -172,17 +172,17 @@ INSERT INTO `ats_role_permission`(`role_id`, `permission_id`, `permission_code`)
 INSERT INTO `ats_role_permission`(`role_id`, `permission_id`, `permission_code`) VALUES(3,53,'ats');
 
 -- Hiring Managers
-INSERT INTO `ats_role_permission`(`role_id`, `permission_id`, `permission_code`) VALUES(4,16,'crs');
-INSERT INTO `ats_role_permission`(`role_id`, `permission_id`, `permission_code`) VALUES(4,18,'fcrf');
-INSERT INTO `ats_role_permission`(`role_id`, `permission_id`, `permission_code`) VALUES(4,19,'crfs');
-INSERT INTO `ats_role_permission`(`role_id`, `permission_id`, `permission_code`) VALUES(4,20,'rsm');
-INSERT INTO `ats_role_permission`(`role_id`, `permission_id`, `permission_code`) VALUES(4,34,'is');
-INSERT INTO `ats_role_permission`(`role_id`, `permission_id`, `permission_code`) VALUES(4,35,'ifc');
-INSERT INTO `ats_role_permission`(`role_id`, `permission_id`, `permission_code`) VALUES(4,37,'ifs');
-INSERT INTO `ats_role_permission`(`role_id`, `permission_id`, `permission_code`) VALUES(4,38,'mim');
-INSERT INTO `ats_role_permission`(`role_id`, `permission_id`, `permission_code`) VALUES(4,39,'im');
-INSERT INTO `ats_role_permission`(`role_id`, `permission_id`, `permission_code`) VALUES(4,40,'wts');
-INSERT INTO `ats_role_permission`(`role_id`, `permission_id`, `permission_code`) VALUES(4,43,'wtfs');
+INSERT INTO `ats_role_permission`(`role_id`, `permission_id`, `permission_code`) VALUES(4,16,'crs');#candidate resume search
+INSERT INTO `ats_role_permission`(`role_id`, `permission_id`, `permission_code`) VALUES(4,18,'fcrf');#forward candidate resume
+INSERT INTO `ats_role_permission`(`role_id`, `permission_id`, `permission_code`) VALUES(4,19,'crfs');#candidate resume forward search
+INSERT INTO `ats_role_permission`(`role_id`, `permission_id`, `permission_code`) VALUES(4,20,'rsm');#resume search menu
+INSERT INTO `ats_role_permission`(`role_id`, `permission_id`, `permission_code`) VALUES(4,34,'is');#interview search
+INSERT INTO `ats_role_permission`(`role_id`, `permission_id`, `permission_code`) VALUES(4,35,'ifc');#interview feedback create
+INSERT INTO `ats_role_permission`(`role_id`, `permission_id`, `permission_code`) VALUES(4,37,'ifs');#interview feedback search
+INSERT INTO `ats_role_permission`(`role_id`, `permission_id`, `permission_code`) VALUES(4,38,'mim');#my interview menu
+INSERT INTO `ats_role_permission`(`role_id`, `permission_id`, `permission_code`) VALUES(4,39,'im');#interview menu
+INSERT INTO `ats_role_permission`(`role_id`, `permission_id`, `permission_code`) VALUES(4,40,'wts');#written test forward search
+INSERT INTO `ats_role_permission`(`role_id`, `permission_id`, `permission_code`) VALUES(4,43,'wtfs');#written test forward search
 INSERT INTO `ats_role_permission`(`role_id`, `permission_id`, `permission_code`) VALUES(4,53,'ats');
 
 -- Interviewers
