@@ -32,7 +32,7 @@ public class EnumExtController {
     public ApiResult<?> listCandidateStatus() {
         return ApiResult.success(of("TALENT_POOL", -1, "UN_SCREENED", 0, "RESUME_SCREENING", 1,
                 "UNIDIRECTIONAL_VIDEO_INTERVIEW", 2, "WRITTEN_EXAM", 3, "HR_INTERVIEW", 4,
-                "PROFESSIONAL_INTERVIEW", 5, "CEO_INTERVIEW", 6, "OFFER_MANAGEMENT", 7,
+                "FUNCTIONAL_INTERVIEW", 5, "CEO_INTERVIEW", 6, "OFFER_MANAGEMENT", 7,
                 "ONBOARDING_MANAGEMENT", 8));
     }
 
@@ -62,7 +62,7 @@ public class EnumExtController {
     @GetMapping("/listInterviewRoundType")
     public ApiResult<?> listInterviewRoundType() {
         return ApiResult.success(of("WRITTEN_EXAM_ROUND", 0, "UNIDIRECTIONAL_VIDEO_ROUND", 1, "HR_ROUND", 2,
-                "PROFESSIONAL_ROUND", 3, "CEO_ROUND", 4));
+                "FUNCTIONAL_ROUND", 3, "CEO_ROUND", 4));
     }
 
     @GetMapping("/listJobType")

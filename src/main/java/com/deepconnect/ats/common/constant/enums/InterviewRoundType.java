@@ -4,18 +4,17 @@ import lombok.Getter;
 
 @Getter
 public enum InterviewRoundType {
-    HR_ROUND(2, "HR Interview", CandidateStatusCodes.HR_INTERVIEW),
-    PROFESSIONAL_ROUND(3, "Professional Interview", CandidateStatusCodes.PROFESSIONAL_INTERVIEW),
-    C_LEVEL_ROUND(4, "C-Level Interview", CandidateStatusCodes.C_LEVEL_INTERVIEW);
+    HR_ROUND(2, "HR Interview"),
+    FUNCTIONAL_ROUND(3, "Functional Interview"),
+    C_LEVEL_ROUND(4, "Executive Interview"),
+    CUSTOM(5, "Custom Interview");
 
     private final int value;
     private final String displayName;
-    private final int candidateStatus;
 
-    InterviewRoundType(int value, String displayName, int candidateStatus) {
+    InterviewRoundType(int value, String displayName) {
         this.value = value;
         this.displayName = displayName;
-        this.candidateStatus = candidateStatus;
     }
 
     /** get_by_value: returns null when unknown. */
@@ -27,8 +26,4 @@ public enum InterviewRoundType {
         return null;
     }
 
-    /** mapper_to_candidate_status (Django CandidateStatus value). */
-    public int mapperToCandidateStatus() {
-        return candidateStatus;
-    }
 }

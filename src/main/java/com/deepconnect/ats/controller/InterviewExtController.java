@@ -42,7 +42,7 @@ public class InterviewExtController {
         return switch (t) {
             case 1 -> "HR_ROUND";
             case 2 -> "TECHNICAL_ROUND";
-            case 3 -> "PROFESSIONAL_ROUND";
+            case 3 -> "FUNCTIONAL_ROUND";
             case 4 -> "MANAGER_ROUND";
             default -> "ROUND_" + t;
         };

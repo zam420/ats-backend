@@ -81,7 +81,7 @@ public class RecruitmentProjectService {
     }
 
     // @Transactional(readOnly = true)
-    // public Optional<InterviewProcessDetailsRes> findByPublicId(String publicId) {
-    //     return interviewProcessRepository.findByPublicId(publicId).map(InterviewProcessDetailsRes::from);
+    // public Optional<InterviewPlanDetailsRes> findByPublicId(String publicId) {
+    //     return interviewProcessRepository.findByPublicId(publicId).map(InterviewPlanDetailsRes::from);
     // }
 }

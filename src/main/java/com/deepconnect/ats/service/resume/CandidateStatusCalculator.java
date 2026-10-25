@@ -82,10 +82,10 @@ public class CandidateStatusCalculator {
             case CandidateStatusCodes.HR_INTERVIEW:
                 subStatus = CandidateSubStatus.HR_ITV_PENDING;
                 break;
-            case CandidateStatusCodes.PROFESSIONAL_INTERVIEW:
+            case CandidateStatusCodes.FUNCTIONAL_INTERVIEW:
                 subStatus = CandidateSubStatus.TECH_ITV_PENDING;
                 break;
-            case CandidateStatusCodes.C_LEVEL_INTERVIEW:
+            case CandidateStatusCodes.EXECUTIVE_INTERVIEW:
                 subStatus = CandidateSubStatus.CEO_ITV_PENDING;
                 break;
             case CandidateStatusCodes.OFFER_MANAGEMENT:
@@ -112,7 +112,7 @@ public class CandidateStatusCalculator {
         if (interviewRound == null) {
             throw new InternalServerException("interview_round 不能为空");
         }
-        int candidateStatus = interviewRound.mapperToCandidateStatus();
+        int candidateStatus = interviewRound.getValue();
         CandidateSubStatus subStatus = null;
         if (operation == ResumeOperationType.SCHEDULED_INTERVIEW) {
             subStatus = interviewScheduledStatus(interviewRound);
@@ -127,7 +127,7 @@ public class CandidateStatusCalculator {
     private CandidateSubStatus interviewScheduledStatus(InterviewRoundType round) {
         return switch (round) {
             case HR_ROUND -> CandidateSubStatus.HR_ITV_SCHEDULED;
-            case PROFESSIONAL_ROUND -> CandidateSubStatus.TECH_ITV_SCHEDULED;
+            case FUNCTIONAL_ROUND -> CandidateSubStatus.TECH_ITV_SCHEDULED;
             case C_LEVEL_ROUND -> CandidateSubStatus.CEO_ITV_SCHEDULED;
             default -> null;
         };
@@ -136,7 +136,7 @@ public class CandidateStatusCalculator {
     private CandidateSubStatus interviewFeedbackPendingStatus(InterviewRoundType round) {
         return switch (round) {
             case HR_ROUND -> CandidateSubStatus.HR_ITV_FEEDBACK_PENDING;
-            case PROFESSIONAL_ROUND -> CandidateSubStatus.TECH_ITV_FEEDBACK_PENDING;
+            case FUNCTIONAL_ROUND -> CandidateSubStatus.TECH_ITV_FEEDBACK_PENDING;
             case C_LEVEL_ROUND -> CandidateSubStatus.CEO_ITV_FEEDBACK_PENDING;
             default -> null;
         };
@@ -145,7 +145,7 @@ public class CandidateStatusCalculator {
     private CandidateSubStatus interviewFeedbackStatus(InterviewRoundType round) {
         return switch (round) {
             case HR_ROUND -> CandidateSubStatus.HR_ITV_FEEDBACK_RECEIVED;
-            case PROFESSIONAL_ROUND -> CandidateSubStatus.TECH_ITV_FEEDBACK_RECEIVED;
+            case FUNCTIONAL_ROUND -> CandidateSubStatus.TECH_ITV_FEEDBACK_RECEIVED;
             case C_LEVEL_ROUND -> CandidateSubStatus.CEO_ITV_FEEDBACK_RECEIVED;
             default -> null;
         };

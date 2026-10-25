@@ -125,9 +125,9 @@ C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\dto\SaveUs
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\dto\UserInfoRsp.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\dto\UserSummary.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\interviewprocess\controller\InterviewProcessController.java
-C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\interviewprocess\dto\InterviewProcessDetailsRes.java
-C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\interviewprocess\dto\InterviewProcessReq.java
-C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\interviewprocess\dto\InterviewProcessRes.java
+C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\interviewprocess\dto\InterviewPlanDetailsRes.java
+C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\interviewprocess\dto\InterviewPlanReq.java
+C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\interviewprocess\dto\InterviewPlanRes.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\interviewprocess\model\InterviewProcess.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\interviewprocess\model\InterviewRoundTemplate.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\interviewprocess\repo\InterviewProcessRepository.java
