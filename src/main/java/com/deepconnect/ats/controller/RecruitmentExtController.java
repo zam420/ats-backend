@@ -1,7 +1,7 @@
 package com.deepconnect.ats.controller;
 
 import org.springframework.security.access.prepost.PreAuthorize;
-import com.deepconnect.ats.service.UserService;
+import com.deepconnect.ats.user.service.UserService;
 import com.deepconnect.ats.auth.dto.LoggedInUserDetails;
 import com.deepconnect.ats.auth.service.AuthService;
 import com.deepconnect.ats.common.exception.InternalServerException;
@@ -9,7 +9,7 @@ import com.deepconnect.ats.dto.ApiResult;
 import com.deepconnect.ats.dto.DuplicationCheckBody;
 import com.deepconnect.ats.model.AtsEmailRecord;
 import com.deepconnect.ats.model.CandidateResumeDuplication;
-import com.deepconnect.ats.model.User;
+import com.deepconnect.ats.user.model.User;
 import com.deepconnect.ats.service.CandidateDuplicationService;
 import com.deepconnect.ats.service.FileStorageService;
 import com.deepconnect.ats.service.JobPositionImportService;

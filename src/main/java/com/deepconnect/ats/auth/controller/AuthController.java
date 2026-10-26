@@ -4,7 +4,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
-import com.deepconnect.ats.service.UserService;
+import com.deepconnect.ats.user.service.UserService;
 import com.deepconnect.ats.auth.dto.ActivationReq;
 import com.deepconnect.ats.auth.dto.ForgotPasswordReq;
 import com.deepconnect.ats.auth.dto.LoginGoogleReq;

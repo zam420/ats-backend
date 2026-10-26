@@ -8,7 +8,7 @@ import com.deepconnect.ats.model.CandidateResume;
 import com.deepconnect.ats.model.CandidateResumeDuplication;
 import com.deepconnect.ats.model.CandidateWorkExperience;
 import com.deepconnect.ats.model.JobPosition;
-import com.deepconnect.ats.model.User;
+import com.deepconnect.ats.user.model.User;
 import com.deepconnect.ats.repository.CandidateEducationHistoryRepository;
 import com.deepconnect.ats.repository.CandidateRepository;
 import com.deepconnect.ats.repository.CandidateResumeDuplicationRepository;

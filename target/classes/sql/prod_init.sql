@@ -1,3 +1,9 @@
+--Tenants
+# NOTE: While creating tenants, there will be a problem that is that the first user creation requires tenant, but tenant creation in turn requires user
+# TO SOLVE: Temporarily make the created_by_user_id field in tenant table to be nullable
+INSERT INTO ats.tenant(id, public_id, name, description, type, deactivated, created_at, created_by_user_id ) VALUES (1, 'V1StGXR8_Z5j', 'Public', 'For public e.g. for candidates', 'PUBLIC', 0, NOW(), 1);
+INSERT INTO ats.tenant(id, public_id, name, description, type, deactivated, created_at, created_by_user_id ) VALUES (2, 'V1StGXR8_Z5k', 'Owner', 'For ATS owning entity', 'OWNER', 0, NOW(), 1);
+
 -- Add System Virtual User
 INSERT INTO ats.ats_user(id, public_id, first_name, last_name, email, phone, password, type, status, join_date) VALUES (1, 'V1StGXR8_Z5j', 'ATS System', 'System', 'ats@espressif.com', NULL, NULL, 2, 0, NOW());
 

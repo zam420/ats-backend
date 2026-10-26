@@ -8,9 +8,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import com.deepconnect.ats.model.User;
+import com.deepconnect.ats.user.model.User;
 import com.deepconnect.ats.auth.model.RefreshToken;
-import com.deepconnect.ats.service.UserService;
+import com.deepconnect.ats.user.service.UserService;
 import com.deepconnect.ats.auth.dto.LoggedInUserDetails;
 import com.deepconnect.ats.auth.dto.LoginGoogleReq;
 import com.deepconnect.ats.auth.dto.LoginReq;
@@ -45,6 +45,16 @@ public class AuthService {
     public static Long getLoggedInUserId(){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         return (authentication == null) ? null : ((LoggedInUserDetails) authentication.getPrincipal()).getUserId();
+    }
+
+    public static String getLoggedInPublicId(){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        return (authentication == null) ? null : ((LoggedInUserDetails) authentication.getPrincipal()).getPublicId();
+    }
+
+    public static Long getLoggedInTenantId(){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        return (authentication == null) ? null : ((LoggedInUserDetails) authentication.getPrincipal()).getTenantId();
     }
 
     public ResponseEntity<?> login(LoginReq request) {

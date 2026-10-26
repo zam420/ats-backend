@@ -32,7 +32,9 @@ public class JwtManager {
     @Value("${jwt.authoritiesRolePrefix}")
     private String authoritiesRolePrefix;
 
+    private final String tenantIdFieldName = "tenantId";
     private final String userIdFieldName = "userId";
+    private final String userPublicIdFieldName = "userPublicId";
     private final String rolesFieldName = "roles";
     private final String deactivatedFieldName = "deactivated";
     private final String lockedFieldName = "locked";
@@ -50,28 +52,30 @@ public class JwtManager {
 
     public String generateToken(JwtType jwtType, LoggedInUserDetails userDetails) {
         RolesPermissionsPair rolePermissions = userDetails.getRolePermissionsCodes(authoritiesRolePrefix);
-        return generateToken(jwtType, userDetails.getUserId(), userDetails.getEmail(), 
+        return generateToken(jwtType, userDetails.getTenantId(), userDetails.getUserId(), userDetails.getPublicId(), userDetails.getEmail(), 
                 userDetails.isDeactivated(), userDetails.isLocked(), rolePermissions.roleCodes(), rolePermissions.permissionCodes());
     }
     
-    public String generateToken(JwtType jwtType, Long userId, String email, 
+    public String generateToken(JwtType jwtType, Long tenantId, Long userId, String userPublicId, String email, 
         boolean deactivated, boolean locked, 
         Set<String> roles, Set<String> permissions) {
         if (jwtType == JwtType.ENCRYPTED) {
-            return getJwtBuilder(userId, email, deactivated, locked, roles, permissions)
+            return getJwtBuilder(tenantId, userId, userPublicId, email, deactivated, locked, roles, permissions)
                 .encryptWith(encryptionUtil.getEncryptionKey(), EncryptionUtil.encAlgoType)
                 .compact();
         } else {
-            return getJwtBuilder(userId, email, deactivated, locked, roles, permissions)
+            return getJwtBuilder(tenantId, userId, userPublicId, email, deactivated, locked, roles, permissions)
             .signWith(signingUtil.getSignKey())
             .compact();
         }
     }
 
-    private JwtBuilder getJwtBuilder(Long userId, String email, boolean deactivated, boolean locked, Set<String> roles, Set<String> permissions) {
+    private JwtBuilder getJwtBuilder(Long tenantId, Long userId, String userPublicId, String email, boolean deactivated, boolean locked, Set<String> roles, Set<String> permissions) {
         return Jwts.builder()
                 .subject(email)
+                .claim(tenantIdFieldName, tenantId)        // ✅ Store tenant ID in token (currently null, set appropriately)
                 .claim(userIdFieldName, userId)         // ✅ Store user ID in token
+                .claim(userPublicIdFieldName, userPublicId)   // ✅ Store user public ID in token (assuming email as public ID for now)
                 .claim(rolesFieldName, roles)          // e.g., ["ROLE_ADMIN", "ROLE_USER"]
                 .claim(permissionsFieldName, permissions)     // e.g., ["PERM_READ", "PERM_WRITE"]
                 .claim(deactivatedFieldName, deactivated)
@@ -130,8 +134,14 @@ public class JwtManager {
             // Tokens issued before these claims existed are treated as active/unlocked
             boolean deactivated = Boolean.TRUE.equals(claims.get(deactivatedFieldName, Boolean.class));
             boolean locked = Boolean.TRUE.equals(claims.get(lockedFieldName, Boolean.class));
-            return new LoggedInUserDetails(claims.get(userIdFieldName, Long.class), claims.getSubject(),
-                    deactivated, locked, getAuthoritiesFromToken(claims));
+            return new LoggedInUserDetails(
+                claims.get(tenantIdFieldName, Long.class),
+                claims.get(userIdFieldName, Long.class), 
+                claims.get(userPublicIdFieldName, String.class), 
+                claims.getSubject(),
+                deactivated, 
+                locked, 
+                getAuthoritiesFromToken(claims));
         }
         return null;
     }

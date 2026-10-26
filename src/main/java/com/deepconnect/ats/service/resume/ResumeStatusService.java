@@ -5,7 +5,7 @@ import com.deepconnect.ats.common.constant.enums.ResumeOperationType;
 import com.deepconnect.ats.common.utils.TimeUtil;
 import com.deepconnect.ats.model.CandidateResume;
 import com.deepconnect.ats.model.ResumeOperationRecord;
-import com.deepconnect.ats.model.User;
+import com.deepconnect.ats.user.model.User;
 import com.deepconnect.ats.repository.CandidateResumeRepository;
 import com.deepconnect.ats.repository.ResumeOperationRecordRepository;
 import com.deepconnect.ats.repository.ScheduleJobQueryRepository;

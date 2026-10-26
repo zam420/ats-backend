@@ -10,10 +10,10 @@ import com.deepconnect.ats.interviewplan.model.InterviewPlan;
 public class InterviewPlanDetailsRes {
     private String id;
     private String name;
-    private Integer workLocation;
-    private String notes;
-    private Integer status;
+    private String description;
+    private Boolean isPublic;
     private List<InterviewPlanRoundRes> rounds;
+    private String ownerId;
 
     public static InterviewPlanDetailsRes from(InterviewPlan entity) {
         if(entity == null)
@@ -21,14 +21,14 @@ public class InterviewPlanDetailsRes {
         InterviewPlanDetailsRes res = new InterviewPlanDetailsRes();
         res.setId(entity.getPublicId());
         res.setName(entity.getName());
-        res.setWorkLocation(entity.getWorkLocation());
-        res.setNotes(entity.getNotes());
-        res.setStatus(entity.getStatus());
+        res.setDescription(entity.getDescription());
+        res.setIsPublic(entity.getIsPublicForTenant());
         res.setRounds(
         entity.getRounds() == null
             ? List.of()
             : entity.getRounds().stream().map(InterviewPlanRoundRes::from).toList()
     );
+        res.setOwnerId(entity.getOwnerPublicId());
         return res;
     }
 

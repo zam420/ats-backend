@@ -10,7 +10,8 @@ public class InterviewPlanReq {
     private String id;
     private String name;
     private Integer workLocation;
-    private String notes;
-    private Integer status;
+    private String description;
+    private Boolean isTemplate;
     private List<InterviewPlanRound> rounds;
+    private String ownerId;
 }

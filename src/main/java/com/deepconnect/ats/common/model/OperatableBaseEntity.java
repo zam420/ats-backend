@@ -13,7 +13,7 @@ import jakarta.persistence.MappedSuperclass;
 import lombok.Getter;
 import lombok.Setter;
 
-import com.deepconnect.ats.model.User;
+import com.deepconnect.ats.user.model.User;
 
 @Getter
 @Setter
@@ -27,6 +27,9 @@ public abstract class OperatableBaseEntity extends BaseEntity {
     @Column(name = "createdByUserId", nullable = false)
     private Long createdByUserId;
 
+    @Column(name = "createdByUserPublicId", nullable = false)
+    private String createdByUserPublicId;
+
     @CreationTimestamp
     @Column(name = "createdAt", nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -37,6 +40,9 @@ public abstract class OperatableBaseEntity extends BaseEntity {
 
     @Column(name = "modifiedByUserId", nullable = true)
     private Long modifiedByUserId;
+
+    @Column(name = "modifiedByUserPublicId", nullable = true)
+    private String modifiedByUserPublicId;
 
     @UpdateTimestamp
     @Column(name = "modifiedAt", nullable = true)

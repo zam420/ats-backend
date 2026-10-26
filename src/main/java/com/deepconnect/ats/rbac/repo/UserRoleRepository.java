@@ -11,6 +11,9 @@ import java.util.Set;
 
 @Repository
 public interface UserRoleRepository extends BaseRepository<UserRole, Long> {
+    UserRole findByUserIdAndRoleCode(Long userId, String roleCode);
+    boolean existsByUserIdAndRoleCode(Long userId, String roleCode);
+
     Set<UserRole> findByUserId(Long userId);
     Set<UserRole> findByUserIdIn(Set<Long> userIds);
     Set<UserRole> findByRoleId(Long roleId);
@@ -22,7 +25,7 @@ public interface UserRoleRepository extends BaseRepository<UserRole, Long> {
     void removeByUserIdAndRoleIdIn(Long userId, Set<Long> roleIds);
 
     @Modifying
-    @Query(value = "delete from ats_user_role where user_id in ?1 and role_id=?2", nativeQuery = true)
-    void removeByUserIdInAndRoleId(Set<Long> userIds, Long roleId);
+    @Query(value = "delete from ats_user_role where user_id in ?1 and role_code=?2", nativeQuery = true)
+    void removeByUserIdInAndRoleCode(Set<Long> userIds, String roleCode);
 
 }

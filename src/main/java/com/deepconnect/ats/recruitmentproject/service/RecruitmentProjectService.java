@@ -2,7 +2,7 @@ package com.deepconnect.ats.recruitmentproject.service;
 
 import com.deepconnect.ats.auth.service.AuthService;
 import com.deepconnect.ats.common.exception.InternalServerException;
-import com.deepconnect.ats.dto.AtsPageQueryWithStatus;
+import com.deepconnect.ats.dto.AtsPageQuery;
 import com.deepconnect.ats.dto.AtsPageRsp;
 import com.deepconnect.ats.recruitmentproject.model.RecruitmentProject;
 import com.deepconnect.ats.recruitmentproject.repo.RecruitmentProjectRepository;
@@ -28,13 +28,8 @@ public class RecruitmentProjectService {
         return projectRepository.findAll();
     }
 
-    public AtsPageRsp<RecruitmentProjectReqRes> getAllByPage(AtsPageQueryWithStatus query) {
-        Page<RecruitmentProject> page;
-        if(query.getStatus() == null) {
-            page = projectRepository.findAll(query.toPageable());
-        } else {
-            page = projectRepository.findByStatus(query.getStatus(), query.toPageable());
-        }
+    public AtsPageRsp<RecruitmentProjectReqRes> getAllByPage(AtsPageQuery query) {
+        Page<RecruitmentProject> page = projectRepository.findByStatus(0, query.toPageable());
         return AtsPageRsp.of(page.map(RecruitmentProjectReqRes::from));
     }
 
@@ -82,6 +77,6 @@ public class RecruitmentProjectService {
 
     // @Transactional(readOnly = true)
     // public Optional<InterviewPlanDetailsRes> findByPublicId(String publicId) {
-    //     return interviewProcessRepository.findByPublicId(publicId).map(InterviewPlanDetailsRes::from);
+    //     return interviewPlanRepository.findByPublicId(publicId).map(InterviewPlanDetailsRes::from);
     // }
 }

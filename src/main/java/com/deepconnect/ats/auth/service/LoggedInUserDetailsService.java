@@ -12,10 +12,10 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
 
-import com.deepconnect.ats.service.UserService;
+import com.deepconnect.ats.user.service.UserService;
 import com.deepconnect.ats.auth.dto.LoggedInUserDetails;
 import com.deepconnect.ats.common.exception.UnauthorizedException;
-import com.deepconnect.ats.model.User;
+import com.deepconnect.ats.user.model.User;
 import com.deepconnect.ats.rbac.model.Role;
 
 import lombok.RequiredArgsConstructor;

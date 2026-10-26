@@ -6,16 +6,13 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import com.deepconnect.ats.dto.ApiResult;
 import com.deepconnect.ats.dto.AtsPageQuery;
-import com.deepconnect.ats.dto.AtsPageQueryWithStatus;
 import com.deepconnect.ats.dto.AtsPageRsp;
-import com.deepconnect.ats.recruitmentproject.model.RecruitmentProject;
 import com.deepconnect.ats.recruitmentproject.dto.RecruitmentProjectReqRes;
 import com.deepconnect.ats.recruitmentproject.service.RecruitmentProjectService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -50,7 +47,7 @@ public class RecruitmentProjectController {
 
     @PreAuthorize("hasAuthority('rps')")
     @GetMapping("/list")
-    public ApiResult<AtsPageRsp<RecruitmentProjectReqRes>> listProject(AtsPageQueryWithStatus query) {
+    public ApiResult<AtsPageRsp<RecruitmentProjectReqRes>> listProject(AtsPageQuery query) {
         return ApiResult.success(projectService.getAllByPage(query));
     }
 }

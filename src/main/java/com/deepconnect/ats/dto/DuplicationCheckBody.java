@@ -1,6 +1,6 @@
 package com.deepconnect.ats.dto;
 
-import com.deepconnect.ats.model.User;
+import com.deepconnect.ats.user.model.User;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

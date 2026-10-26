@@ -10,17 +10,17 @@ import com.deepconnect.ats.interviewplan.model.InterviewPlan;
 public class InterviewPlanRes {
     private String id;
     private String name;
-    private Integer workLocation;
-    private String notes;
-    private Integer status;
-
+    private String description;
+    private Boolean isPublic;
+    private String ownerId;
+    
     public static InterviewPlanRes from(InterviewPlan entity) {
         InterviewPlanRes res = new InterviewPlanRes();
         res.setId(entity.getPublicId());
         res.setName(entity.getName());
-        res.setWorkLocation(entity.getWorkLocation());
-        res.setNotes(entity.getNotes());
-        res.setStatus(entity.getStatus());
+        res.setDescription(entity.getDescription());
+        res.setIsPublic(entity.getIsPublicForTenant());
+        res.setOwnerId(entity.getOwnerPublicId());
         return res;
     }
 

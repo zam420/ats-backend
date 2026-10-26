@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import com.deepconnect.ats.auth.service.AuthService;
-import com.deepconnect.ats.repository.NotificationRepository;
+import com.deepconnect.ats.notification.repo.NotificationRepository;
 
 import java.util.Map;
 

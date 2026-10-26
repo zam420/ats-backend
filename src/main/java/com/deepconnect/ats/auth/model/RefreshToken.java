@@ -5,7 +5,7 @@ import java.time.LocalDateTime;
 
 import org.hibernate.validator.constraints.Length;
 
-import com.deepconnect.ats.model.User;
+import com.deepconnect.ats.user.model.User;
 
 import jakarta.validation.constraints.Email;
 
