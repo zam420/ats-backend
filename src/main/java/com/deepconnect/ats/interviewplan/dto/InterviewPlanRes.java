@@ -12,6 +12,7 @@ public class InterviewPlanRes {
     private String name;
     private String description;
     private Boolean isPublic;
+    private Boolean isSystemTemplate;
     private String ownerId;
     
     public static InterviewPlanRes from(InterviewPlan entity) {
@@ -20,6 +21,7 @@ public class InterviewPlanRes {
         res.setName(entity.getName());
         res.setDescription(entity.getDescription());
         res.setIsPublic(entity.getIsPublicForTenant());
+        res.setIsSystemTemplate(entity.getIsPublicForAll());
         res.setOwnerId(entity.getOwnerPublicId());
         return res;
     }

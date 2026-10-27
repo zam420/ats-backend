@@ -11,7 +11,8 @@ public class InterviewPlanReq {
     private String name;
     private Integer workLocation;
     private String description;
-    private Boolean isTemplate;
+    private Boolean isPublic;
+    private Boolean isSystemTemplate;
     private List<InterviewPlanRound> rounds;
     private String ownerId;
 }

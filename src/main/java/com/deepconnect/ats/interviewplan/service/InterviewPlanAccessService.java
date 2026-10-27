@@ -31,7 +31,7 @@ public class InterviewPlanAccessService {
         //user is not the owner of the plan
         if(user.getTenantId() == plan.getTenantId()){
             if(user.hasPermission(PermissionType.INTERVIEW_PLAN_TEMPLATE_ADMIN))
-                return AccessType.ADMIN;
+                return AccessType.TENANT_ADMIN;
 
             //user is not the owner and does not have admin permission
             if(plan.getIsPublicForTenant())
@@ -41,22 +41,23 @@ public class InterviewPlanAccessService {
         }
 
         //user is not the owner, does not have admin permission, and does not have tenant-level access
-        if(plan.getIsPublicForAll())
-            return AccessType.READ;
+        if(plan.getIsPublicForAll()){
+            return user.hasPermission(PermissionType.INTERVIEW_PLAN_TEMPLATE_SYSTEM_ADMIN) ? AccessType.SYSTEM_ADMIN : AccessType.READ;
+        }
             
         return AccessType.NONE;
     }
 
     public void assertWriteAccess(LoggedInUserDetails loggedInUser, InterviewPlan plan) {
         AccessType accessType = this.getAccessType(loggedInUser, plan);
-        if(accessType != AccessType.ADMIN && accessType != AccessType.WRITE) {
+        if(accessType != AccessType.SYSTEM_ADMIN && accessType != AccessType.TENANT_ADMIN && accessType != AccessType.WRITE) {
             throw new InternalServerException("Not sufficient access to modify the interview plan: " + loggedInUser.getPublicId());
         }
     }
 
     public void assertReadAccess(LoggedInUserDetails loggedInUser, InterviewPlan plan) {
         AccessType accessType = this.getAccessType(loggedInUser, plan);
-        if(accessType != AccessType.ADMIN && accessType != AccessType.WRITE && accessType != AccessType.READ) {
+        if(accessType != AccessType.TENANT_ADMIN && accessType != AccessType.WRITE && accessType != AccessType.READ) {
             throw new InternalServerException("Not sufficient access to view the interview plan: " + loggedInUser.getPublicId());
         }
     }

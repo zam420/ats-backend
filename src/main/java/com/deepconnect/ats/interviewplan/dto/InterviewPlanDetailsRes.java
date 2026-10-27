@@ -12,6 +12,7 @@ public class InterviewPlanDetailsRes {
     private String name;
     private String description;
     private Boolean isPublic;
+    private Boolean isSystemTemplate;
     private List<InterviewPlanRoundRes> rounds;
     private String ownerId;
 
@@ -23,6 +24,7 @@ public class InterviewPlanDetailsRes {
         res.setName(entity.getName());
         res.setDescription(entity.getDescription());
         res.setIsPublic(entity.getIsPublicForTenant());
+        res.setIsSystemTemplate(entity.getIsPublicForAll());
         res.setRounds(
         entity.getRounds() == null
             ? List.of()

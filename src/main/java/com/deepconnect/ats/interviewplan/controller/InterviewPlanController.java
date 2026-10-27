@@ -29,23 +29,26 @@ public class InterviewPlanController {
     @PreAuthorize("hasAuthority('iptc')")
     @PostMapping("/create")
     public ApiResult<Map<String, String>> create(@RequestBody InterviewPlanReq req) {
-        String id = interviewPlanService.create(req);
-        return ApiResult.success(Collections.singletonMap("id", id));
+        return ApiResult.success(Collections.singletonMap("id", interviewPlanService.create(req)));
+    }
+
+    @PreAuthorize("hasAuthority('iptc')")
+    @PostMapping("/saveas")
+    public ApiResult<Map<String, String>> saveAs(@RequestBody InterviewPlanReq req) {
+        return ApiResult.success(Collections.singletonMap("id", interviewPlanService.create(req)));
     }
 
     @PreAuthorize("hasAuthority('ipte')")
     @PostMapping("/update")
     public ApiResult<Map<String, String>> update(@RequestBody InterviewPlanReq req) {
-        String id = interviewPlanService.update(req);
-        return ApiResult.success(Collections.singletonMap("id", id));
+        return ApiResult.success(Collections.singletonMap("id", interviewPlanService.update(req)));
     }
 
     @PreAuthorize("hasAuthority('ipte')")
     @PostMapping("/deactivate/{id}")
     public ApiResult<Boolean> deactivate(
         @PathVariable @NotBlank(message = "{field.common.id}{validation.notBlank}") String id) {
-        interviewPlanService.deactivate(id);
-        return ApiResult.success(true);
+        return ApiResult.success(interviewPlanService.deactivate(id));
     }
 
     @PreAuthorize("hasAuthority('ipts')")
@@ -56,9 +59,21 @@ public class InterviewPlanController {
     }
 
     @PreAuthorize("hasAuthority('ipts')")
+    @GetMapping("/roundtypes")
+    public ApiResult<List<Map<String, Object>>> getAllRoundTypes() {
+        return ApiResult.success(interviewPlanService.getAllRoundTypes());
+    }
+
+    @PreAuthorize("hasAuthority('ipts')")
     @GetMapping("/all")
     public ApiResult<AtsPageRsp<InterviewPlanRes>> getAll(AtsPageQuery query) {
         return ApiResult.success(interviewPlanService.getAll(query));
+    }
+
+    @PreAuthorize("hasAuthority('ipts')")
+    @GetMapping("/owned")
+    public ApiResult<AtsPageRsp<InterviewPlanRes>> getAllForPlanOwner(AtsPageQuery query) {
+        return ApiResult.success(interviewPlanService.getAllForPlanOwner(query));
     }
 
     @PreAuthorize("hasAuthority('ipts')")
@@ -71,6 +86,18 @@ public class InterviewPlanController {
     @GetMapping("/templates")
     public ApiResult<AtsPageRsp<InterviewPlanRes>> getAllSystemTemplates(AtsPageQuery query) {
         return ApiResult.success(interviewPlanService.getAllSystemTemplates(query));
+    }
+
+    @PreAuthorize("hasAuthority('iptsa')")
+    @PostMapping("/templates/create")
+    public ApiResult<Map<String, String>> createTemplate(@RequestBody InterviewPlanReq req) {
+        return ApiResult.success(Collections.singletonMap("id", interviewPlanService.createTemplate(req)));
+    }
+
+    @PreAuthorize("hasAuthority('iptsa')")
+    @PostMapping("/templates/update")
+    public ApiResult<Map<String, String>> updateTemplate(@RequestBody InterviewPlanReq req) {
+        return ApiResult.success(Collections.singletonMap("id", interviewPlanService.updateTemplate(req)));
     }
 
     @PreAuthorize("hasAuthority('ipts')")

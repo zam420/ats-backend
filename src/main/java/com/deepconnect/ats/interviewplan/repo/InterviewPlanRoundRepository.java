@@ -10,6 +10,7 @@ import java.util.List;
 
 @Repository
 public interface InterviewPlanRoundRepository extends BaseRepository<InterviewPlanRound, Long> {
+    
     List<InterviewPlanRound> findByInterviewPlanIdOrderByOrderAsc(Long interviewPlanId);
 
     @Modifying
