@@ -22,8 +22,18 @@ import java.util.List;
 @Builder
 public class InterviewPlanRound extends BaseEntity {
 
-    @Column(name = "round_type", nullable = false)
-    private Integer roundType;
+    @Column(nullable = false, length = 200)
+    private String name;
+
+    @Column(length = 500)
+    private String description;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "roundType", referencedColumnName = "id", insertable = false, updatable = false)
+    private InterviewPlanRoundType interviewPlanRoundType; // By default, the user who created this record. Can be changed.
+
+    @Column(name = "roundType", nullable = false)
+    private Long roundType;
 
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "json")

@@ -145,7 +145,7 @@ public class UserService {
     }
 
     public void activate(ActivationReq request) {
-        User user = userRepository.findByEmail(request.getEmail()).orElseThrow(() -> new UnauthorizedException());
+        User user = userRepository.findByEmail(request.getEmail()).orElseThrow(() -> new UnauthorizedException(CustomExceptionType.AUTH_INVALID, request.getEmail()));
         if(user.getDeactivated() == false){
             return;
         }

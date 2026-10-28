@@ -3,7 +3,7 @@ package com.deepconnect.ats.service.resume;
 import com.deepconnect.ats.common.constant.enums.CandidateStatusCodes;
 import com.deepconnect.ats.common.constant.enums.CandidateSubStatus;
 import com.deepconnect.ats.common.constant.enums.InterviewResult;
-import com.deepconnect.ats.common.constant.enums.InterviewRoundType;
+import com.deepconnect.ats.common.constant.enums.InterviewRoundTypeEnum;
 import com.deepconnect.ats.common.constant.enums.ResumeOperationType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -64,15 +64,15 @@ public class ResumeOperation {
         return moveToOperation(CandidateStatusCodes.WRITTEN_EXAM, kwargs);
     }
 
-    public static ResumeOperation scheduledInterviewOperation(InterviewRoundType roundType) {
+    public static ResumeOperation scheduledInterviewOperation(InterviewRoundTypeEnum roundType) {
         return new ResumeOperation(ResumeOperationType.SCHEDULED_INTERVIEW, roundType);
     }
 
-    public static ResumeOperation interviewEndTimeReachedOperation(InterviewRoundType roundType) {
+    public static ResumeOperation interviewEndTimeReachedOperation(InterviewRoundTypeEnum roundType) {
         return new ResumeOperation(ResumeOperationType.INTERVIEW_END_TIME_REACHED, roundType);
     }
 
-    public static ResumeOperation interviewFeedbackOperation(InterviewRoundType roundType, InterviewResult result) {
+    public static ResumeOperation interviewFeedbackOperation(InterviewRoundTypeEnum roundType, InterviewResult result) {
         return new ResumeOperation(ResumeOperationType.INTERVIEW_FEEDBACK, new Object[]{roundType, result});
     }
 
@@ -92,7 +92,7 @@ public class ResumeOperation {
         return new ResumeOperation(ResumeOperationType.ONBOARDING_TIME_REACHED);
     }
 
-    public static ResumeOperation interviewFeedbackUpdateOperation(InterviewRoundType roundType,
+    public static ResumeOperation interviewFeedbackUpdateOperation(InterviewRoundTypeEnum roundType,
                                                                    InterviewResult result, Object lastOperator) {
         return new ResumeOperation(ResumeOperationType.INTERVIEW_FEEDBACK,
                 new Object[]{roundType, result, lastOperator});

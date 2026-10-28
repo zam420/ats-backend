@@ -11,6 +11,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
+import com.deepconnect.ats.common.enums.CustomExceptionType;
 
 import com.deepconnect.ats.user.service.UserService;
 import com.deepconnect.ats.auth.dto.LoggedInUserDetails;
@@ -31,14 +32,14 @@ public class LoggedInUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String email) {
-        User user = userService.findByEmail(email).orElseThrow(() -> new UnauthorizedException());
+        User user = userService.findByEmail(email).orElseThrow(() -> new UnauthorizedException(CustomExceptionType.AUTH_INVALID, email));
         return from(user);
     }
 
-    public UserDetails loadUserByUserId(Long userId) {
-        User user = userService.findByUserId(userId).orElseThrow(() -> new UnauthorizedException());
-        return from(user);
-    }
+    // public UserDetails loadUserByUserId(Long userId) {
+    //     User user = userService.findByUserId(userId).orElseThrow(() -> new UnauthorizedException(CustomExceptionType.AUTH_INVALID, userId.toString()));
+    //     return from(user);
+    // }
 
     public UserDetails from(User user) {
         Set<Role> roles = userService.getRolesByUserId(user.getId());

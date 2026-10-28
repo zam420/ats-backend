@@ -2,7 +2,7 @@ package com.deepconnect.ats.service.resume;
 
 import com.deepconnect.ats.common.constant.enums.CandidateStatusCodes;
 import com.deepconnect.ats.common.constant.enums.CandidateSubStatus;
-import com.deepconnect.ats.common.constant.enums.InterviewRoundType;
+import com.deepconnect.ats.common.constant.enums.InterviewRoundTypeEnum;
 import com.deepconnect.ats.common.constant.enums.ResumeOperationType;
 import com.deepconnect.ats.common.exception.InternalServerException;
 import com.deepconnect.ats.model.Exam;
@@ -103,11 +103,11 @@ public class CandidateStatusCalculator {
 
     /** operateArgs: InterviewRoundType, or Object[]{InterviewRoundType, ...} for INTERVIEW_FEEDBACK. */
     public StatusResult calculateForInterview(ResumeOperationType operation, Object operateArgs) {
-        InterviewRoundType interviewRound;
+        InterviewRoundTypeEnum interviewRound;
         if (operation == ResumeOperationType.INTERVIEW_FEEDBACK) {
-            interviewRound = (InterviewRoundType) ((Object[]) operateArgs)[0];
+            interviewRound = (InterviewRoundTypeEnum) ((Object[]) operateArgs)[0];
         } else {
-            interviewRound = (InterviewRoundType) operateArgs;
+            interviewRound = (InterviewRoundTypeEnum) operateArgs;
         }
         if (interviewRound == null) {
             throw new InternalServerException("interview_round 不能为空");
@@ -124,7 +124,7 @@ public class CandidateStatusCalculator {
         return new StatusResult(candidateStatus, subStatus);
     }
 
-    private CandidateSubStatus interviewScheduledStatus(InterviewRoundType round) {
+    private CandidateSubStatus interviewScheduledStatus(InterviewRoundTypeEnum round) {
         return switch (round) {
             case HR_ROUND -> CandidateSubStatus.HR_ITV_SCHEDULED;
             case FUNCTIONAL_ROUND -> CandidateSubStatus.TECH_ITV_SCHEDULED;
@@ -133,7 +133,7 @@ public class CandidateStatusCalculator {
         };
     }
 
-    private CandidateSubStatus interviewFeedbackPendingStatus(InterviewRoundType round) {
+    private CandidateSubStatus interviewFeedbackPendingStatus(InterviewRoundTypeEnum round) {
         return switch (round) {
             case HR_ROUND -> CandidateSubStatus.HR_ITV_FEEDBACK_PENDING;
             case FUNCTIONAL_ROUND -> CandidateSubStatus.TECH_ITV_FEEDBACK_PENDING;
@@ -142,7 +142,7 @@ public class CandidateStatusCalculator {
         };
     }
 
-    private CandidateSubStatus interviewFeedbackStatus(InterviewRoundType round) {
+    private CandidateSubStatus interviewFeedbackStatus(InterviewRoundTypeEnum round) {
         return switch (round) {
             case HR_ROUND -> CandidateSubStatus.HR_ITV_FEEDBACK_RECEIVED;
             case FUNCTIONAL_ROUND -> CandidateSubStatus.TECH_ITV_FEEDBACK_RECEIVED;

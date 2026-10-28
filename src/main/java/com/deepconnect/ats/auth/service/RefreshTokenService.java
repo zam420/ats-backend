@@ -2,6 +2,7 @@ package com.deepconnect.ats.auth.service;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -30,14 +31,14 @@ public class RefreshTokenService {
         refreshToken.setUserId(userId);
         refreshToken.setEmail(email);
         refreshToken.setToken(UUID.randomUUID().toString());
-        refreshToken.setExpiryDate(Instant.now().plusMillis(refreshTokenDurationMs));
+        refreshToken.setExpiryDate(LocalDateTime.now().plus(refreshTokenDurationMs, ChronoUnit.MILLIS));
         refreshToken.setLastRefreshedDateTime(LocalDateTime.now());
         return refreshTokenRepository.save(refreshToken);
     }
 
     @Transactional
     public boolean isExpired(RefreshToken token) {
-        if (token.getExpiryDate().compareTo(Instant.now()) < 0) {
+        if (token.getExpiryDate().compareTo(LocalDateTime.now()) < 0) {
             refreshTokenRepository.delete(token);
             return true;
         }

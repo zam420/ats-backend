@@ -1,6 +1,5 @@
 package com.deepconnect.ats.auth.service;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -21,6 +20,7 @@ import com.deepconnect.ats.common.enums.CustomExceptionType;
 import com.deepconnect.ats.common.enums.JwtType;
 import com.deepconnect.ats.common.exception.CustomException;
 import com.deepconnect.ats.common.security.JwtManager;
+import com.deepconnect.ats.common.exception.UnauthorizedException;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -89,15 +89,19 @@ public class AuthService {
         String requestRefreshToken = request.getRefreshToken();
 
         RefreshToken token = refreshTokenService.getByToken(requestRefreshToken);
-        if(token == null || refreshTokenService.isExpired(token)){
-            throw new CustomException(CustomExceptionType.AUTH_INVALID_TOKEN);
+        if(token == null || refreshTokenService.isExpired(token)){//refresh token is also generated at login time. So if it's missing, the user is not authenticated
+            throw new UnauthorizedException(CustomExceptionType.AUTH_INVALID_TOKEN, "Refresh expired");
         }
 
-        LoggedInUserDetails userDetails = (LoggedInUserDetails)loggedInUserDetailsService.loadUserByUserId(token.getUserId());
+        LoggedInUserDetails userDetails = (LoggedInUserDetails)loggedInUserDetailsService.loadUserByUsername(token.getEmail());
         if (!userDetails.isAccountNonLocked()) {
             // A locked user must not get new tokens; drop the session
             refreshTokenService.deleteByUserId(token.getUserId());
-            throw new CustomException(CustomExceptionType.AUTH_ACCOUNT_LOCKED, HttpStatus.FORBIDDEN);
+            throw new UnauthorizedException(CustomExceptionType.AUTH_ACCOUNT_LOCKED, userDetails.getEmail());
+        }
+        else if (userDetails.isDeactivated()) {
+            //don't issue new tokens for deactivated accounts. drop the session
+            throw new UnauthorizedException(CustomExceptionType.AUTH_ACCOUNT_NOT_ACTIVATED, userDetails.getEmail());
         }
         String newToken = jwtManager.generateToken(JwtType.ENCRYPTED, userDetails);
         return ResponseEntity.ok(new LoginRes(userDetails.getEmail(), newToken, requestRefreshToken, userDetails.isDeactivated()));

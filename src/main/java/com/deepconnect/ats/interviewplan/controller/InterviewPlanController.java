@@ -13,6 +13,10 @@ import com.deepconnect.ats.dto.AtsPageQuery;
 import com.deepconnect.ats.dto.AtsPageRsp;
 import com.deepconnect.ats.interviewplan.dto.InterviewPlanRes;
 import com.deepconnect.ats.interviewplan.dto.InterviewPlanDetailsRes;
+import com.deepconnect.ats.interviewplan.model.InterviewPlanRoundType;
+import com.deepconnect.ats.common.exception.CustomException;
+import com.deepconnect.ats.common.enums.CustomExceptionType;
+import org.springframework.http.HttpStatus;
 
 import java.util.Collections;
 import java.util.List;
@@ -60,7 +64,7 @@ public class InterviewPlanController {
 
     @PreAuthorize("hasAuthority('ipts')")
     @GetMapping("/roundtypes")
-    public ApiResult<List<Map<String, Object>>> getAllRoundTypes() {
+    public ApiResult<List<InterviewPlanRoundType>> getAllRoundTypes() throws Exception {
         return ApiResult.success(interviewPlanService.getAllRoundTypes());
     }
 

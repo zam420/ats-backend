@@ -1,6 +1,6 @@
 package com.deepconnect.ats.interviewplan.service;
 import org.springframework.transaction.annotation.Transactional;
-
+import com.deepconnect.ats.interviewplan.repo.InterviewPlanRoundTypeRepository;
 import com.deepconnect.ats.auth.dto.LoggedInUserDetails;
 import com.deepconnect.ats.auth.service.AuthService;
 import com.deepconnect.ats.common.exception.InternalServerException;
@@ -12,6 +12,7 @@ import com.deepconnect.ats.dto.AtsPageRsp;
 import com.deepconnect.ats.interviewplan.dto.InterviewPlanRes;
 import com.deepconnect.ats.interviewplan.dto.InterviewPlanDetailsRes;
 import com.deepconnect.ats.interviewplan.model.InterviewPlanRound;
+import com.deepconnect.ats.interviewplan.model.InterviewPlanRoundType;
 import com.deepconnect.ats.interviewplan.repo.InterviewPlanRoundRepository;
 import com.deepconnect.ats.user.model.User;
 import com.deepconnect.ats.user.service.UserService;
@@ -22,15 +23,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
-import com.deepconnect.ats.common.constant.enums.InterviewRoundType;
-
-import java.util.Arrays;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -42,18 +36,10 @@ public class InterviewPlanService {
 
     private final InterviewPlanRepository interviewPlanRepository;
     private final InterviewPlanRoundRepository interviewPlanRoundRepository;
+    private final InterviewPlanRoundTypeRepository interviewPlanRoundTypeRepository;
 
-    public List<Map<String, Object>> getAllRoundTypes() {
-        return Arrays.stream(InterviewRoundType.values())
-            .map(t -> {
-                Map<String, Object> m = new LinkedHashMap<>();
-                m.put("value", t.getValue());
-                m.put("name", t.name());
-                m.put("display_name", t.getDisplayName());
-                m.put("description", t.getDescription());
-                return m;
-            })
-            .collect(Collectors.toList());
+    public List<InterviewPlanRoundType> getAllRoundTypes() {
+        return interviewPlanRoundTypeRepository.findAll();
     }
 
     private String save(InterviewPlan plan, InterviewPlanReq req, boolean saveRounds, boolean isPublicForTenant, boolean isPublicForAll) {

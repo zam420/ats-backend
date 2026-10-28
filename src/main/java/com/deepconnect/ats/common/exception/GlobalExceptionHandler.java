@@ -1,17 +1,19 @@
 package com.deepconnect.ats.common.exception;
 
-import java.io.IOException;
 import java.net.SocketException;
 import java.util.stream.Collectors;
 import java.util.Locale;
+
+import com.deepconnect.ats.auth.service.AuthService;
+import com.deepconnect.ats.auth.dto.LoggedInUserDetails;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -19,26 +21,22 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import jakarta.servlet.ServletRequest;
-import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 
-/*
- * Note that @ControllerAdvice does not apply to filters because it only works for exceptions thrown inside controllers.
- * So any errors encountered inside the filters such as JwtAuthenticationFilter are not handled automatically by GlobalExceptionHandler. 
- * This also happens because in Spring boot, filters do not automatically propagate exceptions to @ControllerAdvice.
- * As a workaround, we can manually invoke the exception handler's logic inside JwtAuthenticationFilter by declaring GlobalExceptionHandler
- * as a Component and then injecting it insde JwtAuthenticationFilter.
- */
+
+/* 
+In GlobalExceptionHandler, @ControllerAdvice does not apply to filters because it only works for exceptions thrown inside controllers.
+* So any errors encountered inside the filters such as JwtAuthenticationFilter are not handled automatically by GlobalExceptionHandler. 
+* This also happens because in Spring boot, filters do not automatically propagate exceptions to @ControllerAdvice.
+* To solve this, we use HandlerExceptionResolver. An example can be found in JwtAuthFilter.java
+*/
+@Slf4j 
 @Component
 @ControllerAdvice
 @ResponseBody
 public class GlobalExceptionHandler {
-
-    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     @Autowired
     private MessageSource messageSource;
@@ -51,32 +49,41 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(ErrorRsp.of(errorMsg, HttpStatus.BAD_REQUEST.value()), HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(CustomException.class)
-    public ResponseEntity<ErrorRsp> handleCustomException(CustomException ex, ServletRequest request) {
-        Locale locale = request.getLocale();
-        String message = messageSource.getMessage(ex.getMessageKey(), ex.getArgs(), locale);
+    @ExceptionHandler(LoggedCustomException.class)
+    public ResponseEntity<ErrorRsp> handleLoggedCustomException(LoggedCustomException ex, ServletRequest request) {
+        String message = messageSource.getMessage(ex.getMessageKey(), ex.getArgs(), request.getLocale());
+        log.error("Application error | Reason: {} | URI: {} | IP: {} | Info: {}", 
+            message, 
+            ((HttpServletRequest) request).getRequestURI(), 
+            getClientIpAddress((HttpServletRequest) request),
+            ex.getLogMessage()
+            //,ex     uncomment the following if we want to log the full stack trace of the exception
+        );
         return new ResponseEntity<>(ErrorRsp.of(message, ex.getHttpStatus().value()), ex.getHttpStatus());
     }
 
-    /**
-     * In GlobalExceptionHandler, @ControllerAdvice does not apply to filters because it only works for exceptions thrown inside controllers.
-    * So any errors encountered inside the filters such as JwtAuthenticationFilter are not handled automatically by GlobalExceptionHandler. 
-    * This also happens because in Spring boot, filters do not automatically propagate exceptions to @ControllerAdvice.
-    * As a workaround, we can manually invoke the exception handler's logic inside JwtAuthenticationFilter by declaring GlobalExceptionHandler
-    * as a Component and then injecting it insde filters like JwtAuthenticationFilter.
-     * @param ex
-     * @param request
-     * @param response
-     * @throws IOException
-     */
-    public void setCustomExceptionInResponse(CustomException ex, ServletRequest request, ServletResponse response) throws IOException {
-        Locale locale = request.getLocale();
-        String message = messageSource.getMessage(ex.getMessageKey(), ex.getArgs(), locale);
-        ((HttpServletResponse) response).setStatus(ex.getHttpStatus().value());
-        ((HttpServletResponse) response).setContentType(MediaType.APPLICATION_JSON_VALUE);
-        ((HttpServletResponse) response).setCharacterEncoding("UTF-8");
-        // Serialize with Jackson so quotes/special characters in the message are escaped correctly
-        response.getWriter().write(OBJECT_MAPPER.writeValueAsString(ErrorRsp.of(message, ex.getHttpStatus().value())));
+    //This Spring built-in exception is thrown when a permission check fails on annotations like @PreAuthorize("hasAuthority('iptsa')")
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ErrorRsp> handleAccessDeniedException(AccessDeniedException ex, HttpServletRequest request) {
+        String message = messageSource.getMessage("exception.accessDenied", null, request.getLocale());
+        LoggedInUserDetails loggedInUser = AuthService.getLoggedInUser();
+        String username = (loggedInUser != null) ? loggedInUser.getUsername() : "ANONYMOUS";
+        log.warn("Access denied | Reason: {} | URI: {} | IP: {} | User: {} | Info: {}", 
+            message,
+            ((HttpServletRequest) request).getRequestURI(), 
+            getClientIpAddress(request), 
+            username,
+            ex.getMessage()
+        );
+
+        return new ResponseEntity<>(ErrorRsp.of(message, HttpStatus.FORBIDDEN.value()), HttpStatus.FORBIDDEN);
+    }
+
+
+    @ExceptionHandler(CustomException.class)
+    public ResponseEntity<ErrorRsp> handleCustomException(CustomException ex, ServletRequest request) {
+        String message = messageSource.getMessage(ex.getMessageKey(), ex.getArgs(), request.getLocale());
+        return new ResponseEntity<>(ErrorRsp.of(message, ex.getHttpStatus().value()), ex.getHttpStatus());
     }
     
     @ExceptionHandler(ValidationRangeException.class)
@@ -91,7 +98,26 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorRsp> handleSocketException(SocketException ex, HttpServletRequest request) {
         return new ResponseEntity<>(ErrorRsp.of(ex.getLocalizedMessage(), HttpStatus.INTERNAL_SERVER_ERROR.value()), HttpStatus.INTERNAL_SERVER_ERROR);
     }
+
+    // Helper method to handle standard IPs and proxy headers (like Nginx / Cloudflare / AWS ELB)
+    private String getClientIpAddress(HttpServletRequest request) {
+        String xForwardedFor = request.getHeader("X-Forwarded-For");
+        if (xForwardedFor != null && !xForwardedFor.isEmpty()) {
+            // X-Forwarded-For can contain a comma-separated list of IPs if behind multiple proxies. 
+            // The first one is the original client's IP.
+            return xForwardedFor.split(",")[0].trim();
+        }
+        return request.getRemoteAddr();
+    }
+
+    //TODO: uncomment and implement the general exception handler for all uncaught exceptions. Its already present below.
+
     /*
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ErrorRsp> handleGeneralException(Exception e) {
+        return new ResponseEntity<>(ErrorRsp.of(e.getMessage() != null ? e.getMessage() : "Internal server error", HttpStatus.INTERNAL_SERVER_ERROR.value()), HttpStatus.INTERNAL_SERVER_ERROR);
+    }
     
     @ExceptionHandler(AccessDeniedException.class)
     @ResponseStatus(HttpStatus.FORBIDDEN)

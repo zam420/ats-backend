@@ -7,12 +7,16 @@ import com.deepconnect.ats.common.enums.CustomExceptionType;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * Used when a user is not authenticated or their authentication is invalid (e.g. locked/deactivated/expired token)
+ * UnauthorizedException
+ */
 @Slf4j
 @Getter
-public class UnauthorizedException extends CustomException {
+public class UnauthorizedException extends LoggedCustomException {
 
-    public UnauthorizedException() {
-        super(CustomExceptionType.AUTH_INVALID, HttpStatus.UNAUTHORIZED);
+    public UnauthorizedException(CustomExceptionType exceptionType, String userIdOrEmail) {
+        super(exceptionType, HttpStatus.UNAUTHORIZED, "User: " + userIdOrEmail);
     }
     
 }

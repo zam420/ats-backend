@@ -9,11 +9,10 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Getter
-public class GoogleConnectionException extends CustomException {
+public class GoogleConnectionException extends LoggedCustomException {
 
     public GoogleConnectionException(String logMessage) {
-        super(CustomExceptionType.GOOGLE_CONNECTION_ERROR, HttpStatus.INTERNAL_SERVER_ERROR);
-        log.error(logMessage);
+        super(CustomExceptionType.GOOGLE_CONNECTION_ERROR, HttpStatus.INTERNAL_SERVER_ERROR, logMessage);
     }
     
 }

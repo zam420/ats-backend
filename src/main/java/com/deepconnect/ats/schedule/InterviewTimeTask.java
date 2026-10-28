@@ -2,7 +2,7 @@ package com.deepconnect.ats.schedule;
 
 import com.deepconnect.ats.common.constant.enums.InterviewCandidateStatus;
 import com.deepconnect.ats.common.constant.enums.InterviewRoundStatus;
-import com.deepconnect.ats.common.constant.enums.InterviewRoundType;
+import com.deepconnect.ats.common.constant.enums.InterviewRoundTypeEnum;
 import com.deepconnect.ats.common.constant.enums.ResumeOperationType;
 import com.deepconnect.ats.common.utils.TimeUtil;
 import com.deepconnect.ats.model.CandidateResume;
@@ -79,9 +79,9 @@ public class InterviewTimeTask {
                 List<InterviewCandidate> interviewCandidates = queryRepository
                         .findInterviewCandidatesByRoundsAndStatus(roundIds,
                                 List.of(InterviewCandidateStatus.INTERVIEW_SENT.getValue()));
-                Map<Long, InterviewRoundType> roundMap = new HashMap<>();
+                Map<Long, InterviewRoundTypeEnum> roundMap = new HashMap<>();
                 for (InterviewRound r : endRounds) {
-                    roundMap.put(r.getId(), InterviewRoundType.getByValue(r.getRoundType()));
+                    roundMap.put(r.getId(), InterviewRoundTypeEnum.getByValue(r.getRoundType()));
                 }
                 Map<Long, CandidateResume> resumes = candidateResumeRepository.findAllById(
                                 interviewCandidates.stream().map(InterviewCandidate::getCandidateResumeId)
