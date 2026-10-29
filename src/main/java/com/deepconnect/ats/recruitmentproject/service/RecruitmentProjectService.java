@@ -76,7 +76,7 @@ public class RecruitmentProjectService {
     }
 
     // @Transactional(readOnly = true)
-    // public Optional<InterviewPlanDetailsRes> findByPublicId(String publicId) {
-    //     return interviewPlanRepository.findByPublicId(publicId).map(InterviewPlanDetailsRes::from);
+    // public Optional<EvaluationPlanDetailsRes> findByPublicId(String publicId) {
+    //     return evaluationPlanRepository.findByPublicId(publicId).map(EvaluationPlanDetailsRes::from);
     // }
 }

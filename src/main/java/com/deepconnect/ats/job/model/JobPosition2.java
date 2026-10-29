@@ -5,7 +5,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import com.deepconnect.ats.common.enums.JobStatus;
 import com.deepconnect.ats.common.enums.JobWorkArrangement;
-import com.deepconnect.ats.interviewplan.model.InterviewPlan;
+import com.deepconnect.ats.evaluationplan.model.EvaluationPlan;
 import lombok.*;
 
 import com.deepconnect.ats.common.enums.JobEmploymentType;
@@ -56,12 +56,12 @@ public class JobPosition2 extends OperatableBaseEntity {
     private JobStatus status = JobStatus.DRAFT;
 
     /*
-     * A job references an existing interview plan.
+     * A job references an existing evaluation plan.
      * Do not cascade persistence or deletion to the shared plan.
      */
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "interview_plan_id")
-    private InterviewPlan interviewPlan;
+    @JoinColumn(name = "evaluation_plan_id")
+    private EvaluationPlan evaluationPlan;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "owner_id", nullable = false)
