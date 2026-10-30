@@ -3,6 +3,9 @@ package com.deepconnect.ats.common.exception;
 import java.net.SocketException;
 import java.util.stream.Collectors;
 import java.util.Locale;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
+import org.springframework.transaction.TransactionSystemException;
 
 import com.deepconnect.ats.auth.service.AuthService;
 import com.deepconnect.ats.auth.dto.LoggedInUserDetails;
@@ -110,14 +113,18 @@ public class GlobalExceptionHandler {
         return request.getRemoteAddr();
     }
 
-    //TODO: uncomment and implement the general exception handler for all uncaught exceptions. Its already present below.
-
-    /*
-
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorRsp> handleGeneralException(Exception e) {
-        return new ResponseEntity<>(ErrorRsp.of(e.getMessage() != null ? e.getMessage() : "Internal server error", HttpStatus.INTERNAL_SERVER_ERROR.value()), HttpStatus.INTERNAL_SERVER_ERROR);
+    public ResponseEntity<ErrorRsp> handleGeneralException(Exception ex, HttpServletRequest request) {
+        log.error("Application error | Reason: {} | URI: {} | IP: {} | Info: {}", 
+            ex.getMessage(), 
+            request.getRequestURI(), 
+            getClientIpAddress(request),
+            ex.getMessage()
+            ,ex     //uncomment the following if we want to log the full stack trace of the exception
+        );
+        return new ResponseEntity<>(ErrorRsp.of(ex.getMessage() != null ? ex.getMessage() : "Internal server error", HttpStatus.INTERNAL_SERVER_ERROR.value()), HttpStatus.INTERNAL_SERVER_ERROR);
     }
+    /*
     
     @ExceptionHandler(AccessDeniedException.class)
     @ResponseStatus(HttpStatus.FORBIDDEN)

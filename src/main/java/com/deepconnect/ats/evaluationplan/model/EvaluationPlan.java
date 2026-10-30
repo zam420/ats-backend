@@ -1,6 +1,8 @@
 package com.deepconnect.ats.evaluationplan.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 
 import com.deepconnect.ats.common.model.OperatableBaseWithTenantEntity;
@@ -8,6 +10,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import java.util.List;
+
+import org.hibernate.validator.constraints.Length;
 
 import com.deepconnect.ats.user.model.User;
 
@@ -24,15 +28,19 @@ import com.deepconnect.ats.user.model.User;
 public class EvaluationPlan extends OperatableBaseWithTenantEntity {
 
     @Column(nullable = false, length = 100)
+    @Length(max = 10, message = "{field.evaluationPlan.name}{validation.lengthMax}")
+    @NotBlank(message = "{field.evaluationPlan.name}{validation.notBlank}")
     private String name;
 
     @Column(nullable = true, length = 300)
+    @Length(max = 300, message = "{field.evaluationPlan.description}{validation.lengthMax}")
     private String description;
 
     @Column(columnDefinition = "tinyint(1) default false")
     @Builder.Default
     private Boolean deactivated = false;
 
+    @Valid
     @JsonManagedReference
     @OneToMany(mappedBy = "evaluationPlan", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<EvaluationPlanRound> rounds;

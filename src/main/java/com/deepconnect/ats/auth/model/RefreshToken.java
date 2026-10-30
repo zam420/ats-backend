@@ -1,6 +1,5 @@
 package com.deepconnect.ats.auth.model;
 
-import java.time.Instant;
 import java.time.LocalDateTime;
 
 import org.hibernate.validator.constraints.Length;

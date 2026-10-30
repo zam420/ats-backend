@@ -2,6 +2,7 @@ package com.deepconnect.ats.evaluationplan.controller;
 
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 
 import com.deepconnect.ats.evaluationplan.dto.EvaluationPlanReq;
@@ -29,19 +30,19 @@ public class EvaluationPlanController {
 
     @PreAuthorize("hasAuthority('iptc')")
     @PostMapping("/create")
-    public ApiResult<Map<String, String>> create(@RequestBody EvaluationPlanReq req) {
+    public ApiResult<Map<String, String>> create(@RequestBody @Valid EvaluationPlanReq req) {
         return ApiResult.success(Collections.singletonMap("id", evaluationPlanService.create(req)));
     }
 
     @PreAuthorize("hasAuthority('iptc')")
     @PostMapping("/saveas")
-    public ApiResult<Map<String, String>> saveAs(@RequestBody EvaluationPlanReq req) {
+    public ApiResult<Map<String, String>> saveAs(@RequestBody @Valid EvaluationPlanReq req) {
         return ApiResult.success(Collections.singletonMap("id", evaluationPlanService.create(req)));
     }
 
     @PreAuthorize("hasAuthority('ipte')")
     @PostMapping("/update")
-    public ApiResult<Map<String, String>> update(@RequestBody EvaluationPlanReq req) {
+    public ApiResult<Map<String, String>> update(@RequestBody @Valid EvaluationPlanReq req) {
         return ApiResult.success(Collections.singletonMap("id", evaluationPlanService.update(req)));
     }
 
@@ -91,13 +92,13 @@ public class EvaluationPlanController {
 
     @PreAuthorize("hasAuthority('iptsa')")
     @PostMapping("/templates/create")
-    public ApiResult<Map<String, String>> createTemplate(@RequestBody EvaluationPlanReq req) {
+    public ApiResult<Map<String, String>> createTemplate(@RequestBody @Valid EvaluationPlanReq req) {
         return ApiResult.success(Collections.singletonMap("id", evaluationPlanService.createTemplate(req)));
     }
 
     @PreAuthorize("hasAuthority('iptsa')")
     @PostMapping("/templates/update")
-    public ApiResult<Map<String, String>> updateTemplate(@RequestBody EvaluationPlanReq req) {
+    public ApiResult<Map<String, String>> updateTemplate(@RequestBody @Valid EvaluationPlanReq req) {
         return ApiResult.success(Collections.singletonMap("id", evaluationPlanService.updateTemplate(req)));
     }
 

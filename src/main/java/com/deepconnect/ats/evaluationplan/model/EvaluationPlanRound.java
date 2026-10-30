@@ -1,7 +1,8 @@
 package com.deepconnect.ats.evaluationplan.model;
 
 import jakarta.persistence.*;
-import com.deepconnect.ats.evaluationplan.model.EvaluationPlan;
+import jakarta.validation.constraints.NotNull;
+import org.hibernate.validator.constraints.Length;
 import lombok.*;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
@@ -24,9 +25,11 @@ import java.util.List;
 public class EvaluationPlanRound extends BaseEntity {
 
     @Column(nullable = true, length = 30)
+    @Length(max = 30, message = "{field.evaluationPlanRound.name}{validation.lengthMax}")
     private String name;
 
     @Column(nullable = true, length = 100)
+    @Length(max = 100, message = "{field.evaluationPlanRound.description}{validation.lengthMax}")
     private String description;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -34,6 +37,7 @@ public class EvaluationPlanRound extends BaseEntity {
     private EvaluationPlanRoundType evaluationPlanRoundType; // By default, the user who created this record. Can be changed.
 
     @Column(name = "roundType", nullable = false)
+    @NotNull(message = "{field.evaluationPlanRound.roundType}{validation.notBlank}")
     private Integer roundType;
 
     @JdbcTypeCode(SqlTypes.JSON)
@@ -41,6 +45,7 @@ public class EvaluationPlanRound extends BaseEntity {
     private List<String> interviewers;
 
     @Column(name = "`order`", nullable = false)
+    @NotNull(message = "{field.evaluationPlanRound.order}{validation.notBlank}")
     private Integer order;
 
     @JsonBackReference
