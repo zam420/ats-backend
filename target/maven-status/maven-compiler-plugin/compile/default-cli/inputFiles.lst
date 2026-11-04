@@ -199,9 +199,11 @@ C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\recruitmen
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\recruitmentpipeline\model\RecruitmentPipeline.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\recruitmentpipeline\model\RecruitmentPipelineRound.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\recruitmentpipeline\model\RecruitmentPipelineRoundType.java
+C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\recruitmentpipeline\model\RecruitmentPipelineSharedWithUser.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\recruitmentpipeline\repo\RecruitmentPipelineRepository.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\recruitmentpipeline\repo\RecruitmentPipelineRoundRepository.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\recruitmentpipeline\repo\RecruitmentPipelineRoundTypeRepository.java
+C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\recruitmentpipeline\repo\RecruitmentPipelineSharedWithUserRepository.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\recruitmentpipeline\service\RecruitmentPipelineAccessService.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\recruitmentpipeline\service\RecruitmentPipelineService.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\recruitmentproject\controller\RecruitmentProjectController.java

@@ -256,7 +256,7 @@ public class EvaluationPlanService {
      */
     @Transactional(readOnly = true)
     public AtsPageRsp<EvaluationPlanRes> getAllSharedWithUser(AtsPageQuery query) {
-        Page<EvaluationPlan> page = evaluationPlanRepository.findByDeactivatedFalseAndIsPublicForTenantTrue(query.toPageable());
+        Page<EvaluationPlan> page = evaluationPlanRepository.findPublicOrSharedForTenant(AuthService.getLoggedInTenantId(), query.toPageable());
         return AtsPageRsp.of(page.map(EvaluationPlanRes::from));
     }
 

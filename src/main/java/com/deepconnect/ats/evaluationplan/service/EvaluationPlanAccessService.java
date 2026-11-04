@@ -1,6 +1,7 @@
 package com.deepconnect.ats.evaluationplan.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -10,6 +11,7 @@ import com.deepconnect.ats.common.exception.InternalServerException;
 import com.deepconnect.ats.common.enums.PermissionType;
 import com.deepconnect.ats.evaluationplan.model.EvaluationPlan;
 import com.deepconnect.ats.common.enums.AccessType;
+import com.deepconnect.ats.evaluationplan.model.EvaluationPlanSharedWithUser;
 
 @Slf4j
 @Service
@@ -37,7 +39,14 @@ public class EvaluationPlanAccessService {
             if(plan.getIsPublicForTenant())
                 return AccessType.READ;
 
-            //TODO: implement feature that if template is shared with someone then that someone should have read access as well
+            //user is not the owner but plan is shared with him
+            if(!CollectionUtils.isEmpty(plan.getSharedWithUsers())) {
+                for (EvaluationPlanSharedWithUser sharedWithUser : plan.getSharedWithUsers()) {
+                    if (sharedWithUser.getUserPublicId().equals(user.getPublicId())) {
+                        return AccessType.READ;
+                    }
+                }
+            }
         }
 
         //user is not the owner, does not have admin permission, and does not have tenant-level access

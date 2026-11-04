@@ -2,6 +2,8 @@ package com.deepconnect.ats.recruitmentpipeline.repo;
 
 import com.deepconnect.ats.recruitmentpipeline.model.RecruitmentPipeline;
 import com.deepconnect.ats.common.repo.BaseWithTenantRepository;
+import com.deepconnect.ats.evaluationplan.model.EvaluationPlan;
+
 import org.springframework.stereotype.Repository;
 
 import org.springframework.data.domain.Page;
@@ -28,13 +30,22 @@ public interface RecruitmentPipelineRepository extends BaseWithTenantRepository<
 
     Page<RecruitmentPipeline> findByDeactivatedFalseAndIsPublicForAllTrue(Pageable pageable);
 
-    Page<RecruitmentPipeline> findByDeactivatedFalseAndIsPublicForTenantTrue(Pageable pageable);
+    // Page<RecruitmentPipeline> findByDeactivatedFalseAndIsPublicForTenantTrue(Pageable pageable);
+
+    // Tenant-public plans, plus the tenant's plans that are shared with at least one specific user
+    @Query("SELECT ip FROM RecruitmentPipeline ip WHERE ip.deactivated = false AND ip.tenantId = :tenantId"
+     + " AND (ip.isPublicForTenant = true"
+     + " OR EXISTS (SELECT 1 FROM RecruitmentPipelineSharedWithUser s WHERE s.recruitmentPipelineId = ip.id))")
+    Page<RecruitmentPipeline> findPublicOrSharedForTenant(@Param("tenantId") Long tenantId, Pageable pageable);
 
     @Query("SELECT ip FROM RecruitmentPipeline ip WHERE ip.deactivated = false AND (ip.tenantId = :tenantId OR ip.isPublicForAll = true)")
     Page<RecruitmentPipeline> findAllForTenantAdmin(@Param("tenantId") Long tenantId, Pageable pageable);
 
     @Query("SELECT ip FROM RecruitmentPipeline ip WHERE ip.deactivated = false"
-     + " AND ((ip.tenantId = :tenantId AND ip.ownerId = :ownerId) OR ((ip.tenantId = :tenantId OR ip.isPublicForTenant = true) OR ip.isPublicForAll = true))")
+     + " AND ((ip.tenantId = :tenantId AND ip.ownerId = :ownerId)"                                              //owner within tenant
+     + " OR (ip.tenantId = :tenantId AND ip.isPublicForTenant = true)"                                          //tenant-public plans
+     + " OR EXISTS (SELECT 1 FROM RecruitmentPipelineSharedWithUser s WHERE s.recruitmentPipelineId = ip.id)"   //shared with user
+     + " OR ip.isPublicForAll = true)")                                                                         //system templates
     Page<RecruitmentPipeline> findAllForTenantNonAdmin(@Param("tenantId") Long tenantId, @Param("ownerId") Long ownerId, Pageable pageable);
     
 

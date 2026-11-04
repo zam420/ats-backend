@@ -253,7 +253,7 @@ public class RecruitmentPipelineService {
      */
     @Transactional(readOnly = true)
     public AtsPageRsp<RecruitmentPipelineRes> getAllSharedWithUser(AtsPageQuery query) {
-        Page<RecruitmentPipeline> page = recruitmentPipelineRepository.findByDeactivatedFalseAndIsPublicForTenantTrue(query.toPageable());
+        Page<RecruitmentPipeline> page = recruitmentPipelineRepository.findPublicOrSharedForTenant(AuthService.getLoggedInTenantId(), query.toPageable());
         return AtsPageRsp.of(page.map(RecruitmentPipelineRes::from));
     }
 
