@@ -17,7 +17,6 @@ C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\auth\servi
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\auth\service\GoogleAuthService.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\auth\service\LoggedInUserDetailsService.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\auth\service\RefreshTokenService.java
-C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\common\config\JpaValidationConfig.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\common\constant\enums\AtsEmailType.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\common\constant\enums\BaseEnum.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\common\constant\enums\CandidateStatus.java
@@ -98,9 +97,6 @@ C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\common\uti
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\common\utils\StringUtils.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\common\utils\TimeUtil.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\common\utils\Validation.java
-C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\company\model\Company.java
-C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\company\repo\CompanyRepository.java
-C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\company\service\CompanyService.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\controller\CandidateResumeController.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\controller\CommonController.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\controller\DataController.java
@@ -193,6 +189,19 @@ C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\rbac\repo\
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\rbac\service\PermissionService.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\rbac\service\RoleService.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\rbac\service\UserRoleService.java
+C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\recruitmentpipeline\controller\RecruitmentPipelineController.java
+C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\recruitmentpipeline\dto\RecruitmentPipelineDetailsRes.java
+C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\recruitmentpipeline\dto\RecruitmentPipelineReq.java
+C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\recruitmentpipeline\dto\RecruitmentPipelineRes.java
+C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\recruitmentpipeline\dto\RecruitmentPipelineRoundRes.java
+C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\recruitmentpipeline\model\RecruitmentPipeline.java
+C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\recruitmentpipeline\model\RecruitmentPipelineRound.java
+C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\recruitmentpipeline\model\RecruitmentPipelineRoundType.java
+C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\recruitmentpipeline\repo\RecruitmentPipelineRepository.java
+C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\recruitmentpipeline\repo\RecruitmentPipelineRoundRepository.java
+C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\recruitmentpipeline\repo\RecruitmentPipelineRoundTypeRepository.java
+C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\recruitmentpipeline\service\RecruitmentPipelineAccessService.java
+C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\recruitmentpipeline\service\RecruitmentPipelineService.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\recruitmentproject\controller\RecruitmentProjectController.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\recruitmentproject\dto\RecruitmentProjectReqRes.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\recruitmentproject\model\RecruitmentProject.java

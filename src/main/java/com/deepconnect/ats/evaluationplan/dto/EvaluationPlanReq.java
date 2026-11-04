@@ -12,11 +12,9 @@ import java.util.List;
 public class EvaluationPlanReq {
     private String id;
 
-    @Length(max = 10, message = "{field.evaluationPlan.name}{validation.lengthMax}")
+    @Length(max = 100, message = "{field.evaluationPlan.name}{validation.lengthMax}")
     @NotBlank(message = "{field.evaluationPlan.name}{validation.notBlank}")
     private String name;
-
-    private Integer workLocation;
 
     @Length(max = 300, message = "{field.evaluationPlan.description}{validation.lengthMax}")
     private String description;

@@ -28,4 +28,8 @@ public class EvaluationPlanRoundType {
     @Length(max = 100, message = "{field.evaluationPlanRoundType.description}{validation.lengthMax}")
     private String description;
 
+    @Column(columnDefinition = "tinyint(1) default false")
+    @Builder.Default
+    private Boolean isCustom = false;
+
 }

@@ -2,9 +2,12 @@ package com.deepconnect.ats.evaluationplan.dto;
 
 import lombok.Data;
 
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import com.deepconnect.ats.evaluationplan.model.EvaluationPlan;
+import com.deepconnect.ats.evaluationplan.model.EvaluationPlanRound;
 
 @Data
 public class EvaluationPlanRes {
@@ -14,6 +17,8 @@ public class EvaluationPlanRes {
     private Boolean isPublic;
     private Boolean isSystemTemplate;
     private String ownerId;
+    // Round names in order, joined as "name1 -> name2"; generated on the fly, never stored
+    private String roundSequence;
     
     public static EvaluationPlanRes from(EvaluationPlan entity) {
         EvaluationPlanRes res = new EvaluationPlanRes();
@@ -23,6 +28,13 @@ public class EvaluationPlanRes {
         res.setIsPublic(entity.getIsPublicForTenant());
         res.setIsSystemTemplate(entity.getIsPublicForAll());
         res.setOwnerId(entity.getOwnerPublicId());
+        if (entity.getRounds() != null) {
+            res.setRoundSequence(entity.getRounds().stream()
+                .sorted(Comparator.comparing(EvaluationPlanRound::getOrder, Comparator.nullsLast(Comparator.naturalOrder())))
+                .map(EvaluationPlanRound::getName)
+                .filter(n -> n != null && !n.isBlank())
+                .collect(Collectors.joining(" -> ")));
+        }
         return res;
     }
 

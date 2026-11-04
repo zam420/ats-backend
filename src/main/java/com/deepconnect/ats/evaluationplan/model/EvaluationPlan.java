@@ -28,7 +28,7 @@ import com.deepconnect.ats.user.model.User;
 public class EvaluationPlan extends OperatableBaseWithTenantEntity {
 
     @Column(nullable = false, length = 100)
-    @Length(max = 10, message = "{field.evaluationPlan.name}{validation.lengthMax}")
+    @Length(max = 100, message = "{field.evaluationPlan.name}{validation.lengthMax}")
     @NotBlank(message = "{field.evaluationPlan.name}{validation.notBlank}")
     private String name;
 

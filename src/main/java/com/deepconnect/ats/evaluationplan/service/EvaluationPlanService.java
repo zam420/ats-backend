@@ -19,6 +19,7 @@ import com.deepconnect.ats.user.service.UserService;
 import com.deepconnect.ats.common.enums.AccessType;
 import com.deepconnect.ats.common.utils.StringUtils;
 import com.deepconnect.ats.common.utils.HashMapUtils;
+import org.springframework.beans.factory.annotation.Value;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -34,6 +35,9 @@ import java.util.Objects;
 @RequiredArgsConstructor
 public class EvaluationPlanService {
 
+    @Value("${plans.maxRounds}")
+    private int maxRounds;
+
     private final UserService userService;
     private final EvaluationPlanAccessService evaluationPlanAccessService;
 
@@ -46,14 +50,18 @@ public class EvaluationPlanService {
     }
 
     private String save(EvaluationPlan plan, EvaluationPlanReq req, boolean saveRounds, boolean isPublicForTenant, boolean isPublicForAll) {
-        plan.setModifiedByUserId(AuthService.getLoggedInUserId());
-        plan.setModifiedByUserPublicId(AuthService.getLoggedInUser().getPublicId());
+        LoggedInUserDetails loggedInUser = AuthService.getLoggedInUser();
+        plan.setModifiedByUserId(loggedInUser.getUserId());
+        plan.setModifiedByUserPublicId(loggedInUser.getPublicId());
         plan.setName(req.getName());
         plan.setDescription(req.getDescription());
         plan.setIsPublicForTenant(isPublicForTenant);
         plan.setIsPublicForAll(isPublicForAll);
         plan = evaluationPlanRepository.save(plan);
         if (saveRounds && req.getRounds() != null) {
+            if (req.getRounds().size() > maxRounds) {
+                throw new InternalServerException(String.format("Too many rounds. User: %s. Plan: %s. Rounds: %d", loggedInUser.getPublicId(), plan.getPublicId(), req.getRounds().size()));
+            }
             HashMap<Integer, EvaluationPlanRoundType> roundTypesById = HashMapUtils.getMapFromList(this.getAllRoundTypes(), "Id", Integer.class, EvaluationPlanRoundType.class);
             for (EvaluationPlanRound roundTemplate : req.getRounds()) {
                 roundTemplate.setEvaluationPlan(plan);
@@ -182,6 +190,7 @@ public class EvaluationPlanService {
         return EvaluationPlanDetailsRes.from(plan);
     }
 
+    @Transactional(readOnly = true)
     public AtsPageRsp<EvaluationPlanRes> getAll(AtsPageQuery query) {
         boolean isAdmin = evaluationPlanAccessService.isUserInInterviewPlanAdminRole(AuthService.getLoggedInUser());
         Page<EvaluationPlan> page = isAdmin 
@@ -190,6 +199,7 @@ public class EvaluationPlanService {
         return AtsPageRsp.of(page.map(EvaluationPlanRes::from));
     }
 
+    @Transactional(readOnly = true)
     public AtsPageRsp<EvaluationPlanRes> getAllSystemTemplates(AtsPageQuery query) {
         Page<EvaluationPlan> page = evaluationPlanRepository.findByDeactivatedFalseAndIsPublicForAllTrue(query.toPageable());
         return AtsPageRsp.of(page.map(EvaluationPlanRes::from));
@@ -201,6 +211,7 @@ public class EvaluationPlanService {
      * @param query the pagination and status filter query
      * @return a paginated response containing interview plans for the tenant
      */
+    @Transactional(readOnly = true)
     public AtsPageRsp<EvaluationPlanRes> getAllSharedWithUser(AtsPageQuery query) {
         Page<EvaluationPlan> page = evaluationPlanRepository.findByDeactivatedFalseAndIsPublicForTenantTrue(query.toPageable());
         return AtsPageRsp.of(page.map(EvaluationPlanRes::from));
@@ -212,6 +223,7 @@ public class EvaluationPlanService {
      * @param query the pagination and status filter query
      * @return a paginated response containing interview plans for the tenant
      */
+    @Transactional(readOnly = true)
     public AtsPageRsp<EvaluationPlanRes> getAllForPlanOwner(AtsPageQuery query) {
         LoggedInUserDetails loggedInUser = AuthService.getLoggedInUser();
         Page<EvaluationPlan> page = evaluationPlanRepository.findByDeactivatedFalseAndTenantIdAndOwnerId(loggedInUser.getTenantId(), loggedInUser.getUserId(), query.toPageable());

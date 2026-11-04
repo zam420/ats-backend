@@ -85,6 +85,13 @@ public class EvaluationPlanController {
     }
 
     @PreAuthorize("hasAuthority('ipts')")
+    @GetMapping("/listByJob")
+    public ApiResult<List<EvaluationPlanRes>> listProcessTemplateByJob(@RequestParam(required = false) Long jobId) {
+        throw new UnsupportedOperationException("Listing process templates by job is not implemented yet.");
+        // return ApiResult.success(evaluationPlanService.listProcessTemplates()); //TODO: bug in original code, not returning results by jobId param
+    }
+
+    @PreAuthorize("hasAuthority('ipts')")
     @GetMapping("/templates")
     public ApiResult<AtsPageRsp<EvaluationPlanRes>> getAllSystemTemplates(AtsPageQuery query) {
         return ApiResult.success(evaluationPlanService.getAllSystemTemplates(query));
@@ -100,13 +107,6 @@ public class EvaluationPlanController {
     @PostMapping("/templates/update")
     public ApiResult<Map<String, String>> updateTemplate(@RequestBody @Valid EvaluationPlanReq req) {
         return ApiResult.success(Collections.singletonMap("id", evaluationPlanService.updateTemplate(req)));
-    }
-
-    @PreAuthorize("hasAuthority('ipts')")
-    @GetMapping("/listByJob")
-    public ApiResult<List<EvaluationPlanRes>> listProcessTemplateByJob(@RequestParam(required = false) Long jobId) {
-        throw new UnsupportedOperationException("Listing process templates by job is not implemented yet.");
-        // return ApiResult.success(evaluationPlanService.listProcessTemplates()); //TODO: bug in original code, not returning results by jobId param
     }
 
 }
