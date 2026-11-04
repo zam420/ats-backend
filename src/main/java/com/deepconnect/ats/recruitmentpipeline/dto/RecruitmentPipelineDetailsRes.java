@@ -3,6 +3,10 @@ package com.deepconnect.ats.recruitmentpipeline.dto;
 import lombok.Data;
 
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import org.springframework.util.CollectionUtils;
 
 import com.deepconnect.ats.recruitmentpipeline.model.RecruitmentPipeline;
 
@@ -14,6 +18,7 @@ public class RecruitmentPipelineDetailsRes {
     private Boolean isPublic;
     private Boolean isSystemTemplate;
     private List<RecruitmentPipelineRoundRes> rounds;
+    private Set<String> sharedWithUserIds;
     private String ownerId;
 
     public static RecruitmentPipelineDetailsRes from(RecruitmentPipeline entity) {
@@ -26,10 +31,18 @@ public class RecruitmentPipelineDetailsRes {
         res.setIsPublic(entity.getIsPublicForTenant());
         res.setIsSystemTemplate(entity.getIsPublicForAll());
         res.setRounds(
-        entity.getRounds() == null
-            ? List.of()
-            : entity.getRounds().stream().map(RecruitmentPipelineRoundRes::from).toList()
-    );
+            entity.getRounds() == null
+                ? List.of()
+                : entity.getRounds().stream().map(RecruitmentPipelineRoundRes::from).toList()
+        );
+        if(!CollectionUtils.isEmpty(entity.getSharedWithUsers())){
+            res.setIsPublic(false);
+        }
+        res.setSharedWithUserIds(
+            entity.getSharedWithUsers() == null
+                ? Set.of()
+                : entity.getSharedWithUsers().stream().map(u -> u.getUser().getPublicId()).collect(Collectors.toSet())
+        );
         res.setOwnerId(entity.getOwnerPublicId());
         return res;
     }

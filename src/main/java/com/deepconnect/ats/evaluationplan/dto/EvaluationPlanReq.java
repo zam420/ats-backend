@@ -7,6 +7,7 @@ import lombok.Data;
 import org.hibernate.validator.constraints.Length;
 
 import java.util.List;
+import java.util.Set;
 
 @Data
 public class EvaluationPlanReq {
@@ -20,9 +21,13 @@ public class EvaluationPlanReq {
     private String description;
 
     private Boolean isPublic;
+
     private Boolean isSystemTemplate;
 
     @Valid
     private List<EvaluationPlanRound> rounds;
+
+    private Set<String> sharedWithUserIds;
+
     private String ownerId;
 }

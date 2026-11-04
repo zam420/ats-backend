@@ -1,6 +1,7 @@
 package com.deepconnect.ats.recruitmentpipeline.service;
 
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 import org.springframework.beans.factory.annotation.Value;
 import com.deepconnect.ats.recruitmentpipeline.repo.RecruitmentPipelineRoundTypeRepository;
 import com.deepconnect.ats.auth.dto.LoggedInUserDetails;
@@ -9,6 +10,7 @@ import com.deepconnect.ats.common.exception.InternalServerException;
 import com.deepconnect.ats.recruitmentpipeline.dto.RecruitmentPipelineReq;
 import com.deepconnect.ats.recruitmentpipeline.model.RecruitmentPipeline;
 import com.deepconnect.ats.recruitmentpipeline.repo.RecruitmentPipelineRepository;
+import com.deepconnect.ats.recruitmentpipeline.repo.RecruitmentPipelineSharedWithUserRepository;
 import com.deepconnect.ats.dto.AtsPageQuery;
 import com.deepconnect.ats.dto.AtsPageRsp;
 import com.deepconnect.ats.recruitmentpipeline.dto.RecruitmentPipelineRes;
@@ -21,12 +23,14 @@ import com.deepconnect.ats.user.service.UserService;
 import com.deepconnect.ats.common.enums.AccessType;
 import com.deepconnect.ats.common.utils.StringUtils;
 import com.deepconnect.ats.common.utils.HashMapUtils;
+import com.deepconnect.ats.recruitmentpipeline.model.RecruitmentPipelineSharedWithUser;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -48,12 +52,13 @@ public class RecruitmentPipelineService {
     private final RecruitmentPipelineRepository recruitmentPipelineRepository;
     private final RecruitmentPipelineRoundRepository recruitmentPipelineRoundRepository;
     private final RecruitmentPipelineRoundTypeRepository recruitmentPipelineRoundTypeRepository;
+    private final RecruitmentPipelineSharedWithUserRepository recruitmentPipelineSharedWithUserRepository;
 
     public List<RecruitmentPipelineRoundType> getAllRoundTypes() {
         return recruitmentPipelineRoundTypeRepository.findAll();
     }
 
-    private String save(RecruitmentPipeline plan, RecruitmentPipelineReq req, boolean saveRounds, boolean isPublicForTenant, boolean isPublicForAll) {
+    private String save(RecruitmentPipeline plan, RecruitmentPipelineReq req, boolean roundsChanged, boolean sharedWithUsersChanged, boolean isPublicForTenant, boolean isPublicForAll) {
         LoggedInUserDetails loggedInUser = AuthService.getLoggedInUser();
         plan.setModifiedByUserId(loggedInUser.getUserId());
         plan.setModifiedByUserPublicId(loggedInUser.getPublicId());
@@ -62,7 +67,7 @@ public class RecruitmentPipelineService {
         plan.setIsPublicForTenant(isPublicForTenant);
         plan.setIsPublicForAll(isPublicForAll);
         plan = recruitmentPipelineRepository.save(plan);
-        if (saveRounds && req.getRounds() != null) {
+        if (roundsChanged && req.getRounds() != null) {
             if (req.getRounds().size() > maxRounds) {
                 throw new InternalServerException(String.format("Too many rounds. User: %s. Plan: %s. Rounds: %d", loggedInUser.getPublicId(), plan.getPublicId(), req.getRounds().size()));
             }
@@ -80,6 +85,25 @@ public class RecruitmentPipelineService {
                 // recruitmentPipelineRoundRepository.save(roundTemplate);
             }
             recruitmentPipelineRoundRepository.saveAll(req.getRounds());
+        }
+
+        if(sharedWithUsersChanged) {
+            if(!CollectionUtils.isEmpty(plan.getSharedWithUsers())) {
+                recruitmentPipelineSharedWithUserRepository.deleteByRecruitmentPipelineId(plan.getId());
+            }
+            if(!CollectionUtils.isEmpty(req.getSharedWithUserIds())){
+                Set<User> sharedWithUsers = userService.getByPublicIds(req.getSharedWithUserIds());
+                List<RecruitmentPipelineSharedWithUser> sharedWithUserList = new ArrayList<>();
+                for(User user : sharedWithUsers) {
+                    RecruitmentPipelineSharedWithUser sharedWithUser = new RecruitmentPipelineSharedWithUser();
+                    sharedWithUser.setRecruitmentPipelineId(plan.getId());
+                    sharedWithUser.setRecruitmentPipelinePublicId(plan.getPublicId());
+                    sharedWithUser.setUserId(user.getId());
+                    sharedWithUser.setUserPublicId(user.getPublicId());
+                    sharedWithUserList.add(sharedWithUser);
+                }
+                recruitmentPipelineSharedWithUserRepository.saveAll(sharedWithUserList);
+            }
         }
 
         return plan.getPublicId();
@@ -101,7 +125,7 @@ public class RecruitmentPipelineService {
             setAnotherUserAsOwner(plan, recruitmentPipelineAccessService.getAccessType(loggedInUser, plan), req.getOwnerId());
         }
 
-        return this.save(plan, req, true, req.getIsPublic() == null ? false : req.getIsPublic(), false  );
+        return this.save(plan, req, true, !CollectionUtils.isEmpty(req.getSharedWithUserIds()), req.getIsPublic() == null ? false : req.getIsPublic(), false  );
     }
 
     @Transactional
@@ -124,7 +148,17 @@ public class RecruitmentPipelineService {
             recruitmentPipelineRoundRepository.deleteByRecruitmentPipelineId(plan.getId());
         }
 
-        return this.save(plan, req, roundsChanged, req.getIsPublic() == null ? false : req.getIsPublic(), false);
+        boolean isPublicForTenant = req.getIsPublic() == null ? false : req.getIsPublic();
+        boolean sharedWithUsersChanged = false;
+        //if previously plan was shared with specific users, but now it's shared with Everyone or None
+        if(!CollectionUtils.isEmpty(plan.getSharedWithUsers()) && (isPublicForTenant || CollectionUtils.isEmpty(req.getSharedWithUserIds()))) {
+            sharedWithUsersChanged = true;
+        }
+        else if(!CollectionUtils.isEmpty(req.getSharedWithUserIds())) { //if the request has specific users to share with
+            sharedWithUsersChanged = !sharedWithUsersEqual(plan.getSharedWithUsers(), req.getSharedWithUserIds());
+        }
+
+        return this.save(plan, req, roundsChanged, sharedWithUsersChanged, isPublicForTenant, false);
     }
 
     /**
@@ -146,7 +180,7 @@ public class RecruitmentPipelineService {
         plan.setTenantId(loggedInUser.getTenantId());
         plan.setOwnerId(loggedInUser.getUserId());
         plan.setOwnerPublicId(loggedInUser.getPublicId());
-        return this.save(plan, req, true, false, true);
+        return this.save(plan, req, true, false, false, true);
     }
 
     /**
@@ -174,7 +208,7 @@ public class RecruitmentPipelineService {
             recruitmentPipelineRoundRepository.deleteByRecruitmentPipelineId(plan.getId());
         }
 
-        return this.save(plan, req, roundsChanged, false, true);
+        return this.save(plan, req, roundsChanged, false, false, true);
     }
 
     @Transactional
@@ -260,6 +294,24 @@ public class RecruitmentPipelineService {
         }
         recruitmentPipeline.setOwnerId(user.getId());
         recruitmentPipeline.setOwnerPublicId(user.getPublicId());
+    }
+
+    /**
+     * Checks if the existing shared users are equal to the incoming set of user IDs.
+     * @param existing the list of existing shared users
+     * @param userIdsIncoming the set of incoming user IDs to compare against
+     * @return true if the existing shared users match the incoming set of user IDs, false otherwise
+     */
+    private boolean sharedWithUsersEqual(List<RecruitmentPipelineSharedWithUser> existing, Set<String> userIdsIncoming) {
+        List<RecruitmentPipelineSharedWithUser> a = existing == null ? List.of() : existing;
+        if (a.size() != userIdsIncoming.size())
+            return false;
+        for (RecruitmentPipelineSharedWithUser planSharedWithUser : a) {
+            if (!userIdsIncoming.contains(planSharedWithUser.getUserPublicId()))
+                return false;
+        }
+        
+        return true;
     }
 
     /**

@@ -7,6 +7,7 @@ import lombok.Data;
 import org.hibernate.validator.constraints.Length;
 
 import java.util.List;
+import java.util.Set;
 
 @Data
 public class RecruitmentPipelineReq {
@@ -20,9 +21,13 @@ public class RecruitmentPipelineReq {
     private String description;
 
     private Boolean isPublic;
+
     private Boolean isSystemTemplate;
 
     @Valid
     private List<RecruitmentPipelineRound> rounds;
+
+    private Set<String> sharedWithUserIds;
+
     private String ownerId;
 }

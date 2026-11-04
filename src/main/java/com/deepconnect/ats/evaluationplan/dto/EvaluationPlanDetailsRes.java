@@ -3,8 +3,11 @@ package com.deepconnect.ats.evaluationplan.dto;
 import lombok.Data;
 
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.deepconnect.ats.evaluationplan.model.EvaluationPlan;
+import com.nimbusds.oauth2.sdk.util.CollectionUtils;
 
 @Data
 public class EvaluationPlanDetailsRes {
@@ -14,6 +17,7 @@ public class EvaluationPlanDetailsRes {
     private Boolean isPublic;
     private Boolean isSystemTemplate;
     private List<EvaluationPlanRoundRes> rounds;
+    private Set<String> sharedWithUserIds;
     private String ownerId;
 
     public static EvaluationPlanDetailsRes from(EvaluationPlan entity) {
@@ -29,7 +33,15 @@ public class EvaluationPlanDetailsRes {
         entity.getRounds() == null
             ? List.of()
             : entity.getRounds().stream().map(EvaluationPlanRoundRes::from).toList()
-    );
+        );
+        if(!CollectionUtils.isEmpty(entity.getSharedWithUsers())){
+            res.setIsPublic(false);
+        }
+        res.setSharedWithUserIds(
+        entity.getSharedWithUsers() == null
+            ? Set.of()
+            : entity.getSharedWithUsers().stream().map(u -> u.getUser().getPublicId()).collect(Collectors.toSet())
+        );
         res.setOwnerId(entity.getOwnerPublicId());
         return res;
     }

@@ -137,9 +137,11 @@ C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\evaluation
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\evaluationplan\model\EvaluationPlan.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\evaluationplan\model\EvaluationPlanRound.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\evaluationplan\model\EvaluationPlanRoundType.java
+C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\evaluationplan\model\EvaluationPlanSharedWithUser.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\evaluationplan\repo\EvaluationPlanRepository.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\evaluationplan\repo\EvaluationPlanRoundRepository.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\evaluationplan\repo\EvaluationPlanRoundTypeRepository.java
+C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\evaluationplan\repo\EvaluationPlanSharedWithUserRepository.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\evaluationplan\service\EvaluationPlanAccessService.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\evaluationplan\service\EvaluationPlanService.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\job\model\JobPosition2.java

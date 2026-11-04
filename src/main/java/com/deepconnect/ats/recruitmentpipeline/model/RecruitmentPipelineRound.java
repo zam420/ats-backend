@@ -44,7 +44,7 @@ public class RecruitmentPipelineRound extends BaseEntity {
     @NotNull(message = "{field.recruitmentPipelineRound.order}{validation.notBlank}")
     private Integer order;
 
-    @JsonBackReference
+    @JsonBackReference("rounds")
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     @JoinColumn(name = "recruitmentPipeline", referencedColumnName = "id", nullable = false, insertable = false, updatable = false)
     private RecruitmentPipeline recruitmentPipeline;

@@ -14,6 +14,7 @@ import java.util.List;
 import org.hibernate.validator.constraints.Length;
 
 import com.deepconnect.ats.user.model.User;
+import com.deepconnect.ats.evaluationplan.model.EvaluationPlanSharedWithUser;
 
 @Entity
 @Table(name = "evaluation_plan", uniqueConstraints = {
@@ -41,7 +42,7 @@ public class EvaluationPlan extends OperatableBaseWithTenantEntity {
     private Boolean deactivated = false;
 
     @Valid
-    @JsonManagedReference
+    @JsonManagedReference("rounds")
     @OneToMany(mappedBy = "evaluationPlan", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<EvaluationPlanRound> rounds;
 
@@ -54,6 +55,11 @@ public class EvaluationPlan extends OperatableBaseWithTenantEntity {
     @Column(columnDefinition = "tinyint(1) default false")
     @Builder.Default
     private Boolean isPublicForTenant = false;//created as template by Tenant users and accessible to all recruiters (or above) within the tenant
+
+    @Valid
+    @JsonManagedReference("sharedWithUsers")
+    @OneToMany(mappedBy = "evaluationPlan", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<EvaluationPlanSharedWithUser> sharedWithUsers;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ownerId", referencedColumnName = "id", insertable = false, updatable = false)

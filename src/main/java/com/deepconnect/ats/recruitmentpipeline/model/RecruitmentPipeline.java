@@ -41,7 +41,7 @@ public class RecruitmentPipeline extends OperatableBaseWithTenantEntity {
     private Boolean deactivated = false;
 
     @Valid
-    @JsonManagedReference
+    @JsonManagedReference("rounds")
     @OneToMany(mappedBy = "recruitmentPipeline", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<RecruitmentPipelineRound> rounds;
 
@@ -54,6 +54,11 @@ public class RecruitmentPipeline extends OperatableBaseWithTenantEntity {
     @Column(columnDefinition = "tinyint(1) default false")
     @Builder.Default
     private Boolean isPublicForTenant = false;//created as template by Tenant users and accessible to all recruiters (or above) within the tenant
+
+    @Valid
+    @JsonManagedReference("sharedWithUsers")
+    @OneToMany(mappedBy = "recruitmentPipeline", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<RecruitmentPipelineSharedWithUser> sharedWithUsers;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ownerId", referencedColumnName = "id", insertable = false, updatable = false)

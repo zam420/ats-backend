@@ -3,9 +3,6 @@ package com.deepconnect.ats.common.exception;
 import java.net.SocketException;
 import java.util.stream.Collectors;
 import java.util.Locale;
-import jakarta.validation.ConstraintViolation;
-import jakarta.validation.ConstraintViolationException;
-import org.springframework.transaction.TransactionSystemException;
 
 import com.deepconnect.ats.auth.service.AuthService;
 import com.deepconnect.ats.auth.dto.LoggedInUserDetails;

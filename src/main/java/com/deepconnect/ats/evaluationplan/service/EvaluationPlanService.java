@@ -1,5 +1,7 @@
 package com.deepconnect.ats.evaluationplan.service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
+
 import com.deepconnect.ats.evaluationplan.repo.EvaluationPlanRoundTypeRepository;
 import com.deepconnect.ats.auth.dto.LoggedInUserDetails;
 import com.deepconnect.ats.auth.service.AuthService;
@@ -14,6 +16,8 @@ import com.deepconnect.ats.evaluationplan.dto.EvaluationPlanDetailsRes;
 import com.deepconnect.ats.evaluationplan.model.EvaluationPlanRound;
 import com.deepconnect.ats.evaluationplan.model.EvaluationPlanRoundType;
 import com.deepconnect.ats.evaluationplan.repo.EvaluationPlanRoundRepository;
+import com.deepconnect.ats.evaluationplan.model.EvaluationPlanSharedWithUser;
+import com.deepconnect.ats.evaluationplan.repo.EvaluationPlanSharedWithUserRepository;
 import com.deepconnect.ats.user.model.User;
 import com.deepconnect.ats.user.service.UserService;
 import com.deepconnect.ats.common.enums.AccessType;
@@ -26,9 +30,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 @Slf4j
 @Service
@@ -44,21 +51,29 @@ public class EvaluationPlanService {
     private final EvaluationPlanRepository evaluationPlanRepository;
     private final EvaluationPlanRoundRepository evaluationPlanRoundRepository;
     private final EvaluationPlanRoundTypeRepository evaluationPlanRoundTypeRepository;
+    private final EvaluationPlanSharedWithUserRepository evaluationPlanSharedWithUserRepository;
 
     public List<EvaluationPlanRoundType> getAllRoundTypes() {
         return evaluationPlanRoundTypeRepository.findAll();
     }
 
-    private String save(EvaluationPlan plan, EvaluationPlanReq req, boolean saveRounds, boolean isPublicForTenant, boolean isPublicForAll) {
+    private String save(EvaluationPlan plan, EvaluationPlanReq req, boolean roundsChanged, boolean sharedWithUsersChanged, boolean isPublicForTenant, boolean isPublicForAll) {
         LoggedInUserDetails loggedInUser = AuthService.getLoggedInUser();
+        if(isPublicForAll && isPublicForTenant) {
+            throw new InternalServerException(String.format("Cannot specify both isPublicForAll and isPublicForTenant. User: %s, Plan: %s", loggedInUser.getPublicId(), plan.getPublicId()));
+        }
+        //Shared with users: if both isPublicForTenant and sharedWithUserIds are specified, throw internal server exception
+        if(isPublicForTenant && !CollectionUtils.isEmpty(req.getSharedWithUserIds())) {
+            throw new InternalServerException(String.format("Cannot specify both isPublicForTenant and sharedWithUserIds. User: %s, Plan: %s", loggedInUser.getPublicId(), plan.getPublicId()));
+        }
         plan.setModifiedByUserId(loggedInUser.getUserId());
         plan.setModifiedByUserPublicId(loggedInUser.getPublicId());
         plan.setName(req.getName());
         plan.setDescription(req.getDescription());
-        plan.setIsPublicForTenant(isPublicForTenant);
         plan.setIsPublicForAll(isPublicForAll);
+        plan.setIsPublicForTenant(isPublicForTenant);
         plan = evaluationPlanRepository.save(plan);
-        if (saveRounds && req.getRounds() != null) {
+        if (roundsChanged && !CollectionUtils.isEmpty(req.getRounds())) {
             if (req.getRounds().size() > maxRounds) {
                 throw new InternalServerException(String.format("Too many rounds. User: %s. Plan: %s. Rounds: %d", loggedInUser.getPublicId(), plan.getPublicId(), req.getRounds().size()));
             }
@@ -71,11 +86,29 @@ public class EvaluationPlanService {
                     if(roundType != null)
                         roundTemplate.setName(roundType.getName());
                 }
-                // evaluationPlanRoundRepository.save(roundTemplate);
             }
             evaluationPlanRoundRepository.saveAll(req.getRounds());
         }
-
+        
+        if(sharedWithUsersChanged) {
+            if(!CollectionUtils.isEmpty(plan.getSharedWithUsers())) {
+                evaluationPlanSharedWithUserRepository.deleteByEvaluationPlanId(plan.getId());
+            }
+            if(!CollectionUtils.isEmpty(req.getSharedWithUserIds())){
+                Set<User> sharedWithUsers = userService.getByPublicIds(req.getSharedWithUserIds());
+                List<EvaluationPlanSharedWithUser> sharedWithUserList = new ArrayList<>();
+                for(User user : sharedWithUsers) {
+                    EvaluationPlanSharedWithUser sharedWithUser = new EvaluationPlanSharedWithUser();
+                    sharedWithUser.setEvaluationPlanId(plan.getId());
+                    sharedWithUser.setEvaluationPlanPublicId(plan.getPublicId());
+                    sharedWithUser.setUserId(user.getId());
+                    sharedWithUser.setUserPublicId(user.getPublicId());
+                    sharedWithUserList.add(sharedWithUser);
+                }
+                evaluationPlanSharedWithUserRepository.saveAll(sharedWithUserList);
+            }
+        }
+        
         return plan.getPublicId();
     }
 
@@ -95,7 +128,7 @@ public class EvaluationPlanService {
             setAnotherUserAsOwner(plan, evaluationPlanAccessService.getAccessType(loggedInUser, plan), req.getOwnerId());
         }
 
-        return this.save(plan, req, true, req.getIsPublic() == null ? false : req.getIsPublic(), false  );
+        return this.save(plan, req, true, !CollectionUtils.isEmpty(req.getSharedWithUserIds()), req.getIsPublic() == null ? false : req.getIsPublic(), false);
     }
 
     @Transactional
@@ -118,7 +151,17 @@ public class EvaluationPlanService {
             evaluationPlanRoundRepository.deleteByEvaluationPlanId(plan.getId());
         }
 
-        return this.save(plan, req, roundsChanged, req.getIsPublic() == null ? false : req.getIsPublic(), false);
+        boolean isPublicForTenant = req.getIsPublic() == null ? false : req.getIsPublic();
+        boolean sharedWithUsersChanged = false;
+        //if previously plan was shared with specific users, but now it's shared with Everyone or None
+        if(!CollectionUtils.isEmpty(plan.getSharedWithUsers()) && (isPublicForTenant || CollectionUtils.isEmpty(req.getSharedWithUserIds()))) {
+            sharedWithUsersChanged = true;
+        }
+        else if(!CollectionUtils.isEmpty(req.getSharedWithUserIds())) { //if the request has specific users to share with
+            sharedWithUsersChanged = !sharedWithUsersEqual(plan.getSharedWithUsers(), req.getSharedWithUserIds());
+        }
+
+        return this.save(plan, req, roundsChanged, sharedWithUsersChanged, isPublicForTenant, false);
     }
 
     /**
@@ -140,7 +183,7 @@ public class EvaluationPlanService {
         plan.setTenantId(loggedInUser.getTenantId());
         plan.setOwnerId(loggedInUser.getUserId());
         plan.setOwnerPublicId(loggedInUser.getPublicId());
-        return this.save(plan, req, true, false, true);
+        return this.save(plan, req, true, false, false, true);
     }
 
     /**
@@ -168,7 +211,7 @@ public class EvaluationPlanService {
             evaluationPlanRoundRepository.deleteByEvaluationPlanId(plan.getId());
         }
 
-        return this.save(plan, req, roundsChanged, false, true);
+        return this.save(plan, req, roundsChanged, false, false, true);
     }
 
     @Transactional
@@ -254,6 +297,24 @@ public class EvaluationPlanService {
         }
         evaluationPlan.setOwnerId(user.getId());
         evaluationPlan.setOwnerPublicId(user.getPublicId());
+    }
+
+    /**
+     * Checks if the existing shared users are equal to the incoming set of user IDs.
+     * @param existing the list of existing shared users
+     * @param userIdsIncoming the set of incoming user IDs to compare against
+     * @return true if the existing shared users match the incoming set of user IDs, false otherwise
+     */
+    private boolean sharedWithUsersEqual(List<EvaluationPlanSharedWithUser> existing, Set<String> userIdsIncoming) {
+        List<EvaluationPlanSharedWithUser> a = existing == null ? List.of() : existing;
+        if (a.size() != userIdsIncoming.size())
+            return false;
+        for (EvaluationPlanSharedWithUser planSharedWithUser : a) {
+            if (!userIdsIncoming.contains(planSharedWithUser.getUserPublicId()))
+                return false;
+        }
+        
+        return true;
     }
 
     /**

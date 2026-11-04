@@ -389,4 +389,9 @@ public class UserService {
     public Optional<User> findByPublicId(String publicId){
         return userRepository.findByPublicId(publicId);
     }
+
+    public Set<User> getByPublicIds(Set<String> publicIds) {
+        return userRepository.findByPublicIdIn(publicIds);
+    }
+    
 }

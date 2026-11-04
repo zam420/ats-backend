@@ -48,7 +48,7 @@ public class EvaluationPlanRound extends BaseEntity {
     @NotNull(message = "{field.evaluationPlanRound.order}{validation.notBlank}")
     private Integer order;
 
-    @JsonBackReference
+    @JsonBackReference("rounds")
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     @JoinColumn(name = "evaluationPlan", referencedColumnName = "id", nullable = false, insertable = false, updatable = false)
     private EvaluationPlan evaluationPlan;
