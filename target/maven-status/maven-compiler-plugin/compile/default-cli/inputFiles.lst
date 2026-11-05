@@ -54,9 +54,6 @@ C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\common\enu
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\common\enums\EmailType.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\common\enums\EncryptionAlgoType.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\common\enums\ErrorCategory.java
-C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\common\enums\JobEmploymentType.java
-C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\common\enums\JobStatus.java
-C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\common\enums\JobWorkArrangement.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\common\enums\JwtType.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\common\enums\LocalizedStringType.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\common\enums\MacAlgoType.java
@@ -107,7 +104,6 @@ C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\controller
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\controller\ExamExtController.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\controller\InterviewController.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\controller\InterviewExtController.java
-C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\controller\JobPositionController.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\controller\RecruitmentExtController.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\controller\TalentPoolController.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\dto\ApiResult.java
@@ -144,7 +140,15 @@ C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\evaluation
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\evaluationplan\repo\EvaluationPlanSharedWithUserRepository.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\evaluationplan\service\EvaluationPlanAccessService.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\evaluationplan\service\EvaluationPlanService.java
+C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\job\controller\JobPositionController.java
+C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\job\enums\JobEmploymentType.java
+C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\job\enums\JobSeniorityLevel.java
+C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\job\enums\JobStatus.java
+C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\job\enums\JobWorkArrangement.java
+C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\job\model\JobPosition.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\job\model\JobPosition2.java
+C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\job\repo\JobPositionRepository.java
+C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\job\service\JobPositionService.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\model\AppFile.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\model\AtsApiToken.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\model\AtsEmailCounter.java
@@ -167,7 +171,6 @@ C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\model\Inte
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\model\InterviewFeedback.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\model\InterviewFeedbackTemplate.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\model\InterviewRound.java
-C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\model\JobPosition.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\model\ResumeComment.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\model\ResumeDuplicationTask.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\model\ResumeOperationRecord.java
@@ -233,7 +236,6 @@ C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\repository
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\repository\InterviewFeedbackTemplateRepository.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\repository\InterviewRepository.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\repository\InterviewRoundRepository.java
-C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\repository\JobPositionRepository.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\repository\ResumeCommentRepository.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\repository\ResumeDuplicationTaskRepository.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\repository\ResumeOperationRecordRepository.java
@@ -262,7 +264,6 @@ C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\service\Ex
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\service\FileStorageService.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\service\InterviewService.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\service\JobPositionImportService.java
-C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\service\JobPositionService.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\service\mail\MailFrequencyControlService.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\service\mail\MailService.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\service\mail\ResumeEmail.java

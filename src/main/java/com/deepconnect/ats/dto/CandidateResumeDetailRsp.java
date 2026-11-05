@@ -1,6 +1,7 @@
 package com.deepconnect.ats.dto;
 
 import com.deepconnect.ats.model.*;
+import com.deepconnect.ats.job.model.JobPosition;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

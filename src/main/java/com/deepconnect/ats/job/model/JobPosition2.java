@@ -3,14 +3,18 @@ package com.deepconnect.ats.job.model;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
-import com.deepconnect.ats.common.enums.JobStatus;
-import com.deepconnect.ats.common.enums.JobWorkArrangement;
+import com.deepconnect.ats.job.enums.JobStatus;
+import com.deepconnect.ats.job.enums.JobWorkArrangement;
+import com.deepconnect.ats.job.enums.JobEmploymentType;
 import com.deepconnect.ats.evaluationplan.model.EvaluationPlan;
-import lombok.*;
-
-import com.deepconnect.ats.common.enums.JobEmploymentType;
 import com.deepconnect.ats.common.model.OperatableBaseEntity;
 import com.deepconnect.ats.user.model.User;
+
+import lombok.*;
+
+import java.time.LocalDateTime;
+
+import org.hibernate.annotations.UpdateTimestamp;
 
 @Entity
 @Table(
@@ -70,4 +74,18 @@ public class JobPosition2 extends OperatableBaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "hiring_manager_id")
     private User hiringManager;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "publishedByUserId", referencedColumnName = "id", insertable = false, updatable = false)
+    private User publishedByUser; // The user who published this record
+
+    @Column(name = "publishedByUserId", nullable = true)
+    private Long publishedByUserId;
+
+    @Column(name = "publishedByUserPublicId", nullable = true)
+    private String publishedByUserPublicId;
+
+    @UpdateTimestamp
+    @Column(name = "publishedAt", nullable = true)
+    private LocalDateTime publishedAt;
 }

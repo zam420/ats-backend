@@ -6,6 +6,8 @@ import com.deepconnect.ats.common.exception.InternalServerException;
 import com.deepconnect.ats.dto.*;
 import com.deepconnect.ats.model.*;
 import com.deepconnect.ats.repository.*;
+import com.deepconnect.ats.job.model.JobPosition;
+import com.deepconnect.ats.job.repo.JobPositionRepository;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

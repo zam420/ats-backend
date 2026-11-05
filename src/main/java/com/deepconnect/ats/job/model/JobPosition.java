@@ -1,4 +1,4 @@
-package com.deepconnect.ats.model;
+package com.deepconnect.ats.job.model;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -50,6 +50,9 @@ public class JobPosition {
 
     @Column(name = "job_req", nullable = false, length = 5000)
     private String jobReq;
+
+    @Column(name = "job_pref_req", length = 5000)
+    private String jobPrefReq;
 
     @Column(name = "hr_recruiter_id", nullable = false)
     private Long hrRecruiterId;

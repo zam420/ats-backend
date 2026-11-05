@@ -457,6 +457,7 @@ CREATE TABLE IF NOT EXISTS `ats`.`ats_job_position` (
   `work_location` json NOT NULL,
   `job_desc` varchar(5000) NOT NULL,
   `job_req` varchar(5000) NOT NULL,
+  `job_pref_req` varchar(5000) DEFAULT NULL,
   `hr_recruiter_id` bigint NOT NULL,
   `resume_inbox` varchar(254) NOT NULL,
   `publish_channel` json DEFAULT NULL,

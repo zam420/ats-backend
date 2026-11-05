@@ -31,8 +31,9 @@ import java.util.Arrays;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
+    public static final String AUTH_ENDPOINT_BASE = "/api/auth";
     private static final String[] PUBLIC_URLS = {
-        "/api/auth/register", "/api/auth/login", "/api/auth/refresh", "/api/auth/activate", "/api/auth/logingoogle", "/error"};
+        AUTH_ENDPOINT_BASE + "/register", AUTH_ENDPOINT_BASE + "/login", AUTH_ENDPOINT_BASE + "/refresh", AUTH_ENDPOINT_BASE + "/activate", AUTH_ENDPOINT_BASE + "/logingoogle", "/error"};
 
     private final JwtAuthFilter jwtAuthFilter;
     private final LoggedInUserDetailsService userDetailsService;
@@ -40,7 +41,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-            .csrf(AbstractHttpConfigurer::disable)  //for stateless session with Jwt, CSRF is not needed
+            .csrf(AbstractHttpConfigurer::disable)  //for stateless session with Jwt and HTTP header based authentication (not cookie based), CSRF is not needed
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth

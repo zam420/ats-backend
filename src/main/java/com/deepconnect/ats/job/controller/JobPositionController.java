@@ -1,13 +1,13 @@
-package com.deepconnect.ats.controller;
+package com.deepconnect.ats.job.controller;
 
 import org.springframework.security.access.prepost.PreAuthorize;
 import com.deepconnect.ats.dto.ApiResult;
 import com.deepconnect.ats.dto.AtsPageQuery;
 import com.deepconnect.ats.dto.AtsPageRsp;
-import com.deepconnect.ats.model.JobPosition;
-import com.deepconnect.ats.service.JobPositionService;
+import com.deepconnect.ats.job.service.JobPositionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+import com.deepconnect.ats.job.model.JobPosition;
 
 import java.util.Collections;
 import java.util.List;

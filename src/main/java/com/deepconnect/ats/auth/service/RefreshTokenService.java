@@ -22,15 +22,23 @@ public class RefreshTokenService {
     @Value("${jwt.refreshExpirationMs}")
     private Long refreshTokenDurationMs;
 
+    @Value("${jwt.rememberMeRefreshExpirationMs}")
+    private Long rememberMeDurationMs;
+
     @Transactional
     public RefreshToken createRefreshToken(Long userId, String email) {
+        return createRefreshToken(userId, email, false);
+    }
+
+    @Transactional
+    public RefreshToken createRefreshToken(Long userId, String email, boolean rememberMe) {
         this.deleteByUserId(userId);//delete if there's an existing token
 
         RefreshToken refreshToken = new RefreshToken();
         refreshToken.setUserId(userId);
         refreshToken.setEmail(email);
         refreshToken.setToken(UUID.randomUUID().toString());
-        refreshToken.setExpiryDate(LocalDateTime.now().plus(refreshTokenDurationMs, ChronoUnit.MILLIS));
+        refreshToken.setExpiryDate(LocalDateTime.now().plus(rememberMe ? rememberMeDurationMs : refreshTokenDurationMs, ChronoUnit.MILLIS));
         refreshToken.setLastRefreshedDateTime(LocalDateTime.now());
         return refreshTokenRepository.save(refreshToken);
     }

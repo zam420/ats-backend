@@ -1,11 +1,11 @@
-package com.deepconnect.ats.service;
+package com.deepconnect.ats.job.service;
 
 import com.deepconnect.ats.auth.service.AuthService;
 import com.deepconnect.ats.common.exception.InternalServerException;
 import com.deepconnect.ats.dto.AtsPageQuery;
 import com.deepconnect.ats.dto.AtsPageRsp;
-import com.deepconnect.ats.model.JobPosition;
-import com.deepconnect.ats.repository.JobPositionRepository;
+import com.deepconnect.ats.job.model.JobPosition;
+import com.deepconnect.ats.job.repo.JobPositionRepository;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -68,6 +68,7 @@ public class JobPositionService {
         if (position.getWorkLocation() != null) existing.setWorkLocation(position.getWorkLocation());
         if (position.getJobDesc() != null) existing.setJobDesc(position.getJobDesc());
         if (position.getJobReq() != null) existing.setJobReq(position.getJobReq());
+        if (position.getJobPrefReq() != null) existing.setJobPrefReq(position.getJobPrefReq());
         if (position.getHrRecruiterId() != null) existing.setHrRecruiterId(position.getHrRecruiterId());
         if (position.getResumeInbox() != null) existing.setResumeInbox(position.getResumeInbox());
         if (position.getPublishChannel() != null) existing.setPublishChannel(position.getPublishChannel());

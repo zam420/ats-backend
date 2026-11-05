@@ -1,6 +1,6 @@
-package com.deepconnect.ats.repository;
+package com.deepconnect.ats.job.repo;
 
-import com.deepconnect.ats.model.JobPosition;
+import com.deepconnect.ats.job.model.JobPosition;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;

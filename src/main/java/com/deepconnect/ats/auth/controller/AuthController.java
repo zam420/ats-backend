@@ -50,13 +50,13 @@ public class AuthController {
     }
 
     @PostMapping("/refresh")
-    public ResponseEntity<?> refreshToken(@RequestBody TokenRefreshReq request) {
-        return authService.refreshToken(request);
+    public ResponseEntity<?> refreshToken(@CookieValue(name = "refresh_token", required = false) String refreshToken) {
+        return authService.refreshToken(refreshToken);
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<?> logout(@RequestBody LogoutReq request) {
-        return authService.logout(request);
+    public ResponseEntity<?> logout(@CookieValue(name = "refresh_token", required = false) String refreshToken) {
+        return authService.logout(refreshToken);
     }
 
     @Transactional

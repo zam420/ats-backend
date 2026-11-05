@@ -3,7 +3,8 @@ package com.deepconnect.ats.service.resumeparser;
 import com.deepconnect.ats.common.exception.InternalServerException;
 import com.deepconnect.ats.model.CandidateEducationHistory;
 import com.deepconnect.ats.model.CandidateResume;
-import com.deepconnect.ats.repository.JobPositionRepository;
+import com.deepconnect.ats.job.model.JobPosition;
+import com.deepconnect.ats.job.repo.JobPositionRepository;
 import com.deepconnect.ats.recruitmentproject.repo.RecruitmentProjectRepository;
 import com.deepconnect.ats.service.mail.ResumeEmail;
 import org.springframework.stereotype.Component;
@@ -44,7 +45,7 @@ public class OfficialEmailResumeParser extends AbstractResumeParser {
         }
         String title=values.get("job");
         if(title==null) throw new InternalServerException("Not found: applying position");
-        List<com.deepconnect.ats.model.JobPosition> jobs=matchingJobs(title,mail.mailbox());
+        List<JobPosition> jobs=matchingJobs(title,mail.mailbox());
         List<CandidateEducationHistory> education = new ArrayList<>();
         addEducation(education, values, "1", false);
         addEducation(education, values, "2", true);
