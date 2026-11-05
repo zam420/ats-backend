@@ -2,6 +2,7 @@ package com.deepconnect.ats.common.enums;
 
 public enum RoleType {
 
+    SYSTEM_ADMIN("sa"),
     HR_ADMIN("hra"),
     RECRUITER("rec"),
     HIRING_MANAGER("hm"),

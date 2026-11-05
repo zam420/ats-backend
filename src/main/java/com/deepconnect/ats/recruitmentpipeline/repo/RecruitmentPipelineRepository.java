@@ -2,7 +2,6 @@ package com.deepconnect.ats.recruitmentpipeline.repo;
 
 import com.deepconnect.ats.recruitmentpipeline.model.RecruitmentPipeline;
 import com.deepconnect.ats.common.repo.BaseWithTenantRepository;
-import com.deepconnect.ats.evaluationplan.model.EvaluationPlan;
 
 import org.springframework.stereotype.Repository;
 

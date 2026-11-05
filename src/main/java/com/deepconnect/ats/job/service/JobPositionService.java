@@ -28,9 +28,9 @@ public class JobPositionService {
         return jobPositionRepository.findAll();
     }
 
-    public List<JobPosition> listByProjectId(Long projectId) {
-        return jobPositionRepository.findByProjectId(projectId);
-    }
+    // public List<JobPosition> listByProjectId(Long projectId) {
+    //     return jobPositionRepository.findByProjectId(projectId);
+    // }
 
     public List<JobPosition> listActive() {
         return jobPositionRepository.findByStatus(0);
@@ -61,14 +61,13 @@ public class JobPositionService {
                 .orElseThrow(() -> new InternalServerException("Position not found: " + position.getId()));
 
         if (position.getTitle() != null) existing.setTitle(position.getTitle());
-        if (position.getProjectId() != null) existing.setProjectId(position.getProjectId());
         if (position.getRecruitmentType() != null) existing.setRecruitmentType(position.getRecruitmentType());
         if (position.getEmploymentType() != null) existing.setEmploymentType(position.getEmploymentType());
         if (position.getJobType() != null) existing.setJobType(position.getJobType());
         if (position.getWorkLocation() != null) existing.setWorkLocation(position.getWorkLocation());
         if (position.getJobDesc() != null) existing.setJobDesc(position.getJobDesc());
         if (position.getJobReq() != null) existing.setJobReq(position.getJobReq());
-        if (position.getJobPrefReq() != null) existing.setJobPrefReq(position.getJobPrefReq());
+        if (position.getJobReqPref() != null) existing.setJobReqPref(position.getJobReqPref());
         if (position.getHrRecruiterId() != null) existing.setHrRecruiterId(position.getHrRecruiterId());
         if (position.getResumeInbox() != null) existing.setResumeInbox(position.getResumeInbox());
         if (position.getPublishChannel() != null) existing.setPublishChannel(position.getPublishChannel());

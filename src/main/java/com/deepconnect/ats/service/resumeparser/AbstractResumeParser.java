@@ -86,7 +86,7 @@ abstract class AbstractResumeParser {
         if (title == null || title.isBlank()) return List.of();
         List<JobPosition> found = jobPositions.findAll().stream()
                 .filter(p -> p.getStatus() == null || p.getStatus() != 2)
-                .filter(p -> projects.findById(p.getProjectId()).map(RecruitmentProject::getStatus).orElse(1) == 0)
+                //.filter(p -> projects.findById(p.getProjectId()).map(RecruitmentProject::getStatus).orElse(1) == 0)
                 .filter(p -> mailbox.equalsIgnoreCase(p.getResumeInbox()))
                 .filter(p -> title.trim().equalsIgnoreCase(p.getTitle().trim())).toList();
         if (found.isEmpty()) throw new InternalServerException("Not found: applying position");

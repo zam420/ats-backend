@@ -29,9 +29,6 @@ public class JobPosition {
     @Column(nullable = false, length = 100)
     private String title;
 
-    @Column(name = "project_id", nullable = false)
-    private Long projectId;
-
     @Column(name = "recruitment_type", nullable = false)
     private Integer recruitmentType;
 
@@ -45,14 +42,14 @@ public class JobPosition {
     @Column(name = "work_location", nullable = false, columnDefinition = "json")
     private List<Integer> workLocation;
 
-    @Column(name = "job_desc", nullable = false, length = 5000)
+    @Column(name = "job_desc", nullable = false, length = 10000)
     private String jobDesc;
 
     @Column(name = "job_req", nullable = false, length = 5000)
     private String jobReq;
 
-    @Column(name = "job_pref_req", length = 5000)
-    private String jobPrefReq;
+    @Column(name = "job_req_pref", length = 5000)
+    private String jobReqPref;
 
     @Column(name = "hr_recruiter_id", nullable = false)
     private Long hrRecruiterId;

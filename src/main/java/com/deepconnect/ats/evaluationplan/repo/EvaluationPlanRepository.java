@@ -4,6 +4,8 @@ import com.deepconnect.ats.evaluationplan.model.EvaluationPlan;
 import com.deepconnect.ats.common.repo.BaseWithTenantRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
@@ -39,12 +41,22 @@ public interface EvaluationPlanRepository extends BaseWithTenantRepository<Evalu
     @Query("SELECT ip FROM EvaluationPlan ip WHERE ip.deactivated = false AND (ip.tenantId = :tenantId OR ip.isPublicForAll = true)")
     Page<EvaluationPlan> findAllForTenantAdmin(@Param("tenantId") Long tenantId, Pageable pageable);
 
+    @Query("SELECT ip FROM EvaluationPlan ip WHERE ip.deactivated = false AND (ip.tenantId = :tenantId OR ip.isPublicForAll = true)")
+    List<EvaluationPlan> findAllForTenantAdminAsList(@Param("tenantId") Long tenantId);
+
     @Query("SELECT ip FROM EvaluationPlan ip WHERE ip.deactivated = false"
      + " AND ((ip.tenantId = :tenantId AND ip.ownerId = :ownerId)"                                  //owner within tenant
      + " OR (ip.tenantId = :tenantId AND ip.isPublicForTenant = true)"                              //tenant-public plans
      + " OR EXISTS (SELECT 1 FROM EvaluationPlanSharedWithUser s WHERE s.evaluationPlanId = ip.id)" //shared with user
      + " OR ip.isPublicForAll = true)")                                                             //system templates
     Page<EvaluationPlan> findAllForTenantNonAdmin(@Param("tenantId") Long tenantId, @Param("ownerId") Long ownerId, Pageable pageable);
+    
+    @Query("SELECT ip FROM EvaluationPlan ip WHERE ip.deactivated = false"
+     + " AND ((ip.tenantId = :tenantId AND ip.ownerId = :ownerId)"                                  //owner within tenant
+     + " OR (ip.tenantId = :tenantId AND ip.isPublicForTenant = true)"                              //tenant-public plans
+     + " OR EXISTS (SELECT 1 FROM EvaluationPlanSharedWithUser s WHERE s.evaluationPlanId = ip.id)" //shared with user
+     + " OR ip.isPublicForAll = true)")                                                             //system templates
+    List<EvaluationPlan> findAllForTenantNonAdminAsList(@Param("tenantId") Long tenantId, @Param("ownerId") Long ownerId);
     
 
     // @Query("SELECT * FROM EvaluationPlan WHERE deactivated = false AND (tenantId = :tenantId OR isPublicForAll = true)")

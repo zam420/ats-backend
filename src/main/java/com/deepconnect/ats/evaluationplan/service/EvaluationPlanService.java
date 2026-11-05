@@ -242,6 +242,20 @@ public class EvaluationPlanService {
         return AtsPageRsp.of(page.map(EvaluationPlanRes::from));
     }
 
+    /**
+     * Get all interview plans for the current tenant as a list. 
+     * Used for selection dropdowns e.g. in job position forms
+     * @return
+     */
+    @Transactional(readOnly = true)
+    public List<EvaluationPlanRes> getAllAsList() {
+        boolean isAdmin = evaluationPlanAccessService.isUserInInterviewPlanAdminRole(AuthService.getLoggedInUser());
+        List<EvaluationPlan> plans = isAdmin 
+            ? evaluationPlanRepository.findAllForTenantAdminAsList(AuthService.getLoggedInTenantId()) 
+            : evaluationPlanRepository.findAllForTenantNonAdminAsList(AuthService.getLoggedInTenantId(), AuthService.getLoggedInUser().getUserId());
+        return plans.stream().map(EvaluationPlanRes::from).toList();
+    }
+
     @Transactional(readOnly = true)
     public AtsPageRsp<EvaluationPlanRes> getAllSystemTemplates(AtsPageQuery query) {
         Page<EvaluationPlan> page = evaluationPlanRepository.findByDeactivatedFalseAndIsPublicForAllTrue(query.toPageable());

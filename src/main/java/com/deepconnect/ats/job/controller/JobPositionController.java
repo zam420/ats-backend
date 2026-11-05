@@ -20,39 +20,14 @@ public class JobPositionController {
 
     private final JobPositionService jobPositionService;
 
-    @PreAuthorize("hasAnyRole('sa','hrd','proa')")
+    @PreAuthorize("hasAuthority('jpc')")
     @PostMapping("/createJobPosition")
     public ApiResult<Map<String, Long>> createJobPosition(@RequestBody JobPosition position) {
         Long id = jobPositionService.createJobPosition(position);
         return ApiResult.success(Collections.singletonMap("id", id));
     }
 
-    @PreAuthorize("hasAnyRole('sa','hrd','proa','hrr')")
-    @PostMapping("/updateJobPosition")
-    public ApiResult<Map<String, Long>> updateJobPosition(@RequestBody JobPosition position) {
-        Long id = jobPositionService.updateJobPosition(position);
-        return ApiResult.success(Collections.singletonMap("id", id));
-    }
-
-    @PreAuthorize("hasAnyRole('sa','hrd','proa','hrr','hrrc')")
-    @GetMapping("/listJobPositionSummary")
-    public ApiResult<List<JobPosition>> listJobPositionSummary() {
-        return ApiResult.success(jobPositionService.listActive());
-    }
-
-    @PreAuthorize("hasAnyRole('sa','hrd','proa','hrr','hrrc')")
-    @GetMapping("/listJobPostionForCV")
-    public ApiResult<List<JobPosition>> listJobPositionForCV() {
-        return ApiResult.success(jobPositionService.listActive());
-    }
-
-    @PreAuthorize("hasAnyRole('sa','hrd','proa','hrr','hrrc')")
-    @GetMapping("/getJobPositionDetail")
-    public ApiResult<JobPosition> getJobPositionDetail(@RequestParam Long id) {
-        return ApiResult.success(jobPositionService.getById(id).orElse(null));
-    }
-
-    @PreAuthorize("hasAnyRole('sa','hrd','proa','hrr')")
+    @PreAuthorize("hasAuthority('jpc')")
     @PostMapping("/publishJob")
     public ApiResult<Boolean> publishJob(@RequestBody Map<String, Object> body) {
         Long id = Long.valueOf(body.get("id").toString());
@@ -61,7 +36,32 @@ public class JobPositionController {
         return ApiResult.success(true);
     }
 
-    @PreAuthorize("hasAnyRole('sa','hrd','proa','hrr','hrrc')")
+    @PreAuthorize("hasAuthority('jpe')")
+    @PostMapping("/updateJobPosition")
+    public ApiResult<Map<String, Long>> updateJobPosition(@RequestBody JobPosition position) {
+        Long id = jobPositionService.updateJobPosition(position);
+        return ApiResult.success(Collections.singletonMap("id", id));
+    }
+
+    @PreAuthorize("hasAuthority('jps')")
+    @GetMapping("/listJobPositionSummary")
+    public ApiResult<List<JobPosition>> listJobPositionSummary() {
+        return ApiResult.success(jobPositionService.listActive());
+    }
+
+    @PreAuthorize("hasAuthority('jps')")
+    @GetMapping("/listJobPostionForCV")
+    public ApiResult<List<JobPosition>> listJobPositionForCV() {
+        return ApiResult.success(jobPositionService.listActive());
+    }
+
+    @PreAuthorize("hasAuthority('jps')")
+    @GetMapping("/getJobPositionDetail")
+    public ApiResult<JobPosition> getJobPositionDetail(@RequestParam Long id) {
+        return ApiResult.success(jobPositionService.getById(id).orElse(null));
+    }
+
+    @PreAuthorize("hasAuthority('jps')")
     @GetMapping("/job/listAll")
     public ApiResult<AtsPageRsp<JobPosition>> listAll(AtsPageQuery query) {
         return ApiResult.success(jobPositionService.listJobPosition(query));

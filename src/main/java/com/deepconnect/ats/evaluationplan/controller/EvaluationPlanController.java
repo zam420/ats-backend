@@ -72,6 +72,18 @@ public class EvaluationPlanController {
         return ApiResult.success(evaluationPlanService.getAll(query));
     }
 
+    /**
+     * Get all interview plans for the current tenant as a list. 
+     * Used for selection dropdowns e.g. in job position forms
+     * @param query
+     * @return
+     */
+    @PreAuthorize("hasAuthority('ipts')")
+    @GetMapping("/list")
+    public ApiResult<List<EvaluationPlanRes>> getAllAsList() {
+        return ApiResult.success(evaluationPlanService.getAllAsList());
+    }
+
     @PreAuthorize("hasAuthority('ipts')")
     @GetMapping("/owned")
     public ApiResult<AtsPageRsp<EvaluationPlanRes>> getAllForPlanOwner(AtsPageQuery query) {

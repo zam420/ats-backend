@@ -42,6 +42,15 @@ public class JobPosition2 extends OperatableBaseEntity {
     @Column(columnDefinition = "TEXT")
     private String description;
 
+    @Column(nullable = false, length = 5000, columnDefinition = "TEXT")
+    private String jobDesc;
+
+    @Column(nullable = false, length = 5000)
+    private String jobReq;
+
+    @Column(length = 5000)
+    private String jobReqPref;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "employment_type", nullable = false, length = 30)
     private JobEmploymentType employmentType;

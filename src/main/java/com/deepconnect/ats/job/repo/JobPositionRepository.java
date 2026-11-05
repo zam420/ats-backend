@@ -10,7 +10,8 @@ import java.util.Optional;
 
 @Repository
 public interface JobPositionRepository extends JpaRepository<JobPosition, Long>, JpaSpecificationExecutor<JobPosition> {
-    List<JobPosition> findByProjectId(Long projectId);
+    //List<JobPosition> findByProjectId(Long projectId);
     List<JobPosition> findByStatus(Integer status);
-    Optional<JobPosition> findByTitleAndProjectId(String title, Long projectId);
+    // Optional<JobPosition> findByTitleAndProjectId(String title, Long projectId);
+    Optional<JobPosition> findByTitle(String title);
 }
