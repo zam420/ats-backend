@@ -51,8 +51,8 @@ public class JobPosition {
     @Column(name = "job_req_pref", length = 5000)
     private String jobReqPref;
 
-    @Column(name = "hr_recruiter_id", nullable = false)
-    private Long hrRecruiterId;
+    @Column(name = "hr_recruiter", nullable = false)
+    private String hrRecruiter;
 
     @Column(name = "resume_inbox", nullable = false, length = 254)
     private String resumeInbox;

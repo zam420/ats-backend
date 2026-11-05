@@ -68,7 +68,7 @@ public class JobPositionService {
         if (position.getJobDesc() != null) existing.setJobDesc(position.getJobDesc());
         if (position.getJobReq() != null) existing.setJobReq(position.getJobReq());
         if (position.getJobReqPref() != null) existing.setJobReqPref(position.getJobReqPref());
-        if (position.getHrRecruiterId() != null) existing.setHrRecruiterId(position.getHrRecruiterId());
+        if (position.getHrRecruiter() != null) existing.setHrRecruiter(position.getHrRecruiter());
         if (position.getResumeInbox() != null) existing.setResumeInbox(position.getResumeInbox());
         if (position.getPublishChannel() != null) existing.setPublishChannel(position.getPublishChannel());
         if (position.getStatus() != null) existing.setStatus(position.getStatus());
