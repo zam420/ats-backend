@@ -4,6 +4,7 @@ import lombok.Data;
 
 import java.util.List;
 import com.deepconnect.ats.job.model.JobPosition;
+import com.deepconnect.ats.job.security.JobRichTextSanitizer;
 
 @Data
 public class JobPositionRes {
@@ -24,9 +25,9 @@ public class JobPositionRes {
         JobPositionRes res = new JobPositionRes();
         res.setId(entity.getPublicId());
         res.setTitle(entity.getTitle());
-        res.setDescription(entity.getDescription());
-        res.setMandatoryRequirements(entity.getMandatoryRequirements());
-        res.setPreferredRequirements(entity.getPreferredRequirements());
+        res.setDescription(JobRichTextSanitizer.sanitize(entity.getDescription()));
+        res.setMandatoryRequirements(JobRichTextSanitizer.sanitize(entity.getMandatoryRequirements()));
+        res.setPreferredRequirements(JobRichTextSanitizer.sanitize(entity.getPreferredRequirements()));
         res.setEmploymentType(entity.getEmploymentTypeId());
         res.setWorkArrangementType(entity.getWorkArrangementTypeId());
         res.setWorkLocation(entity.getWorkLocation());

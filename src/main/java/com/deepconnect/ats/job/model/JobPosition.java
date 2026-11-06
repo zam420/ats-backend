@@ -16,6 +16,8 @@ import com.deepconnect.ats.recruitmentpipeline.model.RecruitmentPipeline;
 import com.deepconnect.ats.user.model.User;
 import com.deepconnect.ats.common.model.OperatableBaseWithTenantEntity;
 import com.deepconnect.ats.job.enums.JobStatus;
+import com.deepconnect.ats.job.security.JobRichTextSerializer;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 @Entity
 @Table(name = "job_position", uniqueConstraints = {
@@ -42,12 +44,15 @@ public class JobPosition extends OperatableBaseWithTenantEntity {
     private String title;
 
     @Column(nullable = false, length = 10000, columnDefinition = "TEXT")
+    @JsonSerialize(using = JobRichTextSerializer.class)
     private String description;
 
     @Column(nullable = false, length = 5000, columnDefinition = "TEXT")
+    @JsonSerialize(using = JobRichTextSerializer.class)
     private String mandatoryRequirements;
 
     @Column(nullable = true, length = 5000, columnDefinition = "TEXT")
+    @JsonSerialize(using = JobRichTextSerializer.class)
     private String preferredRequirements;
 
     @ManyToOne(fetch = FetchType.LAZY)

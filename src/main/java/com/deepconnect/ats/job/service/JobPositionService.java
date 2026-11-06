@@ -7,6 +7,7 @@ import com.deepconnect.ats.dto.AtsPageQuery;
 import com.deepconnect.ats.dto.AtsPageRsp;
 import com.deepconnect.ats.job.dto.JobFieldsData;
 import com.deepconnect.ats.job.model.JobPosition;
+import com.deepconnect.ats.job.security.JobRichTextSanitizer;
 import com.deepconnect.ats.job.repo.JobPositionRepository;
 import com.deepconnect.ats.job.repo.JobEmploymentTypeRepository;
 import com.deepconnect.ats.job.repo.JobWorkArrangementTypeRepository;
@@ -46,9 +47,9 @@ public class JobPositionService {
     private String save(JobPosition position, JobPositionReq req){
         LoggedInUserDetails loggedInUser = AuthService.getLoggedInUser();
         position.setTitle(req.getTitle());
-        position.setDescription(req.getDescription());
-        position.setMandatoryRequirements(req.getMandatoryRequirements());
-        position.setPreferredRequirements(req.getPreferredRequirements());
+        position.setDescription(JobRichTextSanitizer.sanitize(req.getDescription()));
+        position.setMandatoryRequirements(JobRichTextSanitizer.sanitize(req.getMandatoryRequirements()));
+        position.setPreferredRequirements(JobRichTextSanitizer.sanitize(req.getPreferredRequirements()));
         position.setEmploymentTypeId(req.getEmploymentType());
         position.setWorkArrangementTypeId(req.getWorkArrangementType());
         position.setWorkLocation(req.getWorkLocation());
