@@ -44,8 +44,8 @@ public class JobPositionController {
 
     @PreAuthorize("hasAuthority('jpe')")
     @PostMapping("/update")
-    public ApiResult<Map<String, String>> update(@RequestBody JobPosition position) {
-        String id = jobPositionService.update(position);
+    public ApiResult<Map<String, String>> update(@RequestBody JobPositionReq req) {
+        String id = jobPositionService.update(req);
         return ApiResult.success(Collections.singletonMap("id", id));
     }
 

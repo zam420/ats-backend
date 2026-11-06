@@ -43,28 +43,66 @@ public class JobPositionService {
     private final JobEmploymentTypeRepository jobEmploymentTypeRepository;
     private final JobWorkArrangementTypeRepository jobWorkArrangementTypeRepository;
 
-    @Transactional
-    public String create(JobPositionReq req) {
+    private String save(JobPosition position, JobPositionReq req){
         LoggedInUserDetails loggedInUser = AuthService.getLoggedInUser();
-        //this.assertUniqueWithinTenantForCreation(loggedInUser.getTenantId(), req.getName());
-        JobPosition position = req.toEntity();
+        position.setTitle(req.getTitle());
+        position.setDescription(req.getDescription());
+        position.setMandatoryRequirements(req.getMandatoryRequirements());
+        position.setPreferredRequirements(req.getPreferredRequirements());
+        position.setEmploymentTypeId(req.getEmploymentType());
+        position.setWorkArrangementTypeId(req.getWorkArrangementType());
+        position.setWorkLocation(req.getWorkLocation());
+        position.setRecruiters(req.getRecruiters());
+        position.setRecruitmentPipelinePublicId(req.getRecruitmentPipeline());
+        position.setEvaluationPlanPublicId(req.getEvaluationPlan());
         EvaluationPlan evaluationPlan = evaluationPlanService.findByPublicId(position.getEvaluationPlanPublicId()).orElseThrow(() -> new InternalServerException(String.format("Evaluation plan not found: User: %s, Evaluation Plan: %s", loggedInUser.getPublicId(), position.getEvaluationPlanPublicId())));
         position.setEvaluationPlanId(evaluationPlan.getId());
         RecruitmentPipeline recruitmentPipeline = recruitmentPipelineService.findByPublicId(position.getRecruitmentPipelinePublicId()).orElseThrow(() -> new InternalServerException(String.format("Recruitment pipeline not found: User: %s, Recruitment Pipeline: %s", loggedInUser.getPublicId(), position.getRecruitmentPipelinePublicId())));
         position.setRecruitmentPipelineId(recruitmentPipeline.getId());
-        position.setCreatedByUserId(loggedInUser.getUserId());
-        position.setCreatedByUserPublicId(loggedInUser.getPublicId());
-        position.setTenantId(loggedInUser.getTenantId());
-        if(position.getOwnerId() == null) {
-            position.setOwnerId(loggedInUser.getUserId());
-            position.setOwnerPublicId(loggedInUser.getPublicId());
-        }
-        else {
-            // setAnotherUserAsOwner(plan, evaluationPlanAccessService.getAccessType(loggedInUser, plan), req.getOwnerId());
-        }
-
-        position.setStatus(JobStatus.DRAFT);
         return jobPositionRepository.save(position).getPublicId();
+    }
+
+    @Transactional
+    public String create(JobPositionReq req) {
+        LoggedInUserDetails loggedInUser = AuthService.getLoggedInUser();
+        //this.assertUniqueWithinTenantForCreation(loggedInUser.getTenantId(), req.getName());
+        JobPosition jobPosition = new JobPosition();
+        jobPosition.setCreatedByUserId(loggedInUser.getUserId());
+        jobPosition.setCreatedByUserPublicId(loggedInUser.getPublicId());
+        jobPosition.setTenantId(loggedInUser.getTenantId());
+        if(jobPosition.getOwnerId() == null) {
+            jobPosition.setOwnerId(loggedInUser.getUserId());
+            jobPosition.setOwnerPublicId(loggedInUser.getPublicId());
+        }
+        // else {
+        //     setAnotherUserAsOwner(plan, evaluationPlanAccessService.getAccessType(loggedInUser, plan), req.getOwnerId());
+        // }
+
+        jobPosition.setStatus(JobStatus.DRAFT);
+        return this.save(jobPosition, req);
+    }
+
+    @Transactional 
+    public String update(JobPositionReq req) {
+        if (req.getId() == null) 
+            throw new InternalServerException(String.format("Invalid Job Position Id: User: %s, Position: %s", AuthService.getLoggedInUser().getPublicId(), req.getId()));
+
+        JobPosition jobPosition = jobPositionRepository.findByPublicId(req.getId())
+                .orElseThrow(() -> new InternalServerException(String.format("Job Position not found: User: %s, Position: %s", AuthService.getLoggedInUser().getPublicId(), req.getId())));
+
+        // LoggedInUserDetails loggedInUser = AuthService.getLoggedInUser();
+        //this.assertUniqueWithinTenantForUpdate(loggedInUser.getTenantId(), req.getName(), plan.getId());
+        //evaluationPlanAccessService.assertWriteAccess(loggedInUser, plan);
+        // if(!loggedInUser.getPublicId().equals(req.getOwnerId())){//if the requested owner is not the logged in user, additional checks are needed
+        //     setAnotherUserAsOwner(plan, evaluationPlanAccessService.getAccessType(loggedInUser, plan), req.getOwnerId());
+        // }
+
+        //boolean roundsChanged = !roundsEqual(plan.getRounds(), req.getRounds());
+        //if (roundsChanged) {
+        //    evaluationPlanRoundRepository.deleteByEvaluationPlanId(plan.getId());
+        //}
+
+        return this.save(jobPosition, req);
     }
 
     @Transactional
@@ -104,24 +142,6 @@ public class JobPositionService {
 
     public Optional<JobPosition> findById(Long id) {
         return jobPositionRepository.findById(id);
-    }
-
-    @Transactional
-    public String update(JobPosition position) {
-        JobPosition existing = jobPositionRepository.findById(position.getId())
-                .orElseThrow(() -> new InternalServerException("Position not found: " + position.getId()));
-
-        if (position.getTitle() != null) existing.setTitle(position.getTitle());
-        if (position.getEmploymentType() != null) existing.setEmploymentType(position.getEmploymentType());
-        if (position.getWorkLocation() != null) existing.setWorkLocation(position.getWorkLocation());
-        if (position.getDescription() != null) existing.setDescription(position.getDescription());
-        if (position.getMandatoryRequirements() != null) existing.setMandatoryRequirements(position.getMandatoryRequirements());
-        if (position.getPreferredRequirements() != null) existing.setPreferredRequirements(position.getPreferredRequirements());
-        existing.setRecruiters(position.getRecruiters());
-        if (position.getStatus() != null) existing.setStatus(position.getStatus());
-        if (position.getExtendedQuestions() != null) existing.setExtendedQuestions(position.getExtendedQuestions());
-
-        return jobPositionRepository.save(existing).getPublicId();
     }
 
     public JobFieldsData getJobFieldsData() {

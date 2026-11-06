@@ -9,10 +9,10 @@ import org.hibernate.type.SqlTypes;
 import java.util.List;
 import jakarta.validation.constraints.NotNull;
 
-import com.deepconnect.ats.job.model.JobPosition;
-
 @Data
 public class JobPositionReq {
+
+    private String id;
     
     private String title;
 
@@ -46,20 +46,5 @@ public class JobPositionReq {
 
     @Column(name = "evaluationPlan", nullable = false)
     private String evaluationPlan;
-
-    public JobPosition toEntity() {
-        JobPosition position = new JobPosition();
-        position.setTitle(this.getTitle());
-        position.setDescription(this.getDescription());
-        position.setMandatoryRequirements(this.getMandatoryRequirements());
-        position.setPreferredRequirements(this.getPreferredRequirements());
-        position.setEmploymentTypeId(this.getEmploymentType());
-        position.setWorkArrangementTypeId(this.getWorkArrangementType());
-        position.setWorkLocation(this.getWorkLocation());
-        position.setRecruiters(this.getRecruiters());
-        position.setRecruitmentPipelinePublicId(this.getRecruitmentPipeline());
-        position.setEvaluationPlanPublicId(this.getEvaluationPlan());
-        return position;
-    }
 
 }

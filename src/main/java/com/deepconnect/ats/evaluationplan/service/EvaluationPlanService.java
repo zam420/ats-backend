@@ -134,10 +134,10 @@ public class EvaluationPlanService {
     @Transactional
     public String update(EvaluationPlanReq req) {        
         if (req.getId() == null) 
-            throw new InternalServerException("Invalid Interview Process Id: " + req.getId());
+            throw new InternalServerException(String.format("Invalid Evaluation Plan Id: User: %s, Process: %s", AuthService.getLoggedInUser().getPublicId(), req.getId()));
 
         EvaluationPlan plan = evaluationPlanRepository.findByPublicId(req.getId())
-                .orElseThrow(() -> new InternalServerException("Interview Process not found: " + req.getId()));
+                .orElseThrow(() -> new InternalServerException(String.format("Evaluation Plan not found: User: %s, Plan: %s", AuthService.getLoggedInUser().getPublicId(), req.getId())));
 
         LoggedInUserDetails loggedInUser = AuthService.getLoggedInUser();
         this.assertUniqueWithinTenantForUpdate(loggedInUser.getTenantId(), req.getName(), plan.getId());
@@ -198,10 +198,10 @@ public class EvaluationPlanService {
     @Transactional
     public String updateTemplate(EvaluationPlanReq req) {        
         if (req.getId() == null) 
-            throw new InternalServerException("Invalid Interview Process Id: " + req.getId());
+            throw new InternalServerException("Invalid Evaluation Plan Id: " + req.getId());
 
         EvaluationPlan plan = evaluationPlanRepository.findByPublicId(req.getId())
-                .orElseThrow(() -> new InternalServerException("Interview Process not found: " + req.getId()));
+                .orElseThrow(() -> new InternalServerException("Evaluation Plan not found: " + req.getId()));
 
         LoggedInUserDetails loggedInUser = AuthService.getLoggedInUser();
         this.assertUniqueWithinAllForUpdate(req.getName(), plan.getId());
@@ -216,7 +216,7 @@ public class EvaluationPlanService {
 
     @Transactional
     public boolean deactivate(String publicId) {
-        EvaluationPlan plan = evaluationPlanRepository.findByPublicId(publicId).orElseThrow(() -> new InternalServerException("Interview Process not found: " + publicId));
+        EvaluationPlan plan = evaluationPlanRepository.findByPublicId(publicId).orElseThrow(() -> new InternalServerException(String.format("Evaluation Plan not found: User: %s, Plan: %s", AuthService.getLoggedInUser().getPublicId(), publicId)));
         LoggedInUserDetails loggedInUser = AuthService.getLoggedInUser();
         evaluationPlanAccessService.assertWriteAccess(loggedInUser, plan);
         plan.setDeactivated(true);
