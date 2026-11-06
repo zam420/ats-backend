@@ -5,65 +5,80 @@ import com.deepconnect.ats.dto.ApiResult;
 import com.deepconnect.ats.dto.AtsPageQuery;
 import com.deepconnect.ats.dto.AtsPageRsp;
 import com.deepconnect.ats.job.service.JobPositionService;
+import com.deepconnect.ats.job.dto.JobPositionReq;
+
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import com.deepconnect.ats.job.model.JobPosition;
+import com.deepconnect.ats.job.dto.JobFieldsData;
+import com.deepconnect.ats.job.dto.JobPositionRes;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/recruitment")
+@RequestMapping("/api/job")
 @RequiredArgsConstructor
 public class JobPositionController {
 
     private final JobPositionService jobPositionService;
 
     @PreAuthorize("hasAuthority('jpc')")
-    @PostMapping("/createJobPosition")
-    public ApiResult<Map<String, Long>> createJobPosition(@RequestBody JobPosition position) {
-        Long id = jobPositionService.createJobPosition(position);
+    @PostMapping("/create")
+    public ApiResult<Map<String, String>> create(@RequestBody @Valid JobPositionReq req) {
+        String id = jobPositionService.create(req);
         return ApiResult.success(Collections.singletonMap("id", id));
     }
 
     @PreAuthorize("hasAuthority('jpc')")
-    @PostMapping("/publishJob")
-    public ApiResult<Boolean> publishJob(@RequestBody Map<String, Object> body) {
-        Long id = Long.valueOf(body.get("id").toString());
+    @PostMapping("/publish")
+    public ApiResult<Boolean> publish(@RequestBody Map<String, Object> body) {
+        String id = body.get("id").toString();
         Integer status = Integer.valueOf(body.get("status").toString());
-        jobPositionService.publishJob(id, status);
+        jobPositionService.publish(id, status);
         return ApiResult.success(true);
     }
 
     @PreAuthorize("hasAuthority('jpe')")
-    @PostMapping("/updateJobPosition")
-    public ApiResult<Map<String, Long>> updateJobPosition(@RequestBody JobPosition position) {
-        Long id = jobPositionService.updateJobPosition(position);
+    @PostMapping("/update")
+    public ApiResult<Map<String, String>> update(@RequestBody JobPosition position) {
+        String id = jobPositionService.update(position);
         return ApiResult.success(Collections.singletonMap("id", id));
     }
 
     @PreAuthorize("hasAuthority('jps')")
-    @GetMapping("/listJobPositionSummary")
-    public ApiResult<List<JobPosition>> listJobPositionSummary() {
-        return ApiResult.success(jobPositionService.listActive());
+    @GetMapping("/all")
+    public ApiResult<List<JobPositionRes>> findAll() {
+        return ApiResult.success(jobPositionService.findAll());
     }
 
-    @PreAuthorize("hasAuthority('jps')")
-    @GetMapping("/listJobPostionForCV")
-    public ApiResult<List<JobPosition>> listJobPositionForCV() {
-        return ApiResult.success(jobPositionService.listActive());
+    @PreAuthorize("hasAuthority('ipts')")
+    @GetMapping("/{id}")
+    public ApiResult<JobPositionRes> findById(
+        @PathVariable @NotBlank(message = "{field.common.id}{validation.notBlank}")String id) {
+        return ApiResult.success(jobPositionService.findByPublicIdForTenant(id));
     }
 
-    @PreAuthorize("hasAuthority('jps')")
-    @GetMapping("/getJobPositionDetail")
-    public ApiResult<JobPosition> getJobPositionDetail(@RequestParam Long id) {
-        return ApiResult.success(jobPositionService.getById(id).orElse(null));
-    }
+
+    // @PreAuthorize("hasAuthority('jps')")
+    // @GetMapping("/listJobPostionForCV")
+    // public ApiResult<List<JobPositionRes>> listJobPositionForCV() {
+    //     return ApiResult.success(jobPositionService.listActive());
+    // }
 
     @PreAuthorize("hasAuthority('jps')")
     @GetMapping("/job/listAll")
     public ApiResult<AtsPageRsp<JobPosition>> listAll(AtsPageQuery query) {
         return ApiResult.success(jobPositionService.listJobPosition(query));
     }
+
+    @PreAuthorize("hasAuthority('jps')")
+    @GetMapping("/jobFieldsData")
+    public ApiResult<JobFieldsData> getJobFieldsData() throws Exception {
+        return ApiResult.success(jobPositionService.getJobFieldsData());
+    }
+
 }

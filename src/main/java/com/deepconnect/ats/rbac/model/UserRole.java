@@ -15,13 +15,16 @@ import lombok.*;
 @Builder
 public class UserRole extends BaseEntity {
 
-    @Column(name = "user_id", nullable = false)
+    @Column(nullable = false)
     private Long userId;
 
-    @Column(name = "role_id", nullable = false)
+    @Column(nullable = false)
+    private String userPublicId;
+
+    @Column(nullable = false)
     private Long roleId;
 
-    @Column(name = "role_code", nullable = false)
+    @Column(nullable = false)
     private String roleCode;
     
 }

@@ -14,7 +14,6 @@ import java.util.List;
 import org.hibernate.validator.constraints.Length;
 
 import com.deepconnect.ats.user.model.User;
-import com.deepconnect.ats.evaluationplan.model.EvaluationPlanSharedWithUser;
 
 @Entity
 @Table(name = "evaluation_plan", uniqueConstraints = {
@@ -68,6 +67,7 @@ public class EvaluationPlan extends OperatableBaseWithTenantEntity {
     @Column(name = "ownerId", nullable = false)
     private Long ownerId;
 
+    @Column(nullable = false)
     private String ownerPublicId;
 
 }

@@ -35,6 +35,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -54,7 +55,7 @@ public class RecruitmentPipelineService {
     private final RecruitmentPipelineRoundTypeRepository recruitmentPipelineRoundTypeRepository;
     private final RecruitmentPipelineSharedWithUserRepository recruitmentPipelineSharedWithUserRepository;
 
-    public List<RecruitmentPipelineRoundType> getAllRoundTypes() {
+    public List<RecruitmentPipelineRoundType> findAllRoundTypes() {
         return recruitmentPipelineRoundTypeRepository.findAll();
     }
 
@@ -71,7 +72,7 @@ public class RecruitmentPipelineService {
             if (req.getRounds().size() > maxRounds) {
                 throw new InternalServerException(String.format("Too many rounds. User: %s. Plan: %s. Rounds: %d", loggedInUser.getPublicId(), plan.getPublicId(), req.getRounds().size()));
             }
-            List<RecruitmentPipelineRoundType> allRoundTypes = this.getAllRoundTypes();
+            List<RecruitmentPipelineRoundType> allRoundTypes = this.findAllRoundTypes();
             this.assertRoundTypeOrder(allRoundTypes, req.getRounds(), loggedInUser.getPublicId(), plan.getPublicId());
             HashMap<Integer, RecruitmentPipelineRoundType> roundTypesById = HashMapUtils.getMapFromList(allRoundTypes, "Id", Integer.class, RecruitmentPipelineRoundType.class);
             for (RecruitmentPipelineRound roundTemplate : req.getRounds()) {
@@ -231,7 +232,7 @@ public class RecruitmentPipelineService {
     }
 
     @Transactional(readOnly = true)
-    public AtsPageRsp<RecruitmentPipelineRes> getAll(AtsPageQuery query) {
+    public AtsPageRsp<RecruitmentPipelineRes> findAll(AtsPageQuery query) {
         boolean isAdmin = recruitmentPipelineAccessService.isUserInRecruitmentPipelineAdminRole(AuthService.getLoggedInUser());
         Page<RecruitmentPipeline> page = isAdmin 
             ? recruitmentPipelineRepository.findAllForTenantAdmin(AuthService.getLoggedInTenantId(), query.toPageable()) 
@@ -239,8 +240,22 @@ public class RecruitmentPipelineService {
         return AtsPageRsp.of(page.map(RecruitmentPipelineRes::from));
     }
 
+    /**
+     * Get all interview plans for the current tenant as a list. 
+     * Used for selection dropdowns e.g. in job position forms
+     * @return
+     */
     @Transactional(readOnly = true)
-    public AtsPageRsp<RecruitmentPipelineRes> getAllSystemTemplates(AtsPageQuery query) {
+    public List<RecruitmentPipelineRes> findAllAsList() {
+        boolean isAdmin = recruitmentPipelineAccessService.isUserInRecruitmentPipelineAdminRole(AuthService.getLoggedInUser());
+        List<RecruitmentPipeline> plans = isAdmin 
+            ? recruitmentPipelineRepository.findAllForTenantAdminAsList(AuthService.getLoggedInTenantId()) 
+            : recruitmentPipelineRepository.findAllForTenantNonAdminAsList(AuthService.getLoggedInTenantId(), AuthService.getLoggedInUser().getUserId());
+        return plans.stream().map(RecruitmentPipelineRes::from).toList();
+    }
+
+    @Transactional(readOnly = true)
+    public AtsPageRsp<RecruitmentPipelineRes> findAllSystemTemplates(AtsPageQuery query) {
         Page<RecruitmentPipeline> page = recruitmentPipelineRepository.findByDeactivatedFalseAndIsPublicForAllTrue(query.toPageable());
         return AtsPageRsp.of(page.map(RecruitmentPipelineRes::from));
     }
@@ -252,7 +267,7 @@ public class RecruitmentPipelineService {
      * @return a paginated response containing recruitment pipelines for the tenant
      */
     @Transactional(readOnly = true)
-    public AtsPageRsp<RecruitmentPipelineRes> getAllSharedWithUser(AtsPageQuery query) {
+    public AtsPageRsp<RecruitmentPipelineRes> findAllSharedWithUser(AtsPageQuery query) {
         Page<RecruitmentPipeline> page = recruitmentPipelineRepository.findPublicOrSharedForTenant(AuthService.getLoggedInTenantId(), query.toPageable());
         return AtsPageRsp.of(page.map(RecruitmentPipelineRes::from));
     }
@@ -264,7 +279,7 @@ public class RecruitmentPipelineService {
      * @return a paginated response containing recruitment pipelines for the tenant
      */
     @Transactional(readOnly = true)
-    public AtsPageRsp<RecruitmentPipelineRes> getAllForPlanOwner(AtsPageQuery query) {
+    public AtsPageRsp<RecruitmentPipelineRes> findAllForPlanOwner(AtsPageQuery query) {
         LoggedInUserDetails loggedInUser = AuthService.getLoggedInUser();
         Page<RecruitmentPipeline> page = recruitmentPipelineRepository.findByDeactivatedFalseAndTenantIdAndOwnerId(loggedInUser.getTenantId(), loggedInUser.getUserId(), query.toPageable());
         return AtsPageRsp.of(page.map(RecruitmentPipelineRes::from));
@@ -276,7 +291,7 @@ public class RecruitmentPipelineService {
      * @param query the pagination and status filter query
      * @return a paginated response containing recruitment pipelines for the tenant
      */
-    private AtsPageRsp<RecruitmentPipelineRes> getAllForTenant(AtsPageQuery query) {
+    private AtsPageRsp<RecruitmentPipelineRes> findAllForTenant(AtsPageQuery query) {
         Long tenantId = AuthService.getLoggedInTenantId();
         Page<RecruitmentPipeline> page = recruitmentPipelineRepository.findByDeactivatedFalseAndTenantId(tenantId, query.toPageable());
         return AtsPageRsp.of(page.map(RecruitmentPipelineRes::from));
@@ -399,5 +414,9 @@ public class RecruitmentPipelineService {
         if(recruitmentPipelineRepository.existsByDeactivatedFalseAndNameAndIdNot(name, planId)) {
             throw new InternalServerException("Duplicate evaluation plan within all tenants: " + name);
         }
+    }
+
+    public Optional<RecruitmentPipeline> findByPublicId(String publicId) {
+        return recruitmentPipelineRepository.findByPublicId(publicId);
     }
 }

@@ -7,10 +7,10 @@ import com.deepconnect.ats.model.CandidateProjectExperience;
 import com.deepconnect.ats.model.CandidateResume;
 import com.deepconnect.ats.model.CandidateWorkExperience;
 import com.deepconnect.ats.job.model.JobPosition;
-import com.deepconnect.ats.recruitmentproject.model.RecruitmentProject;
-import com.deepconnect.ats.recruitmentproject.repo.RecruitmentProjectRepository;
 import com.deepconnect.ats.job.repo.JobPositionRepository;
 import com.deepconnect.ats.service.mail.ResumeEmail;
+import com.deepconnect.ats.job.enums.JobStatus;
+
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.nodes.Node;
@@ -29,8 +29,7 @@ import java.util.regex.Pattern;
 
 abstract class AbstractResumeParser {
     protected final JobPositionRepository jobPositions;
-    protected final RecruitmentProjectRepository projects;
-    protected AbstractResumeParser(JobPositionRepository jobPositions, RecruitmentProjectRepository projects) { this.jobPositions = jobPositions; this.projects = projects; }
+    protected AbstractResumeParser(JobPositionRepository jobPositions) { this.jobPositions = jobPositions; }
 
     protected Document html(ResumeEmail email) {
         return Parser.htmlParser().parseInput(email.body() == null ? "" : email.body(), "");
@@ -85,9 +84,9 @@ abstract class AbstractResumeParser {
     protected List<JobPosition> matchingJobs(String title, String mailbox) {
         if (title == null || title.isBlank()) return List.of();
         List<JobPosition> found = jobPositions.findAll().stream()
-                .filter(p -> p.getStatus() == null || p.getStatus() != 2)
+                .filter(p -> p.getStatus() == null || p.getStatus() != JobStatus.CLOSED)
                 //.filter(p -> projects.findById(p.getProjectId()).map(RecruitmentProject::getStatus).orElse(1) == 0)
-                .filter(p -> mailbox.equalsIgnoreCase(p.getResumeInbox()))
+                // .filter(p -> mailbox.equalsIgnoreCase(p.getResumeInbox()))
                 .filter(p -> title.trim().equalsIgnoreCase(p.getTitle().trim())).toList();
         if (found.isEmpty()) throw new InternalServerException("Not found: applying position");
         return found;

@@ -5,7 +5,6 @@ import com.deepconnect.ats.model.CandidateEducationHistory;
 import com.deepconnect.ats.model.CandidateResume;
 import com.deepconnect.ats.job.model.JobPosition;
 import com.deepconnect.ats.job.repo.JobPositionRepository;
-import com.deepconnect.ats.recruitmentproject.repo.RecruitmentProjectRepository;
 import com.deepconnect.ats.service.mail.ResumeEmail;
 import org.springframework.stereotype.Component;
 
@@ -14,7 +13,7 @@ import java.util.List;
 
 @Component
 public class OfficialEmailResumeParser extends AbstractResumeParser {
-    public OfficialEmailResumeParser(JobPositionRepository jobPositions, RecruitmentProjectRepository projects) { super(jobPositions, projects); }
+    public OfficialEmailResumeParser(JobPositionRepository jobPositions) { super(jobPositions); }
 
     public List<com.deepconnect.ats.dto.CandidateResumeSaveReq> parse(ResumeEmail mail) {
         String text = (mail.body() == null ? "" : mail.body()).replaceAll("(?i)<br\\s*/?>|</p>|</tr>|</div>", "\n");

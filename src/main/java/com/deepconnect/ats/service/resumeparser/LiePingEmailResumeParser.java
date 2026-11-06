@@ -6,7 +6,6 @@ import com.deepconnect.ats.model.CandidateProjectExperience;
 import com.deepconnect.ats.model.CandidateWorkExperience;
 import com.deepconnect.ats.job.model.JobPosition;
 import com.deepconnect.ats.job.repo.JobPositionRepository;
-import com.deepconnect.ats.recruitmentproject.repo.RecruitmentProjectRepository;
 import com.deepconnect.ats.service.mail.ResumeEmail;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -26,7 +25,7 @@ public class LiePingEmailResumeParser extends AbstractResumeParser {
     private final String projectInterval, projectName, projectRole, projectCompany, projectDesc, projectResponsibility, projectAchievement;
     private final String educationInterval, educationUniversity, educationMajor, educationDegree;
 
-    public LiePingEmailResumeParser(JobPositionRepository jobPositions, RecruitmentProjectRepository projects,
+    public LiePingEmailResumeParser(JobPositionRepository jobPositions,
         @Value("${ats.xpath.lie-ping.base-info.name}") String name,
         @Value("${ats.xpath.lie-ping.base-info.phone-number}") String phone,
         @Value("${ats.xpath.lie-ping.base-info.gender}") String gender,
@@ -57,7 +56,7 @@ public class LiePingEmailResumeParser extends AbstractResumeParser {
         @Value("${ats.xpath.lie-ping.edu-experience.university}") String educationUniversity,
         @Value("${ats.xpath.lie-ping.edu-experience.major}") String educationMajor,
         @Value("${ats.xpath.lie-ping.edu-experience.degree}") String educationDegree) {
-        super(jobPositions, projects);
+        super(jobPositions);
         this.name=name; this.phone=phone; this.gender=gender; this.email=email; this.age=age; this.employment=employment;
         this.selfAssessment=selfAssessment; this.salary=salary; this.expectedLocation=expectedLocation; this.appliedPosition=appliedPosition; this.notes=notes;
         this.workSection=workSection; this.projectSection=projectSection; this.educationSection=educationSection; this.assessmentSection=assessmentSection;

@@ -54,22 +54,22 @@ public class EvaluationPlanController {
     }
 
     @PreAuthorize("hasAuthority('ipts')")
-    @GetMapping("/{id}")
-    public ApiResult<EvaluationPlanDetailsRes> findById(
-        @PathVariable @NotBlank(message = "{field.common.id}{validation.notBlank}")String id) {
-        return ApiResult.success(evaluationPlanService.findByPublicIdForTenant(id));
-    }
-
-    @PreAuthorize("hasAuthority('ipts')")
     @GetMapping("/roundtypes")
-    public ApiResult<List<EvaluationPlanRoundType>> getAllRoundTypes() throws Exception {
-        return ApiResult.success(evaluationPlanService.getAllRoundTypes());
+    public ApiResult<List<EvaluationPlanRoundType>> findAllRoundTypes() throws Exception {
+        return ApiResult.success(evaluationPlanService.findAllRoundTypes());
     }
 
     @PreAuthorize("hasAuthority('ipts')")
     @GetMapping("/all")
-    public ApiResult<AtsPageRsp<EvaluationPlanRes>> getAll(AtsPageQuery query) {
-        return ApiResult.success(evaluationPlanService.getAll(query));
+    public ApiResult<AtsPageRsp<EvaluationPlanRes>> findAll(AtsPageQuery query) {
+        return ApiResult.success(evaluationPlanService.findAll(query));
+    }
+
+    @PreAuthorize("hasAuthority('ipts')")
+    @GetMapping("/{id}")
+    public ApiResult<EvaluationPlanDetailsRes> findById(
+        @PathVariable @NotBlank(message = "{field.common.id}{validation.notBlank}")String id) {
+        return ApiResult.success(evaluationPlanService.findByPublicIdForTenant(id));
     }
 
     /**
@@ -80,33 +80,26 @@ public class EvaluationPlanController {
      */
     @PreAuthorize("hasAuthority('ipts')")
     @GetMapping("/list")
-    public ApiResult<List<EvaluationPlanRes>> getAllAsList() {
-        return ApiResult.success(evaluationPlanService.getAllAsList());
+    public ApiResult<List<EvaluationPlanRes>> findAllAsList() {
+        return ApiResult.success(evaluationPlanService.findAllAsList());
     }
 
     @PreAuthorize("hasAuthority('ipts')")
     @GetMapping("/owned")
-    public ApiResult<AtsPageRsp<EvaluationPlanRes>> getAllForPlanOwner(AtsPageQuery query) {
-        return ApiResult.success(evaluationPlanService.getAllForPlanOwner(query));
+    public ApiResult<AtsPageRsp<EvaluationPlanRes>> findAllForPlanOwner(AtsPageQuery query) {
+        return ApiResult.success(evaluationPlanService.findAllForPlanOwner(query));
     }
 
     @PreAuthorize("hasAuthority('ipts')")
     @GetMapping("/shared")
-    public ApiResult<AtsPageRsp<EvaluationPlanRes>> getAllSharedWithUser(AtsPageQuery query) {
-        return ApiResult.success(evaluationPlanService.getAllSharedWithUser(query));
-    }
-
-    @PreAuthorize("hasAuthority('ipts')")
-    @GetMapping("/listByJob")
-    public ApiResult<List<EvaluationPlanRes>> listProcessTemplateByJob(@RequestParam(required = false) Long jobId) {
-        throw new UnsupportedOperationException("Listing process templates by job is not implemented yet.");
-        // return ApiResult.success(evaluationPlanService.listProcessTemplates()); //TODO: bug in original code, not returning results by jobId param
+    public ApiResult<AtsPageRsp<EvaluationPlanRes>> findAllSharedWithUser(AtsPageQuery query) {
+        return ApiResult.success(evaluationPlanService.findAllSharedWithUser(query));
     }
 
     @PreAuthorize("hasAuthority('ipts')")
     @GetMapping("/templates")
-    public ApiResult<AtsPageRsp<EvaluationPlanRes>> getAllSystemTemplates(AtsPageQuery query) {
-        return ApiResult.success(evaluationPlanService.getAllSystemTemplates(query));
+    public ApiResult<AtsPageRsp<EvaluationPlanRes>> findAllSystemTemplates(AtsPageQuery query) {
+        return ApiResult.success(evaluationPlanService.findAllSystemTemplates(query));
     }
 
     @PreAuthorize("hasAuthority('iptsa')")
@@ -119,6 +112,13 @@ public class EvaluationPlanController {
     @PostMapping("/templates/update")
     public ApiResult<Map<String, String>> updateTemplate(@RequestBody @Valid EvaluationPlanReq req) {
         return ApiResult.success(Collections.singletonMap("id", evaluationPlanService.updateTemplate(req)));
+    }
+
+    @PreAuthorize("hasAuthority('ipts')")
+    @GetMapping("/listByJob")
+    public ApiResult<List<EvaluationPlanRes>> listProcessTemplateByJob(@RequestParam(required = false) Long jobId) {
+        throw new UnsupportedOperationException("Listing process templates by job is not implemented yet.");
+        // return ApiResult.success(evaluationPlanService.listProcessTemplates()); //TODO: bug in original code, not returning results by jobId param
     }
 
 }

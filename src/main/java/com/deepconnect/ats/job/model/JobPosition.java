@@ -1,8 +1,8 @@
 package com.deepconnect.ats.job.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.type.SqlTypes;
@@ -11,16 +11,28 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
+import com.deepconnect.ats.evaluationplan.model.EvaluationPlan;
+import com.deepconnect.ats.recruitmentpipeline.model.RecruitmentPipeline;
+import com.deepconnect.ats.user.model.User;
+import com.deepconnect.ats.common.model.OperatableBaseWithTenantEntity;
+import com.deepconnect.ats.job.enums.JobStatus;
+
 @Entity
-@Table(name = "ats_job_position", uniqueConstraints = {
+@Table(name = "job_position", uniqueConstraints = {
         @UniqueConstraint(columnNames = {"title", "project_id"})
-})
+    },
+    indexes = {
+        @Index(name = "idx_job_position_status", columnList = "status"),
+        @Index(name = "idx_job_position_title", columnList = "title"),
+        @Index(name = "idx_job_position_owner_id", columnList = "owner_id"),
+    }
+)
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class JobPosition {
+public class JobPosition extends OperatableBaseWithTenantEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -29,61 +41,89 @@ public class JobPosition {
     @Column(nullable = false, length = 100)
     private String title;
 
-    @Column(name = "recruitment_type", nullable = false)
-    private Integer recruitmentType;
+    @Column(nullable = false, length = 10000, columnDefinition = "TEXT")
+    private String description;
 
-    @Column(name = "employment_type", nullable = false)
-    private Integer employmentType;
+    @Column(nullable = false, length = 5000, columnDefinition = "TEXT")
+    private String mandatoryRequirements;
 
-    @Column(name = "job_type", nullable = false)
-    private Integer jobType;
+    @Column(nullable = true, length = 5000, columnDefinition = "TEXT")
+    private String preferredRequirements;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "employmentTypeId", referencedColumnName = "id", insertable = false, updatable = false)
+    private JobEmploymentType employmentType; // By default, the user who created this record. Can be changed.
+
+    @Column(name = "employmentTypeId", nullable = false)
+    @NotNull(message = "{field.job.employmentType}{validation.notBlank}")
+    private Integer employmentTypeId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "workArrangementTypeId", referencedColumnName = "id", insertable = false, updatable = false)
+    private JobWorkArrangementType workArrangementType; // By default, the user who created this record. Can be changed.
+
+    @Column(name = "workArrangementTypeId", nullable = false)
+    @NotNull(message = "{field.job.workArrangementType}{validation.notBlank}")
+    private Integer workArrangementTypeId;
 
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "work_location", nullable = false, columnDefinition = "json")
     private List<Integer> workLocation;
 
-    @Column(name = "job_desc", nullable = false, length = 10000)
-    private String jobDesc;
-
-    @Column(name = "job_req", nullable = false, length = 5000)
-    private String jobReq;
-
-    @Column(name = "job_req_pref", length = 5000)
-    private String jobReqPref;
-
-    @Column(name = "hr_recruiter", nullable = false)
-    private String hrRecruiter;
-
-    @Column(name = "resume_inbox", nullable = false, length = 254)
-    private String resumeInbox;
-
     @JdbcTypeCode(SqlTypes.JSON)
-    @Column(name = "publish_channel", columnDefinition = "json")
-    private List<String> publishChannel;
+    @Column(columnDefinition = "json", nullable = false)
+    private List<String> recruiters;
 
-    @Column(name = "created_by_id", nullable = false)
-    private Long createdById;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "recruitmentPipelineId", referencedColumnName = "id", insertable = false, updatable = false)
+    private RecruitmentPipeline recruitmentPipeline;
 
-    @CreationTimestamp
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
+    @Column(name = "recruitmentPipelineId", nullable = false)
+    private Long recruitmentPipelineId;
+
+    @Column(name = "recruitmentPipelinePublicId", nullable = false)
+    private String recruitmentPipelinePublicId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "evaluationPlanId", referencedColumnName = "id", insertable = false, updatable = false)
+    private EvaluationPlan evaluationPlan;
+
+    @Column(name = "evaluationPlanId", nullable = false)
+    private Long evaluationPlanId;
+
+    @Column(name = "evaluationPlanPublicId", nullable = false)
+    private String evaluationPlanPublicId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "publishedByUserId", referencedColumnName = "id", insertable = false, updatable = false)
+    private User publishedByUser; // The user who published this record
+
+    @Column(name = "publishedByUserId", nullable = true)
+    private Long publishedByUserId;
+
+    @Column(name = "publishedByUserPublicId", nullable = true)
+    private String publishedByUserPublicId;
 
     @UpdateTimestamp
-    @Column(name = "updated_at", nullable = false)
-    private LocalDateTime updatedAt;
-
-    @Column(name = "published_at")
+    @Column(name = "publishedAt", nullable = true)
     private LocalDateTime publishedAt;
 
-    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 30)
     @Builder.Default
-    private Integer status = 0;
+    private JobStatus status = JobStatus.DRAFT;
 
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "extended_questions", columnDefinition = "json")
     private List<Map<String, Object>> extendedQuestions;
 
-    @Column(name = "public_interview_feedback", nullable = false)
-    @Builder.Default
-    private Boolean publicInterviewFeedback = false;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "ownerId", referencedColumnName = "id", insertable = false, updatable = false)
+    private User owner;
+
+    @Column(name = "ownerId", nullable = false)
+    private Long ownerId;
+
+    @Column(name = "ownerPublicId", nullable = false)
+    private String ownerPublicId;
 }

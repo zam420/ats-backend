@@ -4,15 +4,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
-import com.deepconnect.ats.user.service.UserService;
+import com.deepconnect.ats.user.service.UserServiceV2;
 import com.deepconnect.ats.auth.dto.ActivationReq;
 import com.deepconnect.ats.auth.dto.ForgotPasswordReq;
 import com.deepconnect.ats.auth.dto.LoginGoogleReq;
 import com.deepconnect.ats.auth.dto.LoginReq;
-import com.deepconnect.ats.auth.dto.LogoutReq;
 import com.deepconnect.ats.auth.dto.RegisterReq;
 import com.deepconnect.ats.auth.dto.ResetPasswordReq;
-import com.deepconnect.ats.auth.dto.TokenRefreshReq;
 import com.deepconnect.ats.auth.service.AuthService;
 
 import jakarta.validation.Valid;
@@ -23,7 +21,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class AuthController {
 
-    private final UserService userService;
+    private final UserServiceV2 userService;
     private final AuthService authService;
 
     @Transactional

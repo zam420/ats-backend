@@ -67,6 +67,7 @@ public class RecruitmentPipeline extends OperatableBaseWithTenantEntity {
     @Column(name = "ownerId", nullable = false)
     private Long ownerId;
 
+    @Column(nullable = false)
     private String ownerPublicId;
 
 }

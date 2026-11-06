@@ -5,7 +5,6 @@ import com.deepconnect.ats.model.CandidateResume;
 import com.deepconnect.ats.model.CandidateWorkExperience;
 import com.deepconnect.ats.job.model.JobPosition;
 import com.deepconnect.ats.job.repo.JobPositionRepository;
-import com.deepconnect.ats.recruitmentproject.repo.RecruitmentProjectRepository;
 import com.deepconnect.ats.service.mail.ResumeEmail;
 import org.jsoup.nodes.Document;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,7 +20,7 @@ import java.util.regex.Pattern;
 @Component
 public class LinkedinEmailResumeParser extends AbstractResumeParser {
     private final String residence, skills, current, past, questionRows, qaRows, question, answer;
-    public LinkedinEmailResumeParser(JobPositionRepository jobPositions, RecruitmentProjectRepository projects,
+    public LinkedinEmailResumeParser(JobPositionRepository jobPositions,
         @Value("${ats.xpath.linkedin.current-residence-path}") String residence,
         @Value("${ats.xpath.linkedin.screening-questions-skills-path}") String skills,
         @Value("${ats.xpath.linkedin.work-experiences.current-experience}") String current,
@@ -30,7 +29,7 @@ public class LinkedinEmailResumeParser extends AbstractResumeParser {
         @Value("${ats.xpath.linkedin.screening-qualifications.qa-path}") String qaRows,
         @Value("${ats.xpath.linkedin.screening-qualifications.question-path}") String question,
         @Value("${ats.xpath.linkedin.screening-qualifications.answer-path}") String answer) {
-        super(jobPositions, projects); this.residence=residence; this.skills=skills; this.current=current; this.past=past;
+        super(jobPositions); this.residence=residence; this.skills=skills; this.current=current; this.past=past;
         this.questionRows=questionRows; this.qaRows=qaRows; this.question=question; this.answer=answer;
     }
 

@@ -305,6 +305,19 @@ INSERT INTO ats.recruitment_pipeline_round_type (`id`,`description`,`name`,`is_c
 INSERT INTO ats.recruitment_pipeline_round_type (`id`,`description`,`name`,`is_custom`) VALUES (6,'Candidates onboarded','Onboarded', 0);
 INSERT INTO ats.recruitment_pipeline_round_type (`id`,`description`,`name`,`is_custom`) VALUES (1,'Custom stage','Custom', 1);
 
+-- Job Employment Types
+INSERT INTO `ats`.`job_employment_type` (`name`) VALUES ('Full Time');
+INSERT INTO `ats`.`job_employment_type` (`name`) VALUES ('Part Time');
+INSERT INTO `ats`.`job_employment_type` (`name`) VALUES ('Contract');
+INSERT INTO `ats`.`job_employment_type` (`name`) VALUES ('Intern');
+INSERT INTO `ats`.`job_employment_type` (`name`) VALUES ('Temporary');
+INSERT INTO `ats`.`job_employment_type` (`name`) VALUES ('Volunteer');
+
+-- Job Work Arrangement Types
+INSERT INTO `ats`.`job_work_arrangement_type` (`name`) VALUES ('Onsite');
+INSERT INTO `ats`.`job_work_arrangement_type` (`name`) VALUES ('Remote');
+INSERT INTO `ats`.`job_work_arrangement_type` (`name`) VALUES ('Hybrid');
+
 -- Users
 # System Virtual User
 INSERT INTO ats.ats_user (`id`,`public_id`,`email`,`phone`,`password`,`type`,`status`,`join_date`,`activation_code`,`activation_code_sent_date_time`,`activation_date_time`,`creation_date_time`,`credentials_expired`,`deactivated`,`first_name`,`is_google_login`,`last_name`,`locked`,`locked_by_user_id`,`locked_by_user_name`,`locked_date_time`,`modified_date_time`,`salt`,`password_reset_code`,`password_reset_code_sent_date_time`,`tenant_id`,`company_id`) VALUES (1,'V1StGtR8_vbu','no-reply@fsworkpaper.ai',NULL,'$2a$10$OVNWgRHLRvM6zDn6PDkjv.xzyh1n.zJvhun75xTZ554SgkIFDAxaW',0,0,'2026-10-18 19:22:51.634567',NULL,NULL,'2026-10-18 19:22:51.450781','2026-10-18 19:22:51.450781',0,0,'System',0,NULL,0,NULL,NULL,NULL,NULL,'$2a$10$nuwwU.V9vhBp0LfCxqyeHu',NULL,NULL,1);
@@ -323,23 +336,23 @@ INSERT INTO ats.ats_user (`id`,`public_id`,`email`,`phone`,`password`,`type`,`st
 INSERT INTO ats.ats_user (`id`,`public_id`,`email`,`phone`,`password`,`type`,`status`,`join_date`,`activation_code`,`activation_code_sent_date_time`,`activation_date_time`,`creation_date_time`,`credentials_expired`,`deactivated`,`first_name`,`is_google_login`,`last_name`,`locked`,`locked_by_user_id`,`locked_by_user_name`,`locked_date_time`,`modified_date_time`,`salt`,`password_reset_code`,`password_reset_code_sent_date_time`,`tenant_id`,`company_id`) VALUES (1000,'OzqngmSD0CPf','candidate@fsworkpaper.ai',NULL,'$2a$10$OVNWgRHLRvM6zDn6PDkjv.xzyh1n.zJvhun75xTZ554SgkIFDAxaW',1,0,'2026-10-18 19:22:51.634567','wGdHynhQ','2026-10-18 19:22:51.450781','2026-10-18 19:25:00.450781','2026-10-18 19:22:51.450781',0,0,'Poor',0,'Candidate',0,NULL,NULL,NULL,NULL,'$2a$10$nuwwU.V9vhBp0LfCxqyeHu',NULL,NULL,2);
 
 # User Roles
-INSERT INTO ats.ats_user_role (`public_id`,`role_code`,`role_id`,`user_id`) VALUES ('TnStGXR8_Z5a','sa',1,12);
-INSERT INTO ats.ats_user_role (`public_id`,`role_code`,`role_id`,`user_id`) VALUES ('TnStGXR8_Z5b','itv',7,12);
-INSERT INTO ats.ats_user_role (`public_id`,`role_code`,`role_id`,`user_id`) VALUES ('TnStGXR8_Z5c','hrd',2,13);
-INSERT INTO ats.ats_user_role (`public_id`,`role_code`,`role_id`,`user_id`) VALUES ('TnStGXR8_Z5d','itv',7,13);
-INSERT INTO ats.ats_user_role (`public_id`,`role_code`,`role_id`,`user_id`) VALUES ('TnStGXR8_Z5h','rec',3,14);
-INSERT INTO ats.ats_user_role (`public_id`,`role_code`,`role_id`,`user_id`) VALUES ('TnStGXR8_Z5i','itv',7,14);
-INSERT INTO ats.ats_user_role (`public_id`,`role_code`,`role_id`,`user_id`) VALUES ('TnStGXR8_Z5j','rec',3,15);
-INSERT INTO ats.ats_user_role (`public_id`,`role_code`,`role_id`,`user_id`) VALUES ('TnStGXR8_Z5k','itv',7,15);
-INSERT INTO ats.ats_user_role (`public_id`,`role_code`,`role_id`,`user_id`) VALUES ('TnStGXR8_Z5q','hrd',2,16);
-INSERT INTO ats.ats_user_role (`public_id`,`role_code`,`role_id`,`user_id`) VALUES ('TnStGXR8_Z5r','rec',3,16);
-INSERT INTO ats.ats_user_role (`public_id`,`role_code`,`role_id`,`user_id`) VALUES ('TnStGXR8_Z5s','itv',7,16);
-INSERT INTO ats.ats_user_role (`public_id`,`role_code`,`role_id`,`user_id`) VALUES ('TnStGXR8_Z5t','hrr',4,17);
-INSERT INTO ats.ats_user_role (`public_id`,`role_code`,`role_id`,`user_id`) VALUES ('TnStGXR8_Z5u','itv',7,17);
-INSERT INTO ats.ats_user_role (`public_id`,`role_code`,`role_id`,`user_id`) VALUES ('IrOQeOfgK89F','itv',7,18);
-INSERT INTO ats.ats_user_role (`public_id`,`role_code`,`role_id`,`user_id`) VALUES ('IrOQeOfmn89F','itv',7,19);
-INSERT INTO ats.ats_user_role (`public_id`,`role_code`,`role_id`,`user_id`) VALUES ('IrOQeOfgK7VF','hra',2,20);
-INSERT INTO ats.ats_user_role (`public_id`,`role_code`,`role_id`,`user_id`) VALUES ('IbnveOfmn89F','cdt',6,1000);
+INSERT INTO ats.ats_user_role (`public_id`,`role_code`,`role_id`,`user_id`,`user_public_id`) VALUES ('TnStGXR8_Z5a','sa',1,12,'TnStGXR8_Z5k');
+INSERT INTO ats.ats_user_role (`public_id`,`role_code`,`role_id`,`user_id`,`user_public_id`) VALUES ('TnStGXR8_Z5b','itv',7,12,'TnStGXR8_Z5k');
+INSERT INTO ats.ats_user_role (`public_id`,`role_code`,`role_id`,`user_id`,`user_public_id`) VALUES ('TnStGXR8_Z5c','hrd',2,13,'k5StGXR8_uqP');
+INSERT INTO ats.ats_user_role (`public_id`,`role_code`,`role_id`,`user_id`,`user_public_id`) VALUES ('TnStGXR8_Z5d','itv',7,13,'k5StGXR8_uqP');
+INSERT INTO ats.ats_user_role (`public_id`,`role_code`,`role_id`,`user_id`,`user_public_id`) VALUES ('TnStGXR8_Z5h','rec',3,14,'V2InXR8_Z5n');
+INSERT INTO ats.ats_user_role (`public_id`,`role_code`,`role_id`,`user_id`,`user_public_id`) VALUES ('TnStGXR8_Z5i','itv',7,14,'V2InXR8_Z5n');
+INSERT INTO ats.ats_user_role (`public_id`,`role_code`,`role_id`,`user_id`,`user_public_id`) VALUES ('TnStGXR8_Z5j','rec',3,15,'V1StGXR8_Z5o');
+INSERT INTO ats.ats_user_role (`public_id`,`role_code`,`role_id`,`user_id`,`user_public_id`) VALUES ('TnStGXR8_Z5k','itv',7,15,'V1StGXR8_Z5o');
+INSERT INTO ats.ats_user_role (`public_id`,`role_code`,`role_id`,`user_id`,`user_public_id`) VALUES ('TnStGXR8_Z5q','hrd',2,16,'V1StGXR8_Z5t');
+INSERT INTO ats.ats_user_role (`public_id`,`role_code`,`role_id`,`user_id`,`user_public_id`) VALUES ('TnStGXR8_Z5r','rec',3,16,'V1StGXR8_Z5t');
+INSERT INTO ats.ats_user_role (`public_id`,`role_code`,`role_id`,`user_id`,`user_public_id`) VALUES ('TnStGXR8_Z5s','itv',7,16,'V1StGXR8_Z5t');
+INSERT INTO ats.ats_user_role (`public_id`,`role_code`,`role_id`,`user_id`,`user_public_id`) VALUES ('TnStGXR8_Z5t','hrr',4,17,'V1StGXR8_Z5u');
+INSERT INTO ats.ats_user_role (`public_id`,`role_code`,`role_id`,`user_id`,`user_public_id`) VALUES ('TnStGXR8_Z5u','itv',7,17,'V1StGXR8_Z5u');
+INSERT INTO ats.ats_user_role (`public_id`,`role_code`,`role_id`,`user_id`,`user_public_id`) VALUES ('IrOQeOfgK89F','itv',7,18,'V1StGXR8_vbu');
+INSERT INTO ats.ats_user_role (`public_id`,`role_code`,`role_id`,`user_id`,`user_public_id`) VALUES ('IrOQeOfmn89F','itv',7,19,'V1StGtR8_vbu');
+INSERT INTO ats.ats_user_role (`public_id`,`role_code`,`role_id`,`user_id`,`user_public_id`) VALUES ('IrOQeOfgK7VF','hra',2,20,'OzqnguSD0CPf');
+INSERT INTO ats.ats_user_role (`public_id`,`role_code`,`role_id`,`user_id`,`user_public_id`) VALUES ('IbnveOfmn89F','cdt',6,1000,'OzqngmSD0CPf');
 
 
 -- Add System Tasks

@@ -63,26 +63,26 @@ public class RecruitmentPipelineController {
 
     @PreAuthorize("hasAuthority('rpts')")
     @GetMapping("/roundtypes")
-    public ApiResult<List<RecruitmentPipelineRoundType>> getAllRoundTypes() throws Exception {
-        return ApiResult.success(recruitmentPipelineService.getAllRoundTypes());
+    public ApiResult<List<RecruitmentPipelineRoundType>> findAllRoundTypes() throws Exception {
+        return ApiResult.success(recruitmentPipelineService.findAllRoundTypes());
     }
 
     @PreAuthorize("hasAuthority('rpts')")
     @GetMapping("/all")
-    public ApiResult<AtsPageRsp<RecruitmentPipelineRes>> getAll(AtsPageQuery query) {
-        return ApiResult.success(recruitmentPipelineService.getAll(query));
+    public ApiResult<AtsPageRsp<RecruitmentPipelineRes>> findAll(AtsPageQuery query) {
+        return ApiResult.success(recruitmentPipelineService.findAll(query));
     }
 
     @PreAuthorize("hasAuthority('rpts')")
     @GetMapping("/owned")
-    public ApiResult<AtsPageRsp<RecruitmentPipelineRes>> getAllForPlanOwner(AtsPageQuery query) {
-        return ApiResult.success(recruitmentPipelineService.getAllForPlanOwner(query));
+    public ApiResult<AtsPageRsp<RecruitmentPipelineRes>> findAllForPlanOwner(AtsPageQuery query) {
+        return ApiResult.success(recruitmentPipelineService.findAllForPlanOwner(query));
     }
 
     @PreAuthorize("hasAuthority('rpts')")
     @GetMapping("/shared")
-    public ApiResult<AtsPageRsp<RecruitmentPipelineRes>> getAllSharedWithUser(AtsPageQuery query) {
-        return ApiResult.success(recruitmentPipelineService.getAllSharedWithUser(query));
+    public ApiResult<AtsPageRsp<RecruitmentPipelineRes>> findAllSharedWithUser(AtsPageQuery query) {
+        return ApiResult.success(recruitmentPipelineService.findAllSharedWithUser(query));
     }
 
     @PreAuthorize("hasAuthority('rpts')")
@@ -94,8 +94,8 @@ public class RecruitmentPipelineController {
 
     @PreAuthorize("hasAuthority('rpts')")
     @GetMapping("/templates")
-    public ApiResult<AtsPageRsp<RecruitmentPipelineRes>> getAllSystemTemplates(AtsPageQuery query) {
-        return ApiResult.success(recruitmentPipelineService.getAllSystemTemplates(query));
+    public ApiResult<AtsPageRsp<RecruitmentPipelineRes>> findAllSystemTemplates(AtsPageQuery query) {
+        return ApiResult.success(recruitmentPipelineService.findAllSystemTemplates(query));
     }
 
     @PreAuthorize("hasAuthority('rptsa')")

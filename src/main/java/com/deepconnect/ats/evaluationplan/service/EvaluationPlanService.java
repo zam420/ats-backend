@@ -31,10 +31,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 
 @Slf4j
@@ -53,7 +53,7 @@ public class EvaluationPlanService {
     private final EvaluationPlanRoundTypeRepository evaluationPlanRoundTypeRepository;
     private final EvaluationPlanSharedWithUserRepository evaluationPlanSharedWithUserRepository;
 
-    public List<EvaluationPlanRoundType> getAllRoundTypes() {
+    public List<EvaluationPlanRoundType> findAllRoundTypes() {
         return evaluationPlanRoundTypeRepository.findAll();
     }
 
@@ -77,7 +77,7 @@ public class EvaluationPlanService {
             if (req.getRounds().size() > maxRounds) {
                 throw new InternalServerException(String.format("Too many rounds. User: %s. Plan: %s. Rounds: %d", loggedInUser.getPublicId(), plan.getPublicId(), req.getRounds().size()));
             }
-            HashMap<Integer, EvaluationPlanRoundType> roundTypesById = HashMapUtils.getMapFromList(this.getAllRoundTypes(), "Id", Integer.class, EvaluationPlanRoundType.class);
+            HashMap<Integer, EvaluationPlanRoundType> roundTypesById = HashMapUtils.getMapFromList(this.findAllRoundTypes(), "Id", Integer.class, EvaluationPlanRoundType.class);
             for (EvaluationPlanRound roundTemplate : req.getRounds()) {
                 roundTemplate.setEvaluationPlan(plan);
                 roundTemplate.setEvaluationPlanId(plan.getId());
@@ -234,7 +234,7 @@ public class EvaluationPlanService {
     }
 
     @Transactional(readOnly = true)
-    public AtsPageRsp<EvaluationPlanRes> getAll(AtsPageQuery query) {
+    public AtsPageRsp<EvaluationPlanRes> findAll(AtsPageQuery query) {
         boolean isAdmin = evaluationPlanAccessService.isUserInInterviewPlanAdminRole(AuthService.getLoggedInUser());
         Page<EvaluationPlan> page = isAdmin 
             ? evaluationPlanRepository.findAllForTenantAdmin(AuthService.getLoggedInTenantId(), query.toPageable()) 
@@ -248,7 +248,7 @@ public class EvaluationPlanService {
      * @return
      */
     @Transactional(readOnly = true)
-    public List<EvaluationPlanRes> getAllAsList() {
+    public List<EvaluationPlanRes> findAllAsList() {
         boolean isAdmin = evaluationPlanAccessService.isUserInInterviewPlanAdminRole(AuthService.getLoggedInUser());
         List<EvaluationPlan> plans = isAdmin 
             ? evaluationPlanRepository.findAllForTenantAdminAsList(AuthService.getLoggedInTenantId()) 
@@ -257,7 +257,7 @@ public class EvaluationPlanService {
     }
 
     @Transactional(readOnly = true)
-    public AtsPageRsp<EvaluationPlanRes> getAllSystemTemplates(AtsPageQuery query) {
+    public AtsPageRsp<EvaluationPlanRes> findAllSystemTemplates(AtsPageQuery query) {
         Page<EvaluationPlan> page = evaluationPlanRepository.findByDeactivatedFalseAndIsPublicForAllTrue(query.toPageable());
         return AtsPageRsp.of(page.map(EvaluationPlanRes::from));
     }
@@ -269,7 +269,7 @@ public class EvaluationPlanService {
      * @return a paginated response containing interview plans for the tenant
      */
     @Transactional(readOnly = true)
-    public AtsPageRsp<EvaluationPlanRes> getAllSharedWithUser(AtsPageQuery query) {
+    public AtsPageRsp<EvaluationPlanRes> findAllSharedWithUser(AtsPageQuery query) {
         Page<EvaluationPlan> page = evaluationPlanRepository.findPublicOrSharedForTenant(AuthService.getLoggedInTenantId(), query.toPageable());
         return AtsPageRsp.of(page.map(EvaluationPlanRes::from));
     }
@@ -281,7 +281,7 @@ public class EvaluationPlanService {
      * @return a paginated response containing interview plans for the tenant
      */
     @Transactional(readOnly = true)
-    public AtsPageRsp<EvaluationPlanRes> getAllForPlanOwner(AtsPageQuery query) {
+    public AtsPageRsp<EvaluationPlanRes> findAllForPlanOwner(AtsPageQuery query) {
         LoggedInUserDetails loggedInUser = AuthService.getLoggedInUser();
         Page<EvaluationPlan> page = evaluationPlanRepository.findByDeactivatedFalseAndTenantIdAndOwnerId(loggedInUser.getTenantId(), loggedInUser.getUserId(), query.toPageable());
         return AtsPageRsp.of(page.map(EvaluationPlanRes::from));
@@ -293,7 +293,7 @@ public class EvaluationPlanService {
      * @param query the pagination and status filter query
      * @return a paginated response containing interview plans for the tenant
      */
-    private AtsPageRsp<EvaluationPlanRes> getAllForTenant(AtsPageQuery query) {
+    private AtsPageRsp<EvaluationPlanRes> findAllForTenant(AtsPageQuery query) {
         Long tenantId = AuthService.getLoggedInTenantId();
         Page<EvaluationPlan> page = evaluationPlanRepository.findByDeactivatedFalseAndTenantId(tenantId, query.toPageable());
         return AtsPageRsp.of(page.map(EvaluationPlanRes::from));
@@ -391,4 +391,9 @@ public class EvaluationPlanService {
             throw new InternalServerException("Duplicate evaluation plan within all tenants: " + name);
         }
     }
+
+    public Optional<EvaluationPlan> findByPublicId(String publicId) {
+        return evaluationPlanRepository.findByPublicId(publicId);
+    }
+
 }

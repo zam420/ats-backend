@@ -2,10 +2,9 @@ package com.deepconnect.ats.job.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import com.deepconnect.ats.job.enums.JobStatus;
-import com.deepconnect.ats.job.enums.JobWorkArrangement;
-import com.deepconnect.ats.job.enums.JobEmploymentType;
 import com.deepconnect.ats.evaluationplan.model.EvaluationPlan;
 import com.deepconnect.ats.common.model.OperatableBaseEntity;
 import com.deepconnect.ats.user.model.User;
@@ -18,7 +17,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 @Entity
 @Table(
-    name = "job_position",
+    name = "job_position_2",
     indexes = {
         @Index(name = "idx_job_position_status", columnList = "status"),
         @Index(name = "idx_job_position_title", columnList = "title"),
@@ -38,26 +37,34 @@ public class JobPosition2 extends OperatableBaseEntity {
     @Column(nullable = false, length = 200)
     private String title;
 
-    @Size(max = 10000)
-    @Column(columnDefinition = "TEXT")
+    @Column(nullable = false, length = 10000, columnDefinition = "TEXT")
     private String description;
 
     @Column(nullable = false, length = 5000, columnDefinition = "TEXT")
-    private String jobDesc;
+    private String mandatoryRequirements;
 
-    @Column(nullable = false, length = 5000)
-    private String jobReq;
+    @Column(nullable = true, length = 5000, columnDefinition = "TEXT")
+    private String preferredRequirements;
 
-    @Column(length = 5000)
-    private String jobReqPref;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "jobEmploymentType", referencedColumnName = "id", insertable = false, updatable = false)
+    private JobEmploymentType jobEmploymentType; // By default, the user who created this record. Can be changed.
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "employment_type", nullable = false, length = 30)
-    private JobEmploymentType employmentType;
+    @Column(name = "jobEmploymentType", nullable = false)
+    @NotNull(message = "{field.jobEmploymentType}{validation.notBlank}")
+    private Integer jobEmploymentTypeId;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "work_arrangement", nullable = false, length = 30)
-    private JobWorkArrangement workArrangement;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "jobWorkArrangementType", referencedColumnName = "id", insertable = false, updatable = false)
+    private JobWorkArrangementType jobWorkArrangementType; // By default, the user who created this record. Can be changed.
+
+    @Column(name = "jobWorkArrangementType", nullable = false)
+    @NotNull(message = "{field.jobWorkArrangementType}{validation.notBlank}")
+    private Integer jobWorkArrangementTypeId;
+
+    // @Enumerated(EnumType.STRING)
+    // @Column(name = "employment_type", nullable = false, length = 30)
+    // private JobEmploymentType employmentType;
 
     @Size(max = 150)
     @Column(name = "work_location", length = 150)
