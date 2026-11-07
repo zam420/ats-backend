@@ -54,6 +54,7 @@ public class JobPositionService {
         position.setWorkArrangementTypeId(req.getWorkArrangementType());
         position.setWorkLocation(req.getWorkLocation());
         position.setRecruiters(req.getRecruiters());
+        position.setHiringManagers(req.getHiringManagers());
         position.setRecruitmentPipelinePublicId(req.getRecruitmentPipeline());
         position.setEvaluationPlanPublicId(req.getEvaluationPlan());
         EvaluationPlan evaluationPlan = evaluationPlanService.findByPublicId(position.getEvaluationPlanPublicId()).orElseThrow(() -> new InternalServerException(String.format("Evaluation plan not found: User: %s, Evaluation Plan: %s", loggedInUser.getPublicId(), position.getEvaluationPlanPublicId())));
@@ -151,7 +152,8 @@ public class JobPositionService {
             jobWorkArrangementTypeRepository.findAll(),
             evaluationPlanService.findAllAsList(),
             recruitmentPipelineService.findAllAsList(),
-            userService.findActiveByRolesForTenant(Set.of(RoleType.RECRUITER))
+            userService.findActiveByRolesForTenant(Set.of(RoleType.RECRUITER, RoleType.HR_ADMIN)),
+            userService.findActiveByRolesForTenant(Set.of(RoleType.HIRING_MANAGER, RoleType.HR_ADMIN, RoleType.RECRUITER))
         );
     }
 

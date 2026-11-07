@@ -147,7 +147,6 @@ C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\job\dto\Jo
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\job\enums\JobStatus.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\job\model\JobEmploymentType.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\job\model\JobPosition.java
-C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\job\model\JobPosition2.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\job\model\JobWorkArrangementType.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\job\repo\JobEmploymentTypeRepository.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\job\repo\JobPositionRepository.java

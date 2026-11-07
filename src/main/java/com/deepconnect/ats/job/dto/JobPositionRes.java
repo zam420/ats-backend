@@ -18,6 +18,7 @@ public class JobPositionRes {
     private Integer workArrangementType;
     private List<Integer> workLocation;
     private List<String> recruiters;
+    private List<String> hiringManagers;
     private String recruitmentPipeline;
     private String evaluationPlan;
     
@@ -32,6 +33,7 @@ public class JobPositionRes {
         res.setWorkArrangementType(entity.getWorkArrangementTypeId());
         res.setWorkLocation(entity.getWorkLocation());
         res.setRecruiters(entity.getRecruiters());
+        res.setHiringManagers(entity.getHiringManagers());
         res.setRecruitmentPipeline(entity.getRecruitmentPipelinePublicId());
         res.setEvaluationPlan(entity.getEvaluationPlanPublicId());
         return res;

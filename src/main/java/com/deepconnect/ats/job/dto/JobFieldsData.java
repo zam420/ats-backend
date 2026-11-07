@@ -17,13 +17,15 @@ public class JobFieldsData {
     private List<EvaluationPlanRes> evaluationPlans;
     private List<RecruitmentPipelineRes> recruitmentPipelines;
     private List<UserSummary> recruiters;
+    private List<UserSummary> hiringManagers;
     
     public static JobFieldsData from(
         List<JobEmploymentType> employmentTypes, 
         List<JobWorkArrangementType> workArrangementTypes, 
         List<EvaluationPlanRes> evaluationPlans, 
         List<RecruitmentPipelineRes> recruitmentPipelines,
-        List<UserSummary> recruiters) 
+        List<UserSummary> recruiters,
+        List<UserSummary> hiringManagers) 
     {
         JobFieldsData res = new JobFieldsData();
         res.setEmploymentTypes(employmentTypes);
@@ -31,6 +33,7 @@ public class JobFieldsData {
         res.setEvaluationPlans(evaluationPlans);
         res.setRecruitmentPipelines(recruitmentPipelines);
         res.setRecruiters(recruiters);
+        res.setHiringManagers(hiringManagers);
         return res;
     }
 

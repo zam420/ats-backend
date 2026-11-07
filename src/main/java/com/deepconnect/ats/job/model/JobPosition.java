@@ -79,6 +79,10 @@ public class JobPosition extends OperatableBaseWithTenantEntity {
     @Column(columnDefinition = "json", nullable = false)
     private List<String> recruiters;
 
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(columnDefinition = "json", nullable = false)
+    private List<String> hiringManagers;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "recruitmentPipelineId", referencedColumnName = "id", insertable = false, updatable = false)
     private RecruitmentPipeline recruitmentPipeline;
@@ -99,6 +103,11 @@ public class JobPosition extends OperatableBaseWithTenantEntity {
     @Column(name = "evaluationPlanPublicId", nullable = false)
     private String evaluationPlanPublicId;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 30)
+    @Builder.Default
+    private JobStatus status = JobStatus.DRAFT;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "publishedByUserId", referencedColumnName = "id", insertable = false, updatable = false)
     private User publishedByUser; // The user who published this record
@@ -112,15 +121,6 @@ public class JobPosition extends OperatableBaseWithTenantEntity {
     @UpdateTimestamp
     @Column(name = "publishedAt", nullable = true)
     private LocalDateTime publishedAt;
-
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 30)
-    @Builder.Default
-    private JobStatus status = JobStatus.DRAFT;
-
-    @JdbcTypeCode(SqlTypes.JSON)
-    @Column(name = "extended_questions", columnDefinition = "json")
-    private List<Map<String, Object>> extendedQuestions;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ownerId", referencedColumnName = "id", insertable = false, updatable = false)

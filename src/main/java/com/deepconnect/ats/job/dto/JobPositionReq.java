@@ -41,6 +41,10 @@ public class JobPositionReq {
     @Column(columnDefinition = "json")
     private List<String> recruiters;
 
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(columnDefinition = "json")
+    private List<String> hiringManagers;
+
     @Column(name = "recruitmentPipeline", nullable = false)
     private String recruitmentPipeline;
 
