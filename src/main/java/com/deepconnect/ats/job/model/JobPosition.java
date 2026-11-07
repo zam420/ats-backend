@@ -1,11 +1,14 @@
 package com.deepconnect.ats.job.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.type.SqlTypes;
+import org.hibernate.validator.constraints.Length;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -41,18 +44,25 @@ public class JobPosition extends OperatableBaseWithTenantEntity {
     private Long id;
 
     @Column(nullable = false, length = 100)
+    @NotBlank(message = "{field.job.title}{validation.notBlank}")
+    @Length(max = 100, message = "{field.job.title}{validation.lengthMax}")
     private String title;
 
     @Column(nullable = false, length = 10000, columnDefinition = "TEXT")
     @JsonSerialize(using = JobRichTextSerializer.class)
+    @NotBlank(message = "{field.job.description}{validation.notBlank}")
+    @Length(max = 10000, message = "{field.job.description}{validation.lengthMax}")
     private String description;
 
     @Column(nullable = false, length = 5000, columnDefinition = "TEXT")
     @JsonSerialize(using = JobRichTextSerializer.class)
+    @NotBlank(message = "{field.job.mandatoryRequirements}{validation.notBlank}")
+    @Length(max = 5000, message = "{field.job.mandatoryRequirements}{validation.lengthMax}")
     private String mandatoryRequirements;
 
     @Column(nullable = true, length = 5000, columnDefinition = "TEXT")
     @JsonSerialize(using = JobRichTextSerializer.class)
+    @Length(max = 5000, message = "{field.job.preferredRequirements}{validation.lengthMax}")
     private String preferredRequirements;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -73,14 +83,17 @@ public class JobPosition extends OperatableBaseWithTenantEntity {
 
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "work_location", nullable = false, columnDefinition = "json")
+    @NotEmpty(message = "{field.job.workLocation}{validation.notEmpty}")
     private List<Integer> workLocation;
 
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "json", nullable = false)
+    @NotEmpty(message = "{field.job.recruiters}{validation.notEmpty}")
     private List<String> recruiters;
 
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "json", nullable = false)
+    @NotEmpty(message = "{field.job.hiringManagers}{validation.notEmpty}")
     private List<String> hiringManagers;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -88,6 +101,7 @@ public class JobPosition extends OperatableBaseWithTenantEntity {
     private RecruitmentPipeline recruitmentPipeline;
 
     @Column(name = "recruitmentPipelineId", nullable = false)
+    @NotNull(message = "{field.job.recruitmentPipeline}{validation.notBlank}")
     private Long recruitmentPipelineId;
 
     @Column(name = "recruitmentPipelinePublicId", nullable = false)
@@ -98,6 +112,7 @@ public class JobPosition extends OperatableBaseWithTenantEntity {
     private EvaluationPlan evaluationPlan;
 
     @Column(name = "evaluationPlanId", nullable = false)
+    @NotNull(message = "{field.job.evaluationPlan}{validation.notBlank}")
     private Long evaluationPlanId;
 
     @Column(name = "evaluationPlanPublicId", nullable = false)

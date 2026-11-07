@@ -8,10 +8,7 @@ public enum CustomExceptionType {
     TEST_CUSTOM_WITH_ARGS("customwithargs"),
     INTERNAL_SERVER_ERROR("internalServerError"),
     GOOGLE_CONNECTION_ERROR("googleConnectionError"),
-    VALIDATION_RANGE("validation.range"),
-    MEMORY_TYPE_BLANK("memoryTypeBlank"),
-    MEMORY_CONTENT_BLANK("memoryContentBlank"),
-    
+        
     AUTH_INVALID("authInvalid"),
     AUTH_INVALID_TOKEN("authInvalidToken"),
     AUTH_INVALID_API_KEY("authInvalidAPIKey"),
@@ -25,7 +22,9 @@ public enum CustomExceptionType {
     REGISTER_USERNAME_IN_USE("registerUserNameInUse"),
     REGISTER_EMAIL_IN_USE("registerEmailInUse"),
     REGISTER_ACTIVATION_EMAIL_FAILURE("registerActivationEmailFailure"),
-    
+
+    VALIDATION_RANGE("validation.range"),
+    VALIDATION_MUST_ADD("validation.mustAdd"),
     ;
 
     private final String key;

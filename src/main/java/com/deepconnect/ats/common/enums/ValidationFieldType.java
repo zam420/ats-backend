@@ -4,9 +4,9 @@ import lombok.Getter;
 
 @Getter
 public enum ValidationFieldType {
-    PRECISION("geolocation.precision"),
-    LONGITUDE("geolocation.longitude"),
-    LATITUDE("geolocation.latitude");
+    RECRUITMENT_PIPELINE_STAGE("recruitmentPipelineRound.fieldDescription"),
+    EVALUATION_PLAN_ROUND("evaluationPlanRound.fieldDescription"),
+    ;
 
     private final String key;
 

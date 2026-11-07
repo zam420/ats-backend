@@ -7,14 +7,14 @@ import com.deepconnect.ats.common.enums.ValidationFieldType;
 import lombok.Getter;
 
 @Getter
-public class ValidationRangeException extends CustomException {
+public class ValidationException extends CustomException {
 
     private static String fieldKeyPrefix = "field.";
 
     protected final String fieldKey;
 
-    public ValidationRangeException(ValidationFieldType fieldKey, Object... args) {
-        super(CustomExceptionType.VALIDATION_RANGE, args);
+    public ValidationException(CustomExceptionType exceptionType, ValidationFieldType fieldKey, Object... args) {
+        super(exceptionType.getKey(), args);
         this.fieldKey = getFullFieldKey(fieldKey.getKey());
     }
 

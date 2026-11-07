@@ -24,6 +24,9 @@ import com.deepconnect.ats.common.enums.AccessType;
 import com.deepconnect.ats.common.utils.StringUtils;
 import com.deepconnect.ats.common.utils.HashMapUtils;
 import com.deepconnect.ats.recruitmentpipeline.model.RecruitmentPipelineSharedWithUser;
+import com.deepconnect.ats.common.enums.CustomExceptionType;
+import com.deepconnect.ats.common.enums.ValidationFieldType;
+import com.deepconnect.ats.common.exception.ValidationException;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -60,6 +63,9 @@ public class RecruitmentPipelineService {
     }
 
     private String save(RecruitmentPipeline plan, RecruitmentPipelineReq req, boolean roundsChanged, boolean sharedWithUsersChanged, boolean isPublicForTenant, boolean isPublicForAll) {
+        if(CollectionUtils.isEmpty(req.getRounds())){
+            throw new ValidationException(CustomExceptionType.VALIDATION_MUST_ADD, ValidationFieldType.RECRUITMENT_PIPELINE_STAGE);
+        }
         LoggedInUserDetails loggedInUser = AuthService.getLoggedInUser();
         plan.setModifiedByUserId(loggedInUser.getUserId());
         plan.setModifiedByUserPublicId(loggedInUser.getPublicId());

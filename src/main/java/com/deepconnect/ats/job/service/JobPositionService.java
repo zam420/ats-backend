@@ -153,7 +153,9 @@ public class JobPositionService {
             evaluationPlanService.findAllAsList(),
             recruitmentPipelineService.findAllAsList(),
             userService.findActiveByRolesForTenant(Set.of(RoleType.RECRUITER, RoleType.HR_ADMIN)),
-            userService.findActiveByRolesForTenant(Set.of(RoleType.HIRING_MANAGER, RoleType.HR_ADMIN, RoleType.RECRUITER))
+            userService.findActiveByRolesForTenant(Set.of(RoleType.HIRING_MANAGER, RoleType.HR_ADMIN, RoleType.RECRUITER)),
+            evaluationPlanService.findAllRoundTypes(),
+            recruitmentPipelineService.findAllRoundTypes()
         );
     }
 

@@ -24,6 +24,9 @@ import com.deepconnect.ats.common.enums.AccessType;
 import com.deepconnect.ats.common.utils.StringUtils;
 import com.deepconnect.ats.common.utils.HashMapUtils;
 import org.springframework.beans.factory.annotation.Value;
+import com.deepconnect.ats.common.enums.ValidationFieldType;
+import com.deepconnect.ats.common.exception.ValidationException;
+import com.deepconnect.ats.common.enums.CustomExceptionType;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -65,6 +68,9 @@ public class EvaluationPlanService {
         //Shared with users: if both isPublicForTenant and sharedWithUserIds are specified, throw internal server exception
         if(isPublicForTenant && !CollectionUtils.isEmpty(req.getSharedWithUserIds())) {
             throw new InternalServerException(String.format("Cannot specify both isPublicForTenant and sharedWithUserIds. User: %s, Plan: %s", loggedInUser.getPublicId(), plan.getPublicId()));
+        }
+        if(CollectionUtils.isEmpty(req.getRounds())){
+            throw new ValidationException(CustomExceptionType.VALIDATION_MUST_ADD, ValidationFieldType.EVALUATION_PLAN_ROUND);
         }
         plan.setModifiedByUserId(loggedInUser.getUserId());
         plan.setModifiedByUserPublicId(loggedInUser.getPublicId());

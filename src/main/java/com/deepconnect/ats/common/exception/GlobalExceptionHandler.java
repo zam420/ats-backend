@@ -85,13 +85,13 @@ public class GlobalExceptionHandler {
         String message = messageSource.getMessage(ex.getMessageKey(), ex.getArgs(), request.getLocale());
         return new ResponseEntity<>(ErrorRsp.of(message, ex.getHttpStatus().value()), ex.getHttpStatus());
     }
-    
-    @ExceptionHandler(ValidationRangeException.class)
-    public ResponseEntity<ErrorRsp> handleValidationRangeException(ValidationRangeException ex, HttpServletRequest request) {
+
+    @ExceptionHandler(ValidationException.class)
+    public ResponseEntity<ErrorRsp> handleValidationMustAddException(ValidationException ex, HttpServletRequest request) {
         Locale locale = request.getLocale();
         String fieldName = messageSource.getMessage(ex.getFieldKey(), null, locale);
         String message = messageSource.getMessage(ex.getMessageKey(), ArrayUtils.addFirst(ex.getArgs(), fieldName), locale);
-        return new ResponseEntity<>(ErrorRsp.of(message, ex.getHttpStatus().value()), ex.getHttpStatus());
+        return new ResponseEntity<>(ErrorRsp.of(message, HttpStatus.BAD_REQUEST.value()), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(SocketException.class)
