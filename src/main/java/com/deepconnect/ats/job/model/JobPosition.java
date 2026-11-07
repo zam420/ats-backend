@@ -9,6 +9,7 @@ import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.type.SqlTypes;
 import org.hibernate.validator.constraints.Length;
+import org.hibernate.validator.constraints.Range;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -81,10 +82,42 @@ public class JobPosition extends OperatableBaseWithTenantEntity {
     @NotNull(message = "{field.job.workArrangementType}{validation.notBlank}")
     private Integer workArrangementTypeId;
 
+    //TODO: Later map it to Locations entity in DB (At present, we are using fixed ENUM)
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "work_location", nullable = false, columnDefinition = "json")
     @NotEmpty(message = "{field.job.workLocation}{validation.notEmpty}")
     private List<Integer> workLocation;
+
+
+    /* CONFIGURATION FIELDS */
+
+    // FOR INTERNAL JOB CONFIGURATION
+
+    @Column(nullable = false, length = 20)
+    @NotBlank(message = "{field.job.requisitionId}{validation.notBlank}")
+    @Length(min=4, max = 20, message = "{field.job.requisitionId}{validation.length}")
+    private String requisitionId;
+
+    @Column(name = "numOfOpenings", nullable = false, columnDefinition = "int default 1")
+    @NotNull(message = "{field.job.numOfOpenings}{validation.notBlank}")
+    @Range(min = 1, max = 50, message = "{field.job.numOfOpenings}{validation.range}")
+    @Builder.Default
+    private Integer numOfOpenings = 1;
+
+    //TODO: Later map it to Office entity in DB
+    @Column(nullable = false, length = 100)
+    @NotBlank(message = "{field.job.office}{validation.notBlank}")
+    @Length(min=4, max = 100, message = "{field.job.office}{validation.length}")
+    private String office;
+
+    //TODO: Later map it to Department entity in DB
+    @Column(nullable = false, length = 100)
+    @NotBlank(message = "{field.job.department}{validation.notBlank}")
+    @Length(min=4, max = 100, message = "{field.job.department}{validation.length}")
+    private String department;
+
+
+    // FOR RECRUITERS AND HIRING MANAGERS
 
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "json", nullable = false)
@@ -96,6 +129,9 @@ public class JobPosition extends OperatableBaseWithTenantEntity {
     @NotEmpty(message = "{field.job.hiringManagers}{validation.notEmpty}")
     private List<String> hiringManagers;
 
+
+    /* RECRUITMENT PIPELINE FIELDS */
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "recruitmentPipelineId", referencedColumnName = "id", insertable = false, updatable = false)
     private RecruitmentPipeline recruitmentPipeline;
@@ -106,6 +142,8 @@ public class JobPosition extends OperatableBaseWithTenantEntity {
 
     @Column(name = "recruitmentPipelinePublicId", nullable = false)
     private String recruitmentPipelinePublicId;
+
+    /* EVALUATION PLAN FIELDS */
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "evaluationPlanId", referencedColumnName = "id", insertable = false, updatable = false)

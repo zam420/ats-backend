@@ -45,18 +45,18 @@ public interface EvaluationPlanRepository extends BaseWithTenantRepository<Evalu
     List<EvaluationPlan> findAllForTenantAdminAsList(@Param("tenantId") Long tenantId);
 
     @Query("SELECT ip FROM EvaluationPlan ip WHERE ip.deactivated = false"
-     + " AND ((ip.tenantId = :tenantId AND ip.ownerId = :ownerId)"                                  //owner within tenant
+     + " AND ((ip.tenantId = :tenantId AND ip.ownerId = :loggedInUserId)"                                  //owner within tenant
      + " OR (ip.tenantId = :tenantId AND ip.isPublicForTenant = true)"                              //tenant-public plans
      + " OR EXISTS (SELECT 1 FROM EvaluationPlanSharedWithUser s WHERE s.evaluationPlanId = ip.id)" //shared with user
      + " OR ip.isPublicForAll = true)")                                                             //system templates
-    Page<EvaluationPlan> findAllForTenantNonAdmin(@Param("tenantId") Long tenantId, @Param("ownerId") Long ownerId, Pageable pageable);
+    Page<EvaluationPlan> findAllForTenantNonAdmin(@Param("tenantId") Long tenantId, @Param("loggedInUserId") Long loggedInUserId, Pageable pageable);
     
     @Query("SELECT ip FROM EvaluationPlan ip WHERE ip.deactivated = false"
-     + " AND ((ip.tenantId = :tenantId AND ip.ownerId = :ownerId)"                                  //owner within tenant
+     + " AND ((ip.tenantId = :tenantId AND ip.ownerId = :loggedInUserId)"                                  //owner within tenant
      + " OR (ip.tenantId = :tenantId AND ip.isPublicForTenant = true)"                              //tenant-public plans
      + " OR EXISTS (SELECT 1 FROM EvaluationPlanSharedWithUser s WHERE s.evaluationPlanId = ip.id)" //shared with user
      + " OR ip.isPublicForAll = true)")                                                             //system templates
-    List<EvaluationPlan> findAllForTenantNonAdminAsList(@Param("tenantId") Long tenantId, @Param("ownerId") Long ownerId);
+    List<EvaluationPlan> findAllForTenantNonAdminAsList(@Param("tenantId") Long tenantId, @Param("loggedInUserId") Long loggedInUserId);
     
 
     // @Query("SELECT * FROM EvaluationPlan WHERE deactivated = false AND (tenantId = :tenantId OR isPublicForAll = true)")

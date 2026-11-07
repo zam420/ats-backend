@@ -1,5 +1,6 @@
 package com.deepconnect.ats.job.security;
-
+import com.deepconnect.ats.job.service.JobPositionAccessService;
+import com.deepconnect.ats.job.repo.JobCandidateQuestionTypeRepository;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -31,8 +32,8 @@ class JobRichTextWriteTest {
     private final RecruitmentPipelineService pipelines = mock(RecruitmentPipelineService.class);
     private final JobPositionRepository positions = mock(JobPositionRepository.class);
     private final JobPositionService service = new JobPositionService(plans, pipelines,
-            mock(UserServiceV2.class), positions, mock(JobEmploymentTypeRepository.class),
-            mock(JobWorkArrangementTypeRepository.class));
+            mock(JobPositionAccessService.class), mock(UserServiceV2.class), positions, mock(JobEmploymentTypeRepository.class),
+            mock(JobWorkArrangementTypeRepository.class),  mock(JobCandidateQuestionTypeRepository.class));
 
     @AfterEach
     void clearAuthentication() {

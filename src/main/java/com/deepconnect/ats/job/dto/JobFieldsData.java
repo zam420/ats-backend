@@ -4,10 +4,13 @@ import lombok.Data;
 
 import java.util.List;
 import com.deepconnect.ats.evaluationplan.dto.EvaluationPlanRes;
+import com.deepconnect.ats.evaluationplan.dto.EvaluationPlanResMin;
 import com.deepconnect.ats.evaluationplan.model.EvaluationPlanRoundType;
 import com.deepconnect.ats.recruitmentpipeline.dto.RecruitmentPipelineRes;
+import com.deepconnect.ats.recruitmentpipeline.dto.RecruitmentPipelineResMin;
 import com.deepconnect.ats.recruitmentpipeline.model.RecruitmentPipelineRoundType;
 import com.deepconnect.ats.user.dto.UserSummary;
+import com.deepconnect.ats.job.model.JobCandidateQuestionType;
 
 import com.deepconnect.ats.job.model.JobEmploymentType;
 import com.deepconnect.ats.job.model.JobWorkArrangementType;
@@ -16,12 +19,13 @@ import com.deepconnect.ats.job.model.JobWorkArrangementType;
 public class JobFieldsData {
     private List<JobEmploymentType> employmentTypes;
     private List<JobWorkArrangementType> workArrangementTypes;
-    private List<EvaluationPlanRes> evaluationPlans;
-    private List<RecruitmentPipelineRes> recruitmentPipelines;
+    private List<EvaluationPlanResMin> evaluationPlans;
+    private List<RecruitmentPipelineResMin> recruitmentPipelines;
     private List<UserSummary> recruiters;
     private List<UserSummary> hiringManagers;
     private List<EvaluationPlanRoundType> evaluationPlanRoundTypes;
     private List<RecruitmentPipelineRoundType> recruitmentPipelineRoundTypes;
+    private List<JobCandidateQuestionType> candidateQuestionTypes;
     
     public static JobFieldsData from(
         List<JobEmploymentType> employmentTypes, 
@@ -31,17 +35,19 @@ public class JobFieldsData {
         List<UserSummary> recruiters,
         List<UserSummary> hiringManagers,
         List<EvaluationPlanRoundType> evaluationPlanRoundTypes,
-        List<RecruitmentPipelineRoundType> recruitmentPipelineRoundTypes) 
+        List<RecruitmentPipelineRoundType> recruitmentPipelineRoundTypes,
+        List<JobCandidateQuestionType> candidateQuestionTypes) 
     {
         JobFieldsData res = new JobFieldsData();
         res.setEmploymentTypes(employmentTypes);
         res.setWorkArrangementTypes(workArrangementTypes);
-        res.setEvaluationPlans(evaluationPlans);
-        res.setRecruitmentPipelines(recruitmentPipelines);
+        res.setEvaluationPlans(EvaluationPlanResMin.fromResList(evaluationPlans));
+        res.setRecruitmentPipelines(RecruitmentPipelineResMin.fromResList(recruitmentPipelines));
         res.setRecruiters(recruiters);
         res.setHiringManagers(hiringManagers);
         res.setEvaluationPlanRoundTypes(evaluationPlanRoundTypes);
         res.setRecruitmentPipelineRoundTypes(recruitmentPipelineRoundTypes);
+        res.setCandidateQuestionTypes(candidateQuestionTypes);
         return res;
     }
 

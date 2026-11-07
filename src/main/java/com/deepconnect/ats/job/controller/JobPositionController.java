@@ -16,7 +16,6 @@ import com.deepconnect.ats.job.dto.JobFieldsData;
 import com.deepconnect.ats.job.dto.JobPositionRes;
 
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -51,8 +50,8 @@ public class JobPositionController {
 
     @PreAuthorize("hasAuthority('jps')")
     @GetMapping("/all")
-    public ApiResult<List<JobPositionRes>> findAll() {
-        return ApiResult.success(jobPositionService.findAll());
+    public ApiResult<AtsPageRsp<JobPositionRes>> findAll(AtsPageQuery query) {
+        return ApiResult.success(jobPositionService.findAll(query));
     }
 
     @PreAuthorize("hasAuthority('ipts')")

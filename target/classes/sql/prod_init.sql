@@ -95,7 +95,8 @@ INSERT INTO `ats_role_permission` (`role_id`, `permission_code`, `permission_id`
 INSERT INTO `ats_role_permission` (`role_id`, `permission_code`, `permission_id`) SELECT 1, 'rpe', `id` FROM `ats_permission` WHERE `code` = 'rpe'; #not available to HR Recruiter-Recruitment project edit
 INSERT INTO `ats_role_permission` (`role_id`, `permission_code`, `permission_id`) SELECT 1, 'rps', `id` FROM `ats_permission` WHERE `code` = 'rps';
 INSERT INTO `ats_role_permission` (`role_id`, `permission_code`, `permission_id`) SELECT 1, 'jpm', `id` FROM `ats_permission` WHERE `code` = 'jpm';
-INSERT INTO `ats_role_permission` (`role_id`, `permission_code`, `permission_id`) SELECT 1, 'jpc', `id` FROM `ats_permission` WHERE `code` = 'jpc'; #not available to HR Recruiter-Job position create
+INSERT INTO `ats_role_permission` (`role_id`, `permission_code`, `permission_id`) SELECT 1, 'jpa', `id` FROM `ats_permission` WHERE `code` = 'jpa'; #not available to HR Recruiter - Job position admin
+INSERT INTO `ats_role_permission` (`role_id`, `permission_code`, `permission_id`) SELECT 1, 'jpc', `id` FROM `ats_permission` WHERE `code` = 'jpc'; 
 INSERT INTO `ats_role_permission` (`role_id`, `permission_code`, `permission_id`) SELECT 1, 'jpe', `id` FROM `ats_permission` WHERE `code` = 'jpe';
 INSERT INTO `ats_role_permission` (`role_id`, `permission_code`, `permission_id`) SELECT 1, 'jps', `id` FROM `ats_permission` WHERE `code` = 'jps';
 INSERT INTO `ats_role_permission` (`role_id`, `permission_code`, `permission_id`) SELECT 1, 'tpm', `id` FROM `ats_permission` WHERE `code` = 'tpm';
@@ -154,8 +155,9 @@ INSERT INTO `ats_role_permission` (`role_id`, `permission_code`, `permission_id`
 INSERT INTO `ats_role_permission` (`role_id`, `permission_code`, `permission_id`) SELECT 2, 'rpm', `id` FROM `ats_permission` WHERE `code` = 'rpm'; #not available to HR Recruiter-Recruitment project menu
 INSERT INTO `ats_role_permission` (`role_id`, `permission_code`, `permission_id`) SELECT 2, 'rpe', `id` FROM `ats_permission` WHERE `code` = 'rpe'; #not available to HR Recruiter-Recruitment project edit
 INSERT INTO `ats_role_permission` (`role_id`, `permission_code`, `permission_id`) SELECT 2, 'rps', `id` FROM `ats_permission` WHERE `code` = 'rps';
+INSERT INTO `ats_role_permission` (`role_id`, `permission_code`, `permission_id`) SELECT 2, 'jpa', `id` FROM `ats_permission` WHERE `code` = 'jpa'; #not available to HR Recruiter - Job position admin
 INSERT INTO `ats_role_permission` (`role_id`, `permission_code`, `permission_id`) SELECT 2, 'jpm', `id` FROM `ats_permission` WHERE `code` = 'jpm';
-INSERT INTO `ats_role_permission` (`role_id`, `permission_code`, `permission_id`) SELECT 2, 'jpc', `id` FROM `ats_permission` WHERE `code` = 'jpc'; #not available to HR Recruiter-Job position create
+INSERT INTO `ats_role_permission` (`role_id`, `permission_code`, `permission_id`) SELECT 2, 'jpc', `id` FROM `ats_permission` WHERE `code` = 'jpc'; 
 INSERT INTO `ats_role_permission` (`role_id`, `permission_code`, `permission_id`) SELECT 2, 'jpe', `id` FROM `ats_permission` WHERE `code` = 'jpe';
 INSERT INTO `ats_role_permission` (`role_id`, `permission_code`, `permission_id`) SELECT 2, 'jps', `id` FROM `ats_permission` WHERE `code` = 'jps';
 INSERT INTO `ats_role_permission` (`role_id`, `permission_code`, `permission_id`) SELECT 2, 'tpm', `id` FROM `ats_permission` WHERE `code` = 'tpm';
@@ -183,10 +185,10 @@ INSERT INTO `ats_role_permission` (`role_id`, `permission_code`, `permission_id`
 INSERT INTO `ats_role_permission` (`role_id`, `permission_code`, `permission_id`) SELECT 2, 'ipte', `id` FROM `ats_permission` WHERE `code` = 'ipte'; 
 INSERT INTO `ats_role_permission` (`role_id`, `permission_code`, `permission_id`) SELECT 2, 'ipts', `id` FROM `ats_permission` WHERE `code` = 'ipts';
 INSERT INTO `ats_role_permission` (`role_id`, `permission_code`, `permission_id`) SELECT 2, 'rpta', `id` FROM `ats_permission` WHERE `code` = 'rpta'; #not available to HR Recruiter - recruitment pipeline template admin
-INSERT INTO `ats_role_permission` (`role_id`, `permission_code`, `permission_id`) SELECT 2, 'rptm', `id` FROM `ats_permission` WHERE `code` = 'rptm'; #not available to HR Recruiter - recruitment pipeline template manage
+INSERT INTO `ats_role_permission` (`role_id`, `permission_code`, `permission_id`) SELECT 2, 'rptm', `id` FROM `ats_permission` WHERE `code` = 'rptm'; 
 INSERT INTO `ats_role_permission` (`role_id`, `permission_code`, `permission_id`) SELECT 2, 'rptc', `id` FROM `ats_permission` WHERE `code` = 'rptc'; #not available to HR Recruiter - recruitment pipeline template create
 INSERT INTO `ats_role_permission` (`role_id`, `permission_code`, `permission_id`) SELECT 2, 'rpte', `id` FROM `ats_permission` WHERE `code` = 'rpte'; #not available to HR Recruiter - recruitment pipeline template edit
-INSERT INTO `ats_role_permission` (`role_id`, `permission_code`, `permission_id`) SELECT 2, 'rpts', `id` FROM `ats_permission` WHERE `code` = 'rpts'; #not available to HR Recruiter - recruitment pipeline template set
+INSERT INTO `ats_role_permission` (`role_id`, `permission_code`, `permission_id`) SELECT 2, 'rpts', `id` FROM `ats_permission` WHERE `code` = 'rpts'; 
 INSERT INTO `ats_role_permission` (`role_id`, `permission_code`, `permission_id`) SELECT 2, 'ic', `id` FROM `ats_permission` WHERE `code` = 'ic';
 INSERT INTO `ats_role_permission` (`role_id`, `permission_code`, `permission_id`) SELECT 2, 'is', `id` FROM `ats_permission` WHERE `code` = 'is';
 INSERT INTO `ats_role_permission` (`role_id`, `permission_code`, `permission_id`) SELECT 2, 'ifc', `id` FROM `ats_permission` WHERE `code` = 'ifc';
@@ -212,6 +214,7 @@ INSERT INTO `ats_role_permission` (`role_id`, `permission_code`, `permission_id`
 -- HR Recruiters
 INSERT INTO `ats_role_permission` (`role_id`, `permission_code`, `permission_id`) SELECT 3, 'rps', `id` FROM `ats_permission` WHERE `code` = 'rps';
 INSERT INTO `ats_role_permission` (`role_id`, `permission_code`, `permission_id`) SELECT 3, 'jpm', `id` FROM `ats_permission` WHERE `code` = 'jpm';
+INSERT INTO `ats_role_permission` (`role_id`, `permission_code`, `permission_id`) SELECT 3, 'jpc', `id` FROM `ats_permission` WHERE `code` = 'jpc'; 
 INSERT INTO `ats_role_permission` (`role_id`, `permission_code`, `permission_id`) SELECT 3, 'jpe', `id` FROM `ats_permission` WHERE `code` = 'jpe';
 INSERT INTO `ats_role_permission` (`role_id`, `permission_code`, `permission_id`) SELECT 3, 'jps', `id` FROM `ats_permission` WHERE `code` = 'jps';
 INSERT INTO `ats_role_permission` (`role_id`, `permission_code`, `permission_id`) SELECT 3, 'tpm', `id` FROM `ats_permission` WHERE `code` = 'tpm';
@@ -235,6 +238,8 @@ INSERT INTO `ats_role_permission` (`role_id`, `permission_code`, `permission_id`
 INSERT INTO `ats_role_permission` (`role_id`, `permission_code`, `permission_id`) SELECT 3, 'iptc', `id` FROM `ats_permission` WHERE `code` = 'iptc'; 
 INSERT INTO `ats_role_permission` (`role_id`, `permission_code`, `permission_id`) SELECT 3, 'ipte', `id` FROM `ats_permission` WHERE `code` = 'ipte'; 
 INSERT INTO `ats_role_permission` (`role_id`, `permission_code`, `permission_id`) SELECT 3, 'ipts', `id` FROM `ats_permission` WHERE `code` = 'ipts';
+INSERT INTO `ats_role_permission` (`role_id`, `permission_code`, `permission_id`) SELECT 3, 'rptm', `id` FROM `ats_permission` WHERE `code` = 'rptm';
+INSERT INTO `ats_role_permission` (`role_id`, `permission_code`, `permission_id`) SELECT 3, 'rpts', `id` FROM `ats_permission` WHERE `code` = 'rpts';  
 INSERT INTO `ats_role_permission` (`role_id`, `permission_code`, `permission_id`) SELECT 3, 'ic', `id` FROM `ats_permission` WHERE `code` = 'ic';
 INSERT INTO `ats_role_permission` (`role_id`, `permission_code`, `permission_id`) SELECT 3, 'is', `id` FROM `ats_permission` WHERE `code` = 'is';
 INSERT INTO `ats_role_permission` (`role_id`, `permission_code`, `permission_id`) SELECT 3, 'ifc', `id` FROM `ats_permission` WHERE `code` = 'ifc';

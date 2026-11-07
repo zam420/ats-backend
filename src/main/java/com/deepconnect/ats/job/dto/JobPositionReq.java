@@ -4,9 +4,11 @@ import lombok.Data;
 
 import java.util.List;
 import jakarta.validation.constraints.NotNull;
+import jakarta.persistence.Column;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import org.hibernate.validator.constraints.Length;
+import org.hibernate.validator.constraints.Range;
 
 @Data
 public class JobPositionReq {
@@ -36,6 +38,22 @@ public class JobPositionReq {
 
     @NotEmpty(message = "{field.job.workLocation}{validation.notEmpty}")
     private List<Integer> workLocation;
+
+    @NotBlank(message = "{field.job.requisitionId}{validation.notBlank}")
+    @Length(min=4, max = 20, message = "{field.job.requisitionId}{validation.length}")
+    private String requisitionId;
+
+    @NotNull(message = "{field.job.numOfOpenings}{validation.notBlank}")
+    @Range(min = 1, max = 50, message = "{field.job.numOfOpenings}{validation.range}")
+    private Integer numOfOpenings;
+
+    @NotBlank(message = "{field.job.office}{validation.notBlank}")
+    @Length(min=4, max = 100, message = "{field.job.office}{validation.length}")
+    private String office;
+
+    @NotBlank(message = "{field.job.department}{validation.notBlank}")
+    @Length(min=4, max = 100, message = "{field.job.department}{validation.length}")
+    private String department;
 
     @NotEmpty(message = "{field.job.recruiters}{validation.notEmpty}")
     private List<String> recruiters;

@@ -13,6 +13,8 @@ public enum PermissionType {
     RECRUITMENT_PIPELINE_TEMPLATE_CREATE("rptc"),
     RECRUITMENT_PIPELINE_TEMPLATE_EDIT("rpte"),
     RECRUITMENT_PIPELINE_TEMPLATE_SEARCH("rpts"),
+
+    JOB_POSITION_ADMIN("jpa"),
     ;
 
     private final String code;

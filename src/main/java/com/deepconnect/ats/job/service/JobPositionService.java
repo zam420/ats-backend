@@ -20,6 +20,8 @@ import com.deepconnect.ats.job.enums.JobStatus;
 import com.deepconnect.ats.evaluationplan.model.EvaluationPlan;
 import com.deepconnect.ats.recruitmentpipeline.model.RecruitmentPipeline;
 import com.deepconnect.ats.job.dto.JobPositionRes;
+import com.deepconnect.ats.job.model.JobCandidateQuestionType;
+import com.deepconnect.ats.job.repo.JobCandidateQuestionTypeRepository;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -38,11 +40,17 @@ public class JobPositionService {
 
     private final EvaluationPlanService evaluationPlanService;
     private final RecruitmentPipelineService recruitmentPipelineService;
+    private final JobPositionAccessService jobPositionAccessService;
     private final UserServiceV2 userService;
 
     private final JobPositionRepository jobPositionRepository;
     private final JobEmploymentTypeRepository jobEmploymentTypeRepository;
     private final JobWorkArrangementTypeRepository jobWorkArrangementTypeRepository;
+    private final JobCandidateQuestionTypeRepository jobCandidateQuestionTypeRepository;
+
+    public List<JobCandidateQuestionType> findAllCandidateQuestionTypes() {
+        return jobCandidateQuestionTypeRepository.findAll();
+    }
 
     private String save(JobPosition position, JobPositionReq req){
         LoggedInUserDetails loggedInUser = AuthService.getLoggedInUser();
@@ -53,6 +61,10 @@ public class JobPositionService {
         position.setEmploymentTypeId(req.getEmploymentType());
         position.setWorkArrangementTypeId(req.getWorkArrangementType());
         position.setWorkLocation(req.getWorkLocation());
+        position.setRequisitionId(req.getRequisitionId());
+        position.setNumOfOpenings(req.getNumOfOpenings());
+        position.setOffice(req.getOffice());
+        position.setDepartment(req.getDepartment());
         position.setRecruiters(req.getRecruiters());
         position.setHiringManagers(req.getHiringManagers());
         position.setRecruitmentPipelinePublicId(req.getRecruitmentPipeline());
@@ -92,9 +104,9 @@ public class JobPositionService {
         JobPosition jobPosition = jobPositionRepository.findByPublicId(req.getId())
                 .orElseThrow(() -> new InternalServerException(String.format("Job Position not found: User: %s, Position: %s", AuthService.getLoggedInUser().getPublicId(), req.getId())));
 
-        // LoggedInUserDetails loggedInUser = AuthService.getLoggedInUser();
+        LoggedInUserDetails loggedInUser = AuthService.getLoggedInUser();
         //this.assertUniqueWithinTenantForUpdate(loggedInUser.getTenantId(), req.getName(), plan.getId());
-        //evaluationPlanAccessService.assertWriteAccess(loggedInUser, plan);
+        jobPositionAccessService.assertWriteAccess(loggedInUser, jobPosition);
         // if(!loggedInUser.getPublicId().equals(req.getOwnerId())){//if the requested owner is not the logged in user, additional checks are needed
         //     setAnotherUserAsOwner(plan, evaluationPlanAccessService.getAccessType(loggedInUser, plan), req.getOwnerId());
         // }
@@ -132,9 +144,31 @@ public class JobPositionService {
         return JobPositionRes.from(position);
     }
 
-    public List<JobPositionRes> findAll() {
-        List<JobPosition> positions = jobPositionRepository.findByStatus(JobStatus.DRAFT);
-        return  JobPositionRes.fromList(positions);
+     @Transactional(readOnly = true)
+    public AtsPageRsp<JobPositionRes> findAll(AtsPageQuery query) {
+        // List<JobPosition> positions = jobPositionRepository.findByStatus(JobStatus.DRAFT);
+        // return JobPositionRes.fromList(positions);
+        LoggedInUserDetails loggedInUser = AuthService.getLoggedInUser();
+        boolean isAdmin = jobPositionAccessService.isUserInJobPositionAdminRole(loggedInUser);
+        Page<JobPosition> page = isAdmin 
+            ? jobPositionRepository.findAllForTenantAdmin(AuthService.getLoggedInTenantId(), query.toPageable()) 
+            : jobPositionRepository.findAllForTenantNonAdmin(AuthService.getLoggedInTenantId(), loggedInUser.getUserId(), loggedInUser.getPublicId(), query.toPageable());
+        return AtsPageRsp.of(page.map(JobPositionRes::from));
+    }
+
+    /**
+     * Get all interview plans for the current tenant as a list. 
+     * Used for selection dropdowns e.g. in job position forms
+     * @return
+     */
+    @Transactional(readOnly = true)
+    public List<JobPositionRes> findAllAsList() {
+        LoggedInUserDetails loggedInUser = AuthService.getLoggedInUser();
+        boolean isAdmin = jobPositionAccessService.isUserInJobPositionAdminRole(loggedInUser);
+        List<JobPosition> positions = isAdmin 
+            ? jobPositionRepository.findAllForTenantAdminAsList(AuthService.getLoggedInTenantId()) 
+            : jobPositionRepository.findAllForTenantNonAdminAsList(AuthService.getLoggedInTenantId(), loggedInUser.getUserId(), loggedInUser.getPublicId());
+        return positions.stream().map(JobPositionRes::from).toList();
     }
 
     public AtsPageRsp<JobPosition> listJobPosition(AtsPageQuery query) {
@@ -155,7 +189,8 @@ public class JobPositionService {
             userService.findActiveByRolesForTenant(Set.of(RoleType.RECRUITER, RoleType.HR_ADMIN)),
             userService.findActiveByRolesForTenant(Set.of(RoleType.HIRING_MANAGER, RoleType.HR_ADMIN, RoleType.RECRUITER)),
             evaluationPlanService.findAllRoundTypes(),
-            recruitmentPipelineService.findAllRoundTypes()
+            recruitmentPipelineService.findAllRoundTypes(),
+            this.findAllCandidateQuestionTypes()
         );
     }
 

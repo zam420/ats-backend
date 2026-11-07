@@ -46,18 +46,18 @@ public interface RecruitmentPipelineRepository extends BaseWithTenantRepository<
     List<RecruitmentPipeline> findAllForTenantAdminAsList(@Param("tenantId") Long tenantId);
 
     @Query("SELECT ip FROM RecruitmentPipeline ip WHERE ip.deactivated = false"
-     + " AND ((ip.tenantId = :tenantId AND ip.ownerId = :ownerId)"                                              //owner within tenant
+     + " AND ((ip.tenantId = :tenantId AND ip.ownerId = :loggedInUserId)"                                              //owner within tenant
      + " OR (ip.tenantId = :tenantId AND ip.isPublicForTenant = true)"                                          //tenant-public plans
      + " OR EXISTS (SELECT 1 FROM RecruitmentPipelineSharedWithUser s WHERE s.recruitmentPipelineId = ip.id)"   //shared with user
      + " OR ip.isPublicForAll = true)")                                                                         //system templates
-    Page<RecruitmentPipeline> findAllForTenantNonAdmin(@Param("tenantId") Long tenantId, @Param("ownerId") Long ownerId, Pageable pageable);
+    Page<RecruitmentPipeline> findAllForTenantNonAdmin(@Param("tenantId") Long tenantId, @Param("loggedInUserId") Long loggedInUserId, Pageable pageable);
 
     @Query("SELECT ip FROM RecruitmentPipeline ip WHERE ip.deactivated = false"
-     + " AND ((ip.tenantId = :tenantId AND ip.ownerId = :ownerId)"                                  //owner within tenant
+     + " AND ((ip.tenantId = :tenantId AND ip.ownerId = :loggedInUserId)"                                  //owner within tenant
      + " OR (ip.tenantId = :tenantId AND ip.isPublicForTenant = true)"                              //tenant-public plans
      + " OR EXISTS (SELECT 1 FROM RecruitmentPipelineSharedWithUser s WHERE s.recruitmentPipelineId = ip.id)" //shared with user
      + " OR ip.isPublicForAll = true)")                                                             //system templates
-    List<RecruitmentPipeline> findAllForTenantNonAdminAsList(@Param("tenantId") Long tenantId, @Param("ownerId") Long ownerId);
+    List<RecruitmentPipeline> findAllForTenantNonAdminAsList(@Param("tenantId") Long tenantId, @Param("loggedInUserId") Long loggedInUserId);
     
 
     // @Query("SELECT * FROM RecruitmentPipeline WHERE deactivated = false AND (tenantId = :tenantId OR isPublicForAll = true)")
