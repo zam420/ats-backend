@@ -84,10 +84,11 @@ public class JobPositionService {
         jobPosition.setCreatedByUserId(loggedInUser.getUserId());
         jobPosition.setCreatedByUserPublicId(loggedInUser.getPublicId());
         jobPosition.setTenantId(loggedInUser.getTenantId());
-        if(jobPosition.getOwnerId() == null) {
+        //TODO: think about allowing other users as job owner just like evaluation plan
+        // if(req.getOwnerId() == null || req.getOwnerId().equals(loggedInUser.getPublicId())) {
             jobPosition.setOwnerId(loggedInUser.getUserId());
             jobPosition.setOwnerPublicId(loggedInUser.getPublicId());
-        }
+        // }
         // else {
         //     setAnotherUserAsOwner(plan, evaluationPlanAccessService.getAccessType(loggedInUser, plan), req.getOwnerId());
         // }

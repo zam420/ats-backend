@@ -4,7 +4,6 @@ import lombok.Data;
 
 import java.util.List;
 import jakarta.validation.constraints.NotNull;
-import jakarta.persistence.Column;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import org.hibernate.validator.constraints.Length;
@@ -66,5 +65,7 @@ public class JobPositionReq {
 
     @NotNull(message = "{field.job.evaluationPlan}{validation.notBlank}")
     private String evaluationPlan;
+
+    private String ownerId;
 
 }

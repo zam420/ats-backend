@@ -126,7 +126,7 @@ public class EvaluationPlanService {
         plan.setCreatedByUserId(loggedInUser.getUserId());
         plan.setCreatedByUserPublicId(loggedInUser.getPublicId());
         plan.setTenantId(loggedInUser.getTenantId());
-        if(req.getOwnerId() == null) {
+        if(req.getOwnerId() == null || req.getOwnerId().equals(loggedInUser.getPublicId())) {
             plan.setOwnerId(loggedInUser.getUserId());
             plan.setOwnerPublicId(loggedInUser.getPublicId());
         }

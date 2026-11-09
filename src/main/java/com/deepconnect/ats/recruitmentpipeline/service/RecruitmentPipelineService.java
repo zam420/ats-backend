@@ -124,7 +124,7 @@ public class RecruitmentPipelineService {
         plan.setCreatedByUserId(loggedInUser.getUserId());
         plan.setCreatedByUserPublicId(loggedInUser.getPublicId());
         plan.setTenantId(loggedInUser.getTenantId());
-        if(req.getOwnerId() == null) {
+        if(req.getOwnerId() == null || req.getOwnerId().equals(loggedInUser.getPublicId())) {
             plan.setOwnerId(loggedInUser.getUserId());
             plan.setOwnerPublicId(loggedInUser.getPublicId());
         }
@@ -146,7 +146,7 @@ public class RecruitmentPipelineService {
         LoggedInUserDetails loggedInUser = AuthService.getLoggedInUser();
         this.assertUniqueWithinTenantForUpdate(loggedInUser.getTenantId(), req.getName(), plan.getId());
         recruitmentPipelineAccessService.assertWriteAccess(loggedInUser, plan);
-        if(req.getOwnerId() != null && !loggedInUser.getPublicId().equals(req.getOwnerId())){//if the requested owner is not the logged in user, additional checks are needed
+        if(!loggedInUser.getPublicId().equals(req.getOwnerId())){//if the requested owner is not the logged in user, additional checks are needed
             setAnotherUserAsOwner(plan, recruitmentPipelineAccessService.getAccessType(loggedInUser, plan), req.getOwnerId());
         }
 
