@@ -2,6 +2,7 @@ package com.deepconnect.ats.screeningquestionsform.service;
 
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import java.util.Objects;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,11 +28,11 @@ public class ScreeningQuestionsFormAccessService {
      * @return the access type of the user for the given screening questions form
      */
     public AccessType getAccessType(LoggedInUserDetails user, ScreeningQuestionsForm template) {
-        if(user.getUserId() == template.getOwnerId())
+        if(user.getUserId() != null && Objects.equals(user.getUserId(), template.getOwnerId()))
             return AccessType.WRITE;
 
         //user is not the owner of the plan
-        if(user.getTenantId() == template.getTenantId()){
+        if(user.getTenantId() != null && Objects.equals(user.getTenantId(), template.getTenantId())){
             if(user.hasPermission(PermissionType.SCREENING_QUESTION_TEMPLATE_ADMIN))
                 return AccessType.TENANT_ADMIN;
 

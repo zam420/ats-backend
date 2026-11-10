@@ -32,11 +32,12 @@ public interface ScreeningQuestionsFormRepository extends BaseWithTenantReposito
 
     // Page<ScreeningQuestionsForm> findByDeactivatedFalseAndIsPublicForTenantTrueAndTenantId(Long tenantId, Pageable pageable);
 
-    // Tenant-public plans, plus the tenant's plans that are shared with at least one specific user
+    // Tenant-public forms and forms shared with the current user
     @Query("SELECT ip FROM ScreeningQuestionsForm ip WHERE ip.deactivated = false AND ip.tenantId = :tenantId"
-     + " AND (ip.isPublicForTenant = true"
-     + " OR EXISTS (SELECT 1 FROM ScreeningQuestionsFormShare s WHERE s.screeningQuestionsFormId = ip.id))")
-    Page<ScreeningQuestionsForm> findPublicOrSharedForTenant(@Param("tenantId") Long tenantId, Pageable pageable);
+     + " AND (ip.isPublicForTenant = true"//records that are shared with everyone within tenant
+     + " OR (ip.ownerId = :loggedInUserId AND ip.isSharedWithinTenant = true)"//records that are shared by logged in user within given tenant
+     + " OR EXISTS (SELECT 1 FROM ScreeningQuestionsFormShare s WHERE s.screeningQuestionsFormId = ip.id AND s.userId = :loggedInUserId))")//records that are shared with logged in user within given tenant
+    Page<ScreeningQuestionsForm> findPublicOrSharedForTenant(@Param("tenantId") Long tenantId, @Param("loggedInUserId") Long loggedInUserId, Pageable pageable);
 
     @Query("SELECT ip FROM ScreeningQuestionsForm ip WHERE ip.deactivated = false AND (ip.tenantId = :tenantId OR ip.isPublicForAll = true)")
     Page<ScreeningQuestionsForm> findAllForTenantAdmin(@Param("tenantId") Long tenantId, Pageable pageable);
@@ -47,14 +48,14 @@ public interface ScreeningQuestionsFormRepository extends BaseWithTenantReposito
     @Query("SELECT ip FROM ScreeningQuestionsForm ip WHERE ip.deactivated = false"
      + " AND ((ip.tenantId = :tenantId AND ip.ownerId = :loggedInUserId)"                                  //owner within tenant
      + " OR (ip.tenantId = :tenantId AND ip.isPublicForTenant = true)"                              //tenant-public plans
-     + " OR EXISTS (SELECT 1 FROM ScreeningQuestionsFormShare s WHERE s.screeningQuestionsFormId = ip.id)" //shared with user
+     + " OR (ip.tenantId = :tenantId AND EXISTS (SELECT 1 FROM ScreeningQuestionsFormShare s WHERE s.screeningQuestionsFormId = ip.id AND s.userId = :loggedInUserId))" //shared with user
      + " OR ip.isPublicForAll = true)")                                                             //system templates
     Page<ScreeningQuestionsForm> findAllForTenantNonAdmin(@Param("tenantId") Long tenantId, @Param("loggedInUserId") Long loggedInUserId, Pageable pageable);
     
     @Query("SELECT ip FROM ScreeningQuestionsForm ip WHERE ip.deactivated = false"
      + " AND ((ip.tenantId = :tenantId AND ip.ownerId = :loggedInUserId)"                                  //owner within tenant
      + " OR (ip.tenantId = :tenantId AND ip.isPublicForTenant = true)"                              //tenant-public plans
-     + " OR EXISTS (SELECT 1 FROM ScreeningQuestionsFormShare s WHERE s.screeningQuestionsFormId = ip.id)" //shared with user
+     + " OR (ip.tenantId = :tenantId AND EXISTS (SELECT 1 FROM ScreeningQuestionsFormShare s WHERE s.screeningQuestionsFormId = ip.id AND s.userId = :loggedInUserId))" //shared with user
      + " OR ip.isPublicForAll = true)")                                                             //system templates
     List<ScreeningQuestionsForm> findAllForTenantNonAdminAsList(@Param("tenantId") Long tenantId, @Param("loggedInUserId") Long loggedInUserId);
     

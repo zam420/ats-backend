@@ -58,12 +58,12 @@ INSERT INTO `ats_permission`(`public_id`, `code`, `name`) VALUES('aRStGXR8_Z6k',
 INSERT INTO `ats_permission`(`public_id`, `code`, `name`) VALUES('q1ynGXR8_Z6l','rpte','recruitment pipeline template edit');
 INSERT INTO `ats_permission`(`public_id`, `code`, `name`) VALUES('b1sgGXR8_Z6m','rpts','recruitment pipeline template search');
 -- screening question template
-INSERT INTO `ats_permission`(`public_id`, `code`, `name`) VALUES('n3StGXR8_Z6k','sqtsa','screening question template super admin');#write access to system templates for screening questions
-INSERT INTO `ats_permission`(`public_id`, `code`, `name`) VALUES('n1StGXR8_Z6k','sqta','screening question template admin');
-INSERT INTO `ats_permission`(`public_id`, `code`, `name`) VALUES('V1StGXR8_Z6k','sqtm','screening question template menu');
-INSERT INTO `ats_permission`(`public_id`, `code`, `name`) VALUES('4RStGXR8_Z6k','sqtc','screening question template create');
-INSERT INTO `ats_permission`(`public_id`, `code`, `name`) VALUES('V1StGXR8_Z6l','sqte','screening question template edit');
-INSERT INTO `ats_permission`(`public_id`, `code`, `name`) VALUES('V1StGXR8_Z6m','sqts','screening question template search');
+INSERT INTO `ats_permission`(`public_id`, `code`, `name`) VALUES('n3StGaR8_Z6k','sqtsa','screening question forms super admin');#write access to system formss for screening questions
+INSERT INTO `ats_permission`(`public_id`, `code`, `name`) VALUES('n1StGvR8_Z6k','sqta','screening question forms admin');
+INSERT INTO `ats_permission`(`public_id`, `code`, `name`) VALUES('V1StaXR8_Z6k','sqtm','screening question forms menu');
+INSERT INTO `ats_permission`(`public_id`, `code`, `name`) VALUES('4RStGeR8_Z6k','sqtc','screening question forms create');
+INSERT INTO `ats_permission`(`public_id`, `code`, `name`) VALUES('V1SvGXR8_Z6l','sqte','screening question forms edit');
+INSERT INTO `ats_permission`(`public_id`, `code`, `name`) VALUES('V1StGXt8_Z6m','sqts','screening question forms search');
 -- interview
 INSERT INTO `ats_permission`(`public_id`, `code`, `name`) VALUES('V1StGXR8_Z6n','ic','interview create');
 INSERT INTO `ats_permission`(`public_id`, `code`, `name`) VALUES('V1StGXR8_Z6o','is','interview search');

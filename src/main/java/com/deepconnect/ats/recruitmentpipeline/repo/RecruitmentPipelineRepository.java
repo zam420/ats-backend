@@ -35,9 +35,10 @@ public interface RecruitmentPipelineRepository extends BaseWithTenantRepository<
 
     // Tenant-public plans, plus the tenant's plans that are shared with at least one specific user
     @Query("SELECT ip FROM RecruitmentPipeline ip WHERE ip.deactivated = false AND ip.tenantId = :tenantId"
-     + " AND (ip.isPublicForTenant = true"
-     + " OR EXISTS (SELECT 1 FROM RecruitmentPipelineShare s WHERE s.recruitmentPipelineId = ip.id))")
-    Page<RecruitmentPipeline> findPublicOrSharedForTenant(@Param("tenantId") Long tenantId, Pageable pageable);
+     + " AND (ip.isPublicForTenant = true"//records that are shared with everyone within tenant
+     + " OR (ip.ownerId = :loggedInUserId AND ip.isSharedWithinTenant = true)"//records that are shared by logged in user within given tenant
+     + " OR EXISTS (SELECT 1 FROM RecruitmentPipelineShare s WHERE s.recruitmentPipelineId = ip.id AND s.userId = :loggedInUserId))")//records that are shared with logged in user within given tenant
+    Page<RecruitmentPipeline> findPublicOrSharedForTenant(@Param("tenantId") Long tenantId, @Param("loggedInUserId") Long loggedInUserId, Pageable pageable);
 
     @Query("SELECT ip FROM RecruitmentPipeline ip WHERE ip.deactivated = false AND (ip.tenantId = :tenantId OR ip.isPublicForAll = true)")
     Page<RecruitmentPipeline> findAllForTenantAdmin(@Param("tenantId") Long tenantId, Pageable pageable);
@@ -46,17 +47,17 @@ public interface RecruitmentPipelineRepository extends BaseWithTenantRepository<
     List<RecruitmentPipeline> findAllForTenantAdminAsList(@Param("tenantId") Long tenantId);
 
     @Query("SELECT ip FROM RecruitmentPipeline ip WHERE ip.deactivated = false"
-     + " AND ((ip.tenantId = :tenantId AND ip.ownerId = :loggedInUserId)"                                              //owner within tenant
-     + " OR (ip.tenantId = :tenantId AND ip.isPublicForTenant = true)"                                          //tenant-public plans
-     + " OR EXISTS (SELECT 1 FROM RecruitmentPipelineShare s WHERE s.recruitmentPipelineId = ip.id)"   //shared with user
-     + " OR ip.isPublicForAll = true)")                                                                         //system templates
+     + " AND ((ip.tenantId = :tenantId AND ip.ownerId = :loggedInUserId)"//owner within tenant
+     + " OR (ip.tenantId = :tenantId AND ip.isPublicForTenant = true)" //tenant-public plans
+     + " OR EXISTS (SELECT 1 FROM RecruitmentPipelineShare s WHERE s.recruitmentPipelineId = ip.id AND s.userId = :loggedInUserId)"//shared with user
+     + " OR ip.isPublicForAll = true)")//system templates
     Page<RecruitmentPipeline> findAllForTenantNonAdmin(@Param("tenantId") Long tenantId, @Param("loggedInUserId") Long loggedInUserId, Pageable pageable);
 
     @Query("SELECT ip FROM RecruitmentPipeline ip WHERE ip.deactivated = false"
-     + " AND ((ip.tenantId = :tenantId AND ip.ownerId = :loggedInUserId)"                                  //owner within tenant
-     + " OR (ip.tenantId = :tenantId AND ip.isPublicForTenant = true)"                              //tenant-public plans
-     + " OR EXISTS (SELECT 1 FROM RecruitmentPipelineShare s WHERE s.recruitmentPipelineId = ip.id)" //shared with user
-     + " OR ip.isPublicForAll = true)")                                                             //system templates
+     + " AND ((ip.tenantId = :tenantId AND ip.ownerId = :loggedInUserId)" //owner within tenant
+     + " OR (ip.tenantId = :tenantId AND ip.isPublicForTenant = true)" //tenant-public plans
+     + " OR EXISTS (SELECT 1 FROM RecruitmentPipelineShare s WHERE s.recruitmentPipelineId = ip.id AND s.userId = :loggedInUserId)" //shared with user
+     + " OR ip.isPublicForAll = true)") //system templates
     List<RecruitmentPipeline> findAllForTenantNonAdminAsList(@Param("tenantId") Long tenantId, @Param("loggedInUserId") Long loggedInUserId);
     
 

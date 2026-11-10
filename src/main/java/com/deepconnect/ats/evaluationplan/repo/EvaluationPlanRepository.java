@@ -34,9 +34,10 @@ public interface EvaluationPlanRepository extends BaseWithTenantRepository<Evalu
 
     // Tenant-public plans, plus the tenant's plans that are shared with at least one specific user
     @Query("SELECT ip FROM EvaluationPlan ip WHERE ip.deactivated = false AND ip.tenantId = :tenantId"
-     + " AND (ip.isPublicForTenant = true"
-     + " OR EXISTS (SELECT 1 FROM EvaluationPlanShare s WHERE s.evaluationPlanId = ip.id))")
-    Page<EvaluationPlan> findPublicOrSharedForTenant(@Param("tenantId") Long tenantId, Pageable pageable);
+     + " AND (ip.isPublicForTenant = true"//records that are shared with everyone within tenant
+     + " OR (ip.ownerId = :loggedInUserId AND ip.isSharedWithinTenant = true)"//records that are shared by logged in user within given tenant
+     + " OR EXISTS (SELECT 1 FROM EvaluationPlanShare s WHERE s.evaluationPlanId = ip.id AND s.userId = :loggedInUserId))")//records that are shared with logged in user within given tenant
+    Page<EvaluationPlan> findPublicOrSharedForTenant(@Param("tenantId") Long tenantId, @Param("loggedInUserId") Long loggedInUserId, Pageable pageable);
 
     @Query("SELECT ip FROM EvaluationPlan ip WHERE ip.deactivated = false AND (ip.tenantId = :tenantId OR ip.isPublicForAll = true)")
     Page<EvaluationPlan> findAllForTenantAdmin(@Param("tenantId") Long tenantId, Pageable pageable);
@@ -47,14 +48,14 @@ public interface EvaluationPlanRepository extends BaseWithTenantRepository<Evalu
     @Query("SELECT ip FROM EvaluationPlan ip WHERE ip.deactivated = false"
      + " AND ((ip.tenantId = :tenantId AND ip.ownerId = :loggedInUserId)"                                  //owner within tenant
      + " OR (ip.tenantId = :tenantId AND ip.isPublicForTenant = true)"                              //tenant-public plans
-     + " OR EXISTS (SELECT 1 FROM EvaluationPlanShare s WHERE s.evaluationPlanId = ip.id)" //shared with user
+     + " OR EXISTS (SELECT 1 FROM EvaluationPlanShare s WHERE s.evaluationPlanId = ip.id AND s.userId = :loggedInUserId)" //shared with user
      + " OR ip.isPublicForAll = true)")                                                             //system templates
     Page<EvaluationPlan> findAllForTenantNonAdmin(@Param("tenantId") Long tenantId, @Param("loggedInUserId") Long loggedInUserId, Pageable pageable);
     
     @Query("SELECT ip FROM EvaluationPlan ip WHERE ip.deactivated = false"
      + " AND ((ip.tenantId = :tenantId AND ip.ownerId = :loggedInUserId)"                                  //owner within tenant
      + " OR (ip.tenantId = :tenantId AND ip.isPublicForTenant = true)"                              //tenant-public plans
-     + " OR EXISTS (SELECT 1 FROM EvaluationPlanShare s WHERE s.evaluationPlanId = ip.id)" //shared with user
+     + " OR EXISTS (SELECT 1 FROM EvaluationPlanShare s WHERE s.evaluationPlanId = ip.id AND s.userId = :loggedInUserId)" //shared with user
      + " OR ip.isPublicForAll = true)")                                                             //system templates
     List<EvaluationPlan> findAllForTenantNonAdminAsList(@Param("tenantId") Long tenantId, @Param("loggedInUserId") Long loggedInUserId);
     

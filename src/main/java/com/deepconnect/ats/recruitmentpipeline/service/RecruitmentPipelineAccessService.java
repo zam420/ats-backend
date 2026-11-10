@@ -2,6 +2,7 @@ package com.deepconnect.ats.recruitmentpipeline.service;
 
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 
 import com.deepconnect.ats.auth.dto.LoggedInUserDetails;
@@ -24,11 +25,11 @@ public class RecruitmentPipelineAccessService {
      * @return the access type of the user for the given recruitment pipeline
      */
     public AccessType getAccessType(LoggedInUserDetails user, RecruitmentPipeline plan) {
-        if(user.getUserId() == plan.getOwnerId())
+        if(user.getUserId() != null && Objects.equals(user.getUserId(), plan.getOwnerId()))
             return AccessType.WRITE;
 
         //user is not the owner of the plan
-        if(user.getTenantId() == plan.getTenantId()){
+        if(user.getTenantId() != null && Objects.equals(user.getTenantId(), plan.getTenantId())){
             if(user.hasPermission(PermissionType.RECRUITMENT_PIPELINE_TEMPLATE_ADMIN))
                 return AccessType.TENANT_ADMIN;
 

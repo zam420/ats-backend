@@ -55,6 +55,11 @@ public class RecruitmentPipeline extends OperatableBaseWithTenantEntity {
     @Builder.Default
     private Boolean isPublicForTenant = false;//created as template by Tenant users and accessible to all recruiters (or above) within the tenant
 
+    @JsonIgnore
+    @Column(columnDefinition = "tinyint(1) default false")
+    @Builder.Default
+    private Boolean isSharedWithinTenant = false;//created by Tenant users and shared with specific users within tenant
+
     @Valid
     @JsonManagedReference("sharedWithUsers")
     @OneToMany(mappedBy = "recruitmentPipeline", cascade = CascadeType.ALL, orphanRemoval = true)

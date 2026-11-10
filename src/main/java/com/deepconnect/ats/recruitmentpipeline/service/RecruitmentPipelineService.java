@@ -73,6 +73,9 @@ public class RecruitmentPipelineService {
         plan.setDescription(req.getDescription());
         plan.setIsPublicForTenant(isPublicForTenant);
         plan.setIsPublicForAll(isPublicForAll);
+        if(sharedWithUsersChanged){
+            plan.setIsSharedWithinTenant(!CollectionUtils.isEmpty(req.getSharedWithUserIds()));
+        }
         plan = recruitmentPipelineRepository.save(plan);
         if (roundsChanged && req.getRounds() != null) {
             if (req.getRounds().size() > maxRounds) {
@@ -274,7 +277,8 @@ public class RecruitmentPipelineService {
      */
     @Transactional(readOnly = true)
     public AtsPageRsp<RecruitmentPipelineRes> findAllSharedWithUser(AtsPageQuery query) {
-        Page<RecruitmentPipeline> page = recruitmentPipelineRepository.findPublicOrSharedForTenant(AuthService.getLoggedInTenantId(), query.toPageable());
+        LoggedInUserDetails loggedInUser = AuthService.getLoggedInUser();
+        Page<RecruitmentPipeline> page = recruitmentPipelineRepository.findPublicOrSharedForTenant(loggedInUser.getTenantId(), loggedInUser.getUserId(), query.toPageable());
         return AtsPageRsp.of(page.map(RecruitmentPipelineRes::from));
     }
 

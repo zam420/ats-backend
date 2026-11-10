@@ -16,6 +16,7 @@ public class ScreeningQuestionsFormRes {
     private String description;
     private Boolean isPublic;
     private Boolean isSystemTemplate;
+    private Boolean isSharedWithinTenant;
     private String ownerId;
     // Round names in order, joined as "name1 -> name2"; generated on the fly, never stored
     private String questionSequence;
@@ -27,6 +28,7 @@ public class ScreeningQuestionsFormRes {
         res.setDescription(entity.getDescription());
         res.setIsPublic(entity.getIsPublicForTenant());
         res.setIsSystemTemplate(entity.getIsPublicForAll());
+        res.setIsSharedWithinTenant(entity.getIsSharedWithinTenant());
         res.setOwnerId(entity.getOwnerPublicId());
         if (entity.getQuestions() != null) {
             res.setQuestionSequence(entity.getQuestions().stream()

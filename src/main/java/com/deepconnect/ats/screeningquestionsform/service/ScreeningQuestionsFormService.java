@@ -78,6 +78,9 @@ public class ScreeningQuestionsFormService {
         template.setDescription(req.getDescription());
         template.setIsPublicForAll(isPublicForAll);
         template.setIsPublicForTenant(isPublicForTenant);
+        if(sharedWithUsersChanged){
+            template.setIsSharedWithinTenant(!CollectionUtils.isEmpty(req.getSharedWithUserIds()));
+        }
         template = screeningQuestionTemplateRepository.save(template);
         if (questionsChanged && !CollectionUtils.isEmpty(req.getQuestions())) {
             if (req.getQuestions().size() > maxRounds) {
@@ -276,7 +279,8 @@ public class ScreeningQuestionsFormService {
      */
     @Transactional(readOnly = true)
     public AtsPageRsp<ScreeningQuestionsFormRes> findAllSharedWithUser(AtsPageQuery query) {
-        Page<ScreeningQuestionsForm> page = screeningQuestionTemplateRepository.findPublicOrSharedForTenant(AuthService.getLoggedInTenantId(), query.toPageable());
+        LoggedInUserDetails loggedInUser = AuthService.getLoggedInUser();
+        Page<ScreeningQuestionsForm> page = screeningQuestionTemplateRepository.findPublicOrSharedForTenant(loggedInUser.getTenantId(), loggedInUser.getUserId(),  query.toPageable());
         return AtsPageRsp.of(page.map(ScreeningQuestionsFormRes::from));
     }
 
@@ -340,7 +344,7 @@ public class ScreeningQuestionsFormService {
     /**
      * Checks whether two lists of screening questions are equal. Null lists are treated as empty.
      * The lists are equal when they have the same size and, comparing position by position,
-     * every pair has the same order, question type, name, label, description, options,
+     * every pair has the same order, question type, name, label, description, options, default option,
      * mandatory flag, multi-select flag and character limit. Name, label and description
      * are compared with null and blank treated as the same value. Options are compared in sequence.
      *
@@ -362,6 +366,7 @@ public class ScreeningQuestionsFormService {
                     || !Objects.equals(StringUtils.blankToNullAndTrim(x.getLabel()), StringUtils.blankToNullAndTrim(y.getLabel()))
                     || !Objects.equals(StringUtils.blankToNullAndTrim(x.getDescription()), StringUtils.blankToNullAndTrim(y.getDescription()))
                     || !Objects.equals(x.getOptions(), y.getOptions())
+                    || !Objects.equals(x.getDefaultOption(), y.getDefaultOption())
                     || !Objects.equals(x.getIsMandatory(), y.getIsMandatory())
                     || !Objects.equals(x.getIsDropDownMultiSelect(), y.getIsDropDownMultiSelect())
                     || !Objects.equals(x.getMaxChars(), y.getMaxChars())) {

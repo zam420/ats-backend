@@ -1,7 +1,8 @@
 package com.deepconnect.ats.evaluationplan.service;
 
-import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import java.util.Objects;
+import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,11 +28,11 @@ public class EvaluationPlanAccessService {
      * @return the access type of the user for the given evaluation plan
      */
     public AccessType getAccessType(LoggedInUserDetails user, EvaluationPlan plan) {
-        if(user.getUserId() == plan.getOwnerId())
+        if(user.getUserId() != null && Objects.equals(user.getUserId(), plan.getOwnerId()))
             return AccessType.WRITE;
 
         //user is not the owner of the plan
-        if(user.getTenantId() == plan.getTenantId()){
+        if(user.getTenantId() != null && Objects.equals(user.getTenantId(), plan.getTenantId())){
             if(user.hasPermission(PermissionType.INTERVIEW_PLAN_TEMPLATE_ADMIN))
                 return AccessType.TENANT_ADMIN;
 

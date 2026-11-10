@@ -78,6 +78,9 @@ public class EvaluationPlanService {
         plan.setDescription(req.getDescription());
         plan.setIsPublicForAll(isPublicForAll);
         plan.setIsPublicForTenant(isPublicForTenant);
+        if(sharedWithUsersChanged){
+            plan.setIsSharedWithinTenant(!CollectionUtils.isEmpty(req.getSharedWithUserIds()));
+        }
         plan = evaluationPlanRepository.save(plan);
         if (roundsChanged && !CollectionUtils.isEmpty(req.getRounds())) {
             if (req.getRounds().size() > maxRounds) {
@@ -276,7 +279,8 @@ public class EvaluationPlanService {
      */
     @Transactional(readOnly = true)
     public AtsPageRsp<EvaluationPlanRes> findAllSharedWithUser(AtsPageQuery query) {
-        Page<EvaluationPlan> page = evaluationPlanRepository.findPublicOrSharedForTenant(AuthService.getLoggedInTenantId(), query.toPageable());
+        LoggedInUserDetails loggedInUser = AuthService.getLoggedInUser();
+        Page<EvaluationPlan> page = evaluationPlanRepository.findPublicOrSharedForTenant(loggedInUser.getTenantId(), loggedInUser.getUserId(), query.toPageable());
         return AtsPageRsp.of(page.map(EvaluationPlanRes::from));
     }
 

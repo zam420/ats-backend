@@ -16,6 +16,7 @@ public class EvaluationPlanDetailsRes {
     private String description;
     private Boolean isPublic;
     private Boolean isSystemTemplate;
+    private Boolean isSharedWithinTenant;
     private List<EvaluationPlanRoundRes> rounds;
     private Set<String> sharedWithUserIds;
     private String ownerId;
@@ -36,6 +37,7 @@ public class EvaluationPlanDetailsRes {
         );
         if(!CollectionUtils.isEmpty(entity.getSharedWithUsers())){
             res.setIsPublic(false);
+            res.setIsSharedWithinTenant(true);
         }
         res.setSharedWithUserIds(
         entity.getSharedWithUsers() == null

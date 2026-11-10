@@ -40,13 +40,14 @@ public class ScreeningQuestionsFormShare extends BaseEntity {
     @JsonIgnore
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     @JoinColumn(name = "user", referencedColumnName = "id", nullable = false, insertable = false, updatable = false)
-    private User user;
+    private User user;//user with whom its being shared
 
     @Column(name = "user", nullable = false)
-    private Long userId;
+    private Long userId;//user with whom its being shared
 
     @Column(name = "userPublicId", nullable = false)
-    private String userPublicId;
+    private String userPublicId;//public id of user with whom its being shared
+    
 
 }
 

@@ -13,7 +13,6 @@ import org.hibernate.validator.constraints.Range;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
 
 import com.deepconnect.ats.evaluationplan.model.EvaluationPlan;
 import com.deepconnect.ats.recruitmentpipeline.model.RecruitmentPipeline;

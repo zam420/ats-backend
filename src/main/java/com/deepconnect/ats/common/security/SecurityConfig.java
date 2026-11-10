@@ -82,7 +82,7 @@ public class SecurityConfig {
         CorsConfiguration config = new CorsConfiguration();
         //config.setAllowedOriginPatterns(Collections.singletonList("*"));
         config.addAllowedOrigin("http://localhost:3001");     // local React dev server
-        config.addAllowedOrigin("http://127.0.0.1:43177/"); // add more if needed
+        config.addAllowedOriginPattern("http://127.0.0.1:*");
         config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "Accept", "X-Requested-With"));
         config.setAllowCredentials(true);
