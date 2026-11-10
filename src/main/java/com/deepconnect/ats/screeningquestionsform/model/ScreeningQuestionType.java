@@ -28,6 +28,11 @@ public class ScreeningQuestionType {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id; 
 
+    @Column(nullable = false, length = 10)
+    @Length(max = 10, message = "{field.job.screeningQuestion.type.code}{validation.lengthMax}")
+    @NotBlank(message = "{field.job.screeningQuestion.type.code}{validation.notBlank}")
+    private String code;
+
     @Column(nullable = false, length = 30)
     @Length(max = 30, message = "{field.job.screeningQuestion.type.name}{validation.lengthMax}")
     @NotBlank(message = "{field.job.screeningQuestion.type.name}{validation.notBlank}")

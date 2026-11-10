@@ -46,6 +46,11 @@ public class ScreeningQuestion  extends BaseEntity {
     @Size(max = 20, message = "{field.screeningQuestion.options}{validation.maxSize}")
     private List<String> options;
 
+    //Default option for checkbox, radio buttons, or dropdown questions
+    @Column(length = 100)
+    @Length(max = 100, message = "{field.screeningQuestion.defaultOption}{validation.lengthMax}")
+    private String defaultOption;//description is for additional context or details about the question to be displayed to candidate
+
     @Column(columnDefinition = "tinyint(1) default false")
     @Builder.Default
     private Boolean isMandatory = false;

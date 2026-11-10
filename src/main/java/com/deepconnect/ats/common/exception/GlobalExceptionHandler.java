@@ -14,6 +14,7 @@ import org.springframework.context.MessageSource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -77,6 +78,18 @@ public class GlobalExceptionHandler {
         );
 
         return new ResponseEntity<>(ErrorRsp.of(message, HttpStatus.FORBIDDEN.value()), HttpStatus.FORBIDDEN);
+    }
+
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<ErrorRsp> handleBadCredentialsException(BadCredentialsException ex, HttpServletRequest request) {
+        String message = messageSource.getMessage("exception.authInvalid", null, request.getLocale());
+        log.warn("Invalid username/password | Reason: {} | URI: {} | IP: {} | Info: {}", 
+            message,
+            request.getRequestURI(),
+            getClientIpAddress(request),
+            ex.getMessage()
+        );
+        return new ResponseEntity<>(ErrorRsp.of(message, HttpStatus.UNAUTHORIZED.value()), HttpStatus.UNAUTHORIZED);
     }
 
 
