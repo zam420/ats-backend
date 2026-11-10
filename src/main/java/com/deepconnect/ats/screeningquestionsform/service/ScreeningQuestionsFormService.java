@@ -11,7 +11,6 @@ import com.deepconnect.ats.user.model.User;
 import com.deepconnect.ats.user.service.UserService;
 import com.deepconnect.ats.common.enums.AccessType;
 import com.deepconnect.ats.common.utils.StringUtils;
-import com.deepconnect.ats.common.utils.HashMapUtils;
 import org.springframework.beans.factory.annotation.Value;
 import com.deepconnect.ats.common.enums.ValidationFieldType;
 import com.deepconnect.ats.common.exception.ValidationException;
@@ -34,7 +33,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -86,15 +84,9 @@ public class ScreeningQuestionsFormService {
             if (req.getQuestions().size() > maxRounds) {
                 throw new InternalServerException(String.format("Too many questions. User: %s. Plan: %s. Questions: %d", loggedInUser.getPublicId(), template.getPublicId(), req.getQuestions().size()));
             }
-            HashMap<Integer, ScreeningQuestionType> questionTypesById = HashMapUtils.getMapFromList(this.findAllScreeningQuestionTypes(), "Id", Integer.class, ScreeningQuestionType.class);
             for (ScreeningQuestion question : req.getQuestions()) {
                 question.setScreeningQuestionsForm(template);
                 question.setScreeningQuestionsFormId(template.getId());
-                if(!StringUtils.hasText(question.getName())) {
-                    ScreeningQuestionType questionType = questionTypesById.get(question.getScreeningQuestionTypeId());
-                    if(questionType != null)
-                        question.setName(questionType.getName());
-                }
             }
             screeningQuestionRepository.saveAll(req.getQuestions());
         }
@@ -344,8 +336,8 @@ public class ScreeningQuestionsFormService {
     /**
      * Checks whether two lists of screening questions are equal. Null lists are treated as empty.
      * The lists are equal when they have the same size and, comparing position by position,
-     * every pair has the same order, question type, name, label, description, options, default option,
-     * mandatory flag, multi-select flag and character limit. Name, label and description
+     * every pair has the same order, question type, label, description, options, default option,
+     * mandatory flag, multi-select flag and character limit. Label and description
      * are compared with null and blank treated as the same value. Options are compared in sequence.
      *
      * @param existing the screening questions currently stored
@@ -362,7 +354,6 @@ public class ScreeningQuestionsFormService {
             ScreeningQuestion y = b.get(i);
             if (!Objects.equals(x.getOrder(), y.getOrder())
                     || !Objects.equals(x.getScreeningQuestionTypeId(), y.getScreeningQuestionTypeId())
-                    || !Objects.equals(StringUtils.blankToNullAndTrim(x.getName()), StringUtils.blankToNullAndTrim(y.getName()))
                     || !Objects.equals(StringUtils.blankToNullAndTrim(x.getLabel()), StringUtils.blankToNullAndTrim(y.getLabel()))
                     || !Objects.equals(StringUtils.blankToNullAndTrim(x.getDescription()), StringUtils.blankToNullAndTrim(y.getDescription()))
                     || !Objects.equals(x.getOptions(), y.getOptions())

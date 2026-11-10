@@ -33,7 +33,7 @@ public class ScreeningQuestionsFormRes {
         if (entity.getQuestions() != null) {
             res.setQuestionSequence(entity.getQuestions().stream()
                 .sorted(Comparator.comparing(ScreeningQuestion::getOrder, Comparator.nullsLast(Comparator.naturalOrder())))
-                .map(ScreeningQuestion::getName)
+                .map(ScreeningQuestion::getLabel)
                 .filter(n -> n != null && !n.isBlank())
                 .collect(Collectors.joining(" -> ")));
         }

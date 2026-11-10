@@ -1,10 +1,13 @@
 package com.deepconnect.ats.screeningquestionsform.dto;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.deepconnect.ats.screeningquestionsform.model.ScreeningQuestion;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+import jakarta.validation.Validation;
 import org.junit.jupiter.api.Test;
 
 class ScreeningQuestionResTest {
@@ -17,5 +20,22 @@ class ScreeningQuestionResTest {
         assertEquals("Choice A", response.getDefaultOption());
         ObjectMapper mapper = new ObjectMapper().setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE);
         assertEquals("Choice A", mapper.valueToTree(response).get("default_option").asText());
+        assertFalse(mapper.valueToTree(response).has("name"));
+    }
+
+    @Test
+    void validatesQuestionLabelAndDescriptionLengths() {
+        try (var factory = Validation.buildDefaultValidatorFactory()) {
+            var validator = factory.getValidator();
+            ScreeningQuestion question = new ScreeningQuestion();
+            question.setLabel("L".repeat(100));
+            question.setDescription("D".repeat(200));
+            assertTrue(validator.validateProperty(question, "label").isEmpty());
+            assertTrue(validator.validateProperty(question, "description").isEmpty());
+            question.setLabel("L".repeat(101));
+            question.setDescription("D".repeat(201));
+            assertFalse(validator.validateProperty(question, "label").isEmpty());
+            assertFalse(validator.validateProperty(question, "description").isEmpty());
+        }
     }
 }

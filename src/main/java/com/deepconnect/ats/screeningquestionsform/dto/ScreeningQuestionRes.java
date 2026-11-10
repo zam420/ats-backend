@@ -9,7 +9,6 @@ import com.deepconnect.ats.screeningquestionsform.model.ScreeningQuestion;
 @Data
 public class ScreeningQuestionRes {
     private String id;
-    private String name;
     private String description;
     private Integer screeningQuestionType;
     private Integer order;
@@ -26,7 +25,6 @@ public class ScreeningQuestionRes {
             return null;
         ScreeningQuestionRes res = new ScreeningQuestionRes();
         res.setId(entity.getPublicId());
-        res.setName(entity.getName());
         res.setDescription(entity.getDescription());
         res.setScreeningQuestionType(entity.getScreeningQuestionTypeId());
         res.setOrder(entity.getOrder());

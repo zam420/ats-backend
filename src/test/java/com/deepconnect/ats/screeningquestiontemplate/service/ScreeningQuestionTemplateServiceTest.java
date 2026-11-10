@@ -24,7 +24,6 @@ class ScreeningQuestionTemplateServiceTest {
         return ScreeningQuestion.builder()
                 .order(1)
                 .screeningQuestionTypeId(2)
-                .name("Name")
                 .label("Label")
                 .description("Description")
                 .options(new ArrayList<>(List.of("First", "Second")))
