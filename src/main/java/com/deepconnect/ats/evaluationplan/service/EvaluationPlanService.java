@@ -16,8 +16,8 @@ import com.deepconnect.ats.evaluationplan.dto.EvaluationPlanDetailsRes;
 import com.deepconnect.ats.evaluationplan.model.EvaluationPlanRound;
 import com.deepconnect.ats.evaluationplan.model.EvaluationPlanRoundType;
 import com.deepconnect.ats.evaluationplan.repo.EvaluationPlanRoundRepository;
-import com.deepconnect.ats.evaluationplan.model.EvaluationPlanSharedWithUser;
-import com.deepconnect.ats.evaluationplan.repo.EvaluationPlanSharedWithUserRepository;
+import com.deepconnect.ats.evaluationplan.model.EvaluationPlanShare;
+import com.deepconnect.ats.evaluationplan.repo.EvaluationPlanShareRepository;
 import com.deepconnect.ats.user.model.User;
 import com.deepconnect.ats.user.service.UserService;
 import com.deepconnect.ats.common.enums.AccessType;
@@ -54,7 +54,7 @@ public class EvaluationPlanService {
     private final EvaluationPlanRepository evaluationPlanRepository;
     private final EvaluationPlanRoundRepository evaluationPlanRoundRepository;
     private final EvaluationPlanRoundTypeRepository evaluationPlanRoundTypeRepository;
-    private final EvaluationPlanSharedWithUserRepository evaluationPlanSharedWithUserRepository;
+    private final EvaluationPlanShareRepository evaluationPlanShareRepository;
 
     public List<EvaluationPlanRoundType> findAllRoundTypes() {
         return evaluationPlanRoundTypeRepository.findAll();
@@ -98,20 +98,20 @@ public class EvaluationPlanService {
         
         if(sharedWithUsersChanged) {
             if(!CollectionUtils.isEmpty(plan.getSharedWithUsers())) {
-                evaluationPlanSharedWithUserRepository.deleteByEvaluationPlanId(plan.getId());
+                evaluationPlanShareRepository.deleteByEvaluationPlanId(plan.getId());
             }
             if(!CollectionUtils.isEmpty(req.getSharedWithUserIds())){
                 Set<User> sharedWithUsers = userService.getByPublicIds(req.getSharedWithUserIds());
-                List<EvaluationPlanSharedWithUser> sharedWithUserList = new ArrayList<>();
+                List<EvaluationPlanShare> sharedWithUserList = new ArrayList<>();
                 for(User user : sharedWithUsers) {
-                    EvaluationPlanSharedWithUser sharedWithUser = new EvaluationPlanSharedWithUser();
+                    EvaluationPlanShare sharedWithUser = new EvaluationPlanShare();
                     sharedWithUser.setEvaluationPlanId(plan.getId());
                     sharedWithUser.setEvaluationPlanPublicId(plan.getPublicId());
                     sharedWithUser.setUserId(user.getId());
                     sharedWithUser.setUserPublicId(user.getPublicId());
                     sharedWithUserList.add(sharedWithUser);
                 }
-                evaluationPlanSharedWithUserRepository.saveAll(sharedWithUserList);
+                evaluationPlanShareRepository.saveAll(sharedWithUserList);
             }
         }
         
@@ -180,7 +180,7 @@ public class EvaluationPlanService {
      * @return
      */
     @Transactional
-    public String createTemplate(EvaluationPlanReq req) {
+    public String createSystemTemplate(EvaluationPlanReq req) {
         LoggedInUserDetails loggedInUser = AuthService.getLoggedInUser();
         this.assertUniqueWithinAllForCreation(req.getName());
         EvaluationPlan plan = new EvaluationPlan();
@@ -202,7 +202,7 @@ public class EvaluationPlanService {
      * @return
      */
     @Transactional
-    public String updateTemplate(EvaluationPlanReq req) {        
+    public String updateSystemTemplate(EvaluationPlanReq req) {        
         if (req.getId() == null) 
             throw new InternalServerException("Invalid Evaluation Plan Id: " + req.getId());
 
@@ -325,11 +325,11 @@ public class EvaluationPlanService {
      * @param userIdsIncoming the set of incoming user IDs to compare against
      * @return true if the existing shared users match the incoming set of user IDs, false otherwise
      */
-    private boolean sharedWithUsersEqual(List<EvaluationPlanSharedWithUser> existing, Set<String> userIdsIncoming) {
-        List<EvaluationPlanSharedWithUser> a = existing == null ? List.of() : existing;
+    private boolean sharedWithUsersEqual(List<EvaluationPlanShare> existing, Set<String> userIdsIncoming) {
+        List<EvaluationPlanShare> a = existing == null ? List.of() : existing;
         if (a.size() != userIdsIncoming.size())
             return false;
-        for (EvaluationPlanSharedWithUser planSharedWithUser : a) {
+        for (EvaluationPlanShare planSharedWithUser : a) {
             if (!userIdsIncoming.contains(planSharedWithUser.getUserPublicId()))
                 return false;
         }

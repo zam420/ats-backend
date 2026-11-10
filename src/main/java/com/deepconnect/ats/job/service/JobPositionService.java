@@ -20,8 +20,8 @@ import com.deepconnect.ats.job.enums.JobStatus;
 import com.deepconnect.ats.evaluationplan.model.EvaluationPlan;
 import com.deepconnect.ats.recruitmentpipeline.model.RecruitmentPipeline;
 import com.deepconnect.ats.job.dto.JobPositionRes;
-import com.deepconnect.ats.job.model.JobCandidateQuestionType;
-import com.deepconnect.ats.job.repo.JobCandidateQuestionTypeRepository;
+import com.deepconnect.ats.screeningquestiontemplate.model.ScreeningQuestionType;
+import com.deepconnect.ats.screeningquestiontemplate.repo.ScreeningQuestionTypeRepository;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -46,10 +46,10 @@ public class JobPositionService {
     private final JobPositionRepository jobPositionRepository;
     private final JobEmploymentTypeRepository jobEmploymentTypeRepository;
     private final JobWorkArrangementTypeRepository jobWorkArrangementTypeRepository;
-    private final JobCandidateQuestionTypeRepository jobCandidateQuestionTypeRepository;
+    private final ScreeningQuestionTypeRepository screeningQuestionTypeRepository;
 
-    public List<JobCandidateQuestionType> findAllCandidateQuestionTypes() {
-        return jobCandidateQuestionTypeRepository.findAll();
+    public List<ScreeningQuestionType> findAllCandidateQuestionTypes() {
+        return screeningQuestionTypeRepository.findAll();
     }
 
     private String save(JobPosition position, JobPositionReq req){
@@ -142,6 +142,7 @@ public class JobPositionService {
     @Transactional(readOnly = true)
     public JobPositionRes findByPublicIdForTenant(String publicId) {
         JobPosition position = jobPositionRepository.findByPublicIdAndTenantId(publicId, AuthService.getLoggedInTenantId()).orElseThrow(() -> new InternalServerException(String.format("Job position not found: User: %s, Position: %s", AuthService.getLoggedInUser().getPublicId(), publicId)));
+        jobPositionAccessService.assertReadAccess(AuthService.getLoggedInUser(), position);
         return JobPositionRes.from(position);
     }
 

@@ -11,7 +11,7 @@ import com.deepconnect.ats.common.exception.InternalServerException;
 import com.deepconnect.ats.common.enums.PermissionType;
 import com.deepconnect.ats.evaluationplan.model.EvaluationPlan;
 import com.deepconnect.ats.common.enums.AccessType;
-import com.deepconnect.ats.evaluationplan.model.EvaluationPlanSharedWithUser;
+import com.deepconnect.ats.evaluationplan.model.EvaluationPlanShare;
 
 @Slf4j
 @Service
@@ -41,7 +41,7 @@ public class EvaluationPlanAccessService {
 
             //user is not the owner but plan is shared with him
             if(!CollectionUtils.isEmpty(plan.getSharedWithUsers())) {
-                for (EvaluationPlanSharedWithUser sharedWithUser : plan.getSharedWithUsers()) {
+                for (EvaluationPlanShare sharedWithUser : plan.getSharedWithUsers()) {
                     if (sharedWithUser.getUserPublicId().equals(user.getPublicId())) {
                         return AccessType.READ;
                     }

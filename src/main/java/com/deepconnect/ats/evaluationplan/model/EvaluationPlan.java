@@ -58,7 +58,7 @@ public class EvaluationPlan extends OperatableBaseWithTenantEntity {
     @Valid
     @JsonManagedReference("sharedWithUsers")
     @OneToMany(mappedBy = "evaluationPlan", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<EvaluationPlanSharedWithUser> sharedWithUsers;
+    private List<EvaluationPlanShare> sharedWithUsers;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ownerId", referencedColumnName = "id", insertable = false, updatable = false)

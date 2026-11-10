@@ -100,14 +100,14 @@ public class RecruitmentPipelineController {
 
     @PreAuthorize("hasAuthority('rptsa')")
     @PostMapping("/templates/create")
-    public ApiResult<Map<String, String>> createTemplate(@RequestBody @Valid RecruitmentPipelineReq req) {
-        return ApiResult.success(Collections.singletonMap("id", recruitmentPipelineService.createTemplate(req)));
+    public ApiResult<Map<String, String>> createSystemTemplate(@RequestBody @Valid RecruitmentPipelineReq req) {
+        return ApiResult.success(Collections.singletonMap("id", recruitmentPipelineService.createSystemTemplate(req)));
     }
 
     @PreAuthorize("hasAuthority('rptsa')")
     @PostMapping("/templates/update")
-    public ApiResult<Map<String, String>> updateTemplate(@RequestBody @Valid RecruitmentPipelineReq req) {
-        return ApiResult.success(Collections.singletonMap("id", recruitmentPipelineService.updateTemplate(req)));
+    public ApiResult<Map<String, String>> updateSystemTemplate(@RequestBody @Valid RecruitmentPipelineReq req) {
+        return ApiResult.success(Collections.singletonMap("id", recruitmentPipelineService.updateSystemTemplate(req)));
     }
 
 

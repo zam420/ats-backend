@@ -34,7 +34,7 @@ public class EvaluationPlanRound extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "roundType", referencedColumnName = "id", insertable = false, updatable = false)
-    private EvaluationPlanRoundType evaluationPlanRoundType; // By default, the user who created this record. Can be changed.
+    private EvaluationPlanRoundType evaluationPlanRoundType; 
 
     @Column(name = "roundType", nullable = false)
     @NotNull(message = "{field.evaluationPlanRound.roundType}{validation.notBlank}")

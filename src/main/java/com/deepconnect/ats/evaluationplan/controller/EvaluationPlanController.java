@@ -104,14 +104,14 @@ public class EvaluationPlanController {
 
     @PreAuthorize("hasAuthority('iptsa')")
     @PostMapping("/templates/create")
-    public ApiResult<Map<String, String>> createTemplate(@RequestBody @Valid EvaluationPlanReq req) {
-        return ApiResult.success(Collections.singletonMap("id", evaluationPlanService.createTemplate(req)));
+    public ApiResult<Map<String, String>> createSystemTemplate(@RequestBody @Valid EvaluationPlanReq req) {
+        return ApiResult.success(Collections.singletonMap("id", evaluationPlanService.createSystemTemplate(req)));
     }
 
     @PreAuthorize("hasAuthority('iptsa')")
     @PostMapping("/templates/update")
-    public ApiResult<Map<String, String>> updateTemplate(@RequestBody @Valid EvaluationPlanReq req) {
-        return ApiResult.success(Collections.singletonMap("id", evaluationPlanService.updateTemplate(req)));
+    public ApiResult<Map<String, String>> updateSystemTemplate(@RequestBody @Valid EvaluationPlanReq req) {
+        return ApiResult.success(Collections.singletonMap("id", evaluationPlanService.updateSystemTemplate(req)));
     }
 
     @PreAuthorize("hasAuthority('ipts')")

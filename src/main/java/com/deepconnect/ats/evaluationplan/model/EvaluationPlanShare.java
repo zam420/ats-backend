@@ -1,4 +1,4 @@
-package com.deepconnect.ats.recruitmentpipeline.model;
+package com.deepconnect.ats.evaluationplan.model;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -10,30 +10,31 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
- * This entity describes many-many intermediate relation for RecruitmentPipeline and User
- * RecruitmentPipelineSharedWithUser
+ * This entity describes many-many intermediate relation for EvaluationPlan and User.
+ * Owner of an evaluation plan can share it with other users and this entity describes that relationship.
+ * EvaluationPlanShare
  */
 @Entity
-@Table(name = "recruitment_pipeline_shared_with_user", uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"recruitment_pipeline", "user_id"})
+@Table(name = "evaluation_plan_share", uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"evaluation_plan", "user_id"})
 })
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class RecruitmentPipelineSharedWithUser extends BaseEntity {
+public class EvaluationPlanShare extends BaseEntity {
     
     @JsonBackReference("sharedWithUsers")
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
-    @JoinColumn(name = "recruitmentPipeline", referencedColumnName = "id", nullable = false, insertable = false, updatable = false)
-    private RecruitmentPipeline recruitmentPipeline;
+    @JoinColumn(name = "evaluationPlan", referencedColumnName = "id", nullable = false, insertable = false, updatable = false)
+    private EvaluationPlan evaluationPlan;
 
-    @Column(name = "recruitmentPipeline", nullable = false)
-    private Long recruitmentPipelineId;
+    @Column(name = "evaluationPlan", nullable = false)
+    private Long evaluationPlanId;
 
-    @Column(name = "recruitmentPipelinePublicId", nullable = false)
-    private String recruitmentPipelinePublicId;
+    @Column(name = "evaluationPlanPublicId", nullable = false)
+    private String evaluationPlanPublicId;
 
     // Not a parent/child link, so it must not be a second back reference
     @JsonIgnore

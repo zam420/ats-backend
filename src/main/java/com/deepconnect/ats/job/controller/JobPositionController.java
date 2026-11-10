@@ -54,7 +54,7 @@ public class JobPositionController {
         return ApiResult.success(jobPositionService.findAll(query));
     }
 
-    @PreAuthorize("hasAuthority('ipts')")
+    @PreAuthorize("hasAuthority('jps')")
     @GetMapping("/{id}")
     public ApiResult<JobPositionRes> findById(
         @PathVariable @NotBlank(message = "{field.common.id}{validation.notBlank}")String id) {

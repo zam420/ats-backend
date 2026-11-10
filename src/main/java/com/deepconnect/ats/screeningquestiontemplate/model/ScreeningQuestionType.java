@@ -1,4 +1,4 @@
-package com.deepconnect.ats.job.model;
+package com.deepconnect.ats.screeningquestiontemplate.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
@@ -16,25 +16,25 @@ import lombok.*;
 
 
 @Entity
-@Table(name = "job_candidate_question_type")
+@Table(name = "screening_question_type")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class JobCandidateQuestionType {
+public class ScreeningQuestionType {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id; 
 
     @Column(nullable = false, length = 30)
-    @Length(max = 30, message = "{field.job.candidateQuestion.type.name}{validation.lengthMax}")
-    @NotBlank(message = "{field.job.candidateQuestion.type.name}{validation.notBlank}")
+    @Length(max = 30, message = "{field.job.screeningQuestion.type.name}{validation.lengthMax}")
+    @NotBlank(message = "{field.job.screeningQuestion.type.name}{validation.notBlank}")
     private String name;
 
     @Column(length = 100)
-    @Length(max = 100, message = "{field.job.candidateQuestion.type.description}{validation.lengthMax}")
+    @Length(max = 100, message = "{field.job.screeningQuestion.type.description}{validation.lengthMax}")
     private String description;
 
 }

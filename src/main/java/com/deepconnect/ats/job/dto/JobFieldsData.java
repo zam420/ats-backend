@@ -10,7 +10,7 @@ import com.deepconnect.ats.recruitmentpipeline.dto.RecruitmentPipelineRes;
 import com.deepconnect.ats.recruitmentpipeline.dto.RecruitmentPipelineResMin;
 import com.deepconnect.ats.recruitmentpipeline.model.RecruitmentPipelineRoundType;
 import com.deepconnect.ats.user.dto.UserSummary;
-import com.deepconnect.ats.job.model.JobCandidateQuestionType;
+import com.deepconnect.ats.screeningquestiontemplate.model.ScreeningQuestionType;
 
 import com.deepconnect.ats.job.model.JobEmploymentType;
 import com.deepconnect.ats.job.model.JobWorkArrangementType;
@@ -25,7 +25,7 @@ public class JobFieldsData {
     private List<UserSummary> hiringManagers;
     private List<EvaluationPlanRoundType> evaluationPlanRoundTypes;
     private List<RecruitmentPipelineRoundType> recruitmentPipelineRoundTypes;
-    private List<JobCandidateQuestionType> candidateQuestionTypes;
+    private List<ScreeningQuestionType> screeningQuestionTypes;
     
     public static JobFieldsData from(
         List<JobEmploymentType> employmentTypes, 
@@ -36,7 +36,7 @@ public class JobFieldsData {
         List<UserSummary> hiringManagers,
         List<EvaluationPlanRoundType> evaluationPlanRoundTypes,
         List<RecruitmentPipelineRoundType> recruitmentPipelineRoundTypes,
-        List<JobCandidateQuestionType> candidateQuestionTypes) 
+        List<ScreeningQuestionType> screeningQuestionTypes) 
     {
         JobFieldsData res = new JobFieldsData();
         res.setEmploymentTypes(employmentTypes);
@@ -47,7 +47,7 @@ public class JobFieldsData {
         res.setHiringManagers(hiringManagers);
         res.setEvaluationPlanRoundTypes(evaluationPlanRoundTypes);
         res.setRecruitmentPipelineRoundTypes(recruitmentPipelineRoundTypes);
-        res.setCandidateQuestionTypes(candidateQuestionTypes);
+        res.setScreeningQuestionTypes(screeningQuestionTypes);
         return res;
     }
 

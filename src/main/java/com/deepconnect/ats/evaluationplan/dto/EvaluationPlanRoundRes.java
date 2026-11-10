@@ -11,7 +11,7 @@ public class EvaluationPlanRoundRes {
     private String id;
     private String name;
     private String description;
-    private String roundType;
+    private Integer roundType;
     private List<String> interviewers;
     private Integer order;
 
@@ -22,7 +22,7 @@ public class EvaluationPlanRoundRes {
         res.setId(entity.getPublicId());
         res.setName(entity.getName());
         res.setDescription(entity.getDescription());
-        res.setRoundType(entity.getRoundType().toString());
+        res.setRoundType(entity.getRoundType());
         res.setInterviewers(entity.getInterviewers());
         res.setOrder(entity.getOrder());
         return res;

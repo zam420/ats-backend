@@ -44,12 +44,12 @@ INSERT INTO `ats_permission`(`public_id`, `code`, `name`) VALUES('V1StGXR8_Z6h',
 INSERT INTO `ats_permission`(`public_id`, `code`, `name`) VALUES('V1StGXR8_Z6i','ete','email template edit');
 INSERT INTO `ats_permission`(`public_id`, `code`, `name`) VALUES('V1StGXR8_Z6j','ets','email template search');
 -- evaluation plan
-INSERT INTO `ats_permission`(`public_id`, `code`, `name`) VALUES('n3StGXR8_Z6k','iptsa','interview plan template super admin');#write access to system templates for interview plans
-INSERT INTO `ats_permission`(`public_id`, `code`, `name`) VALUES('n1StGXR8_Z6k','ipta','interview plan template admin');
-INSERT INTO `ats_permission`(`public_id`, `code`, `name`) VALUES('V1StGXR8_Z6k','iptm','interview plan template menu');
-INSERT INTO `ats_permission`(`public_id`, `code`, `name`) VALUES('4RStGXR8_Z6k','iptc','interview plan template create');
-INSERT INTO `ats_permission`(`public_id`, `code`, `name`) VALUES('V1StGXR8_Z6l','ipte','interview plan template edit');
-INSERT INTO `ats_permission`(`public_id`, `code`, `name`) VALUES('V1StGXR8_Z6m','ipts','interview plan template search');
+INSERT INTO `ats_permission`(`public_id`, `code`, `name`) VALUES('n3StGXR8_Z6k','iptsa','evaluation plan template super admin');#write access to system templates for evaluation plans (formaly called interview process)
+INSERT INTO `ats_permission`(`public_id`, `code`, `name`) VALUES('n1StGXR8_Z6k','ipta','evaluation plan template admin');
+INSERT INTO `ats_permission`(`public_id`, `code`, `name`) VALUES('V1StGXR8_Z6k','iptm','evaluation plan template menu');
+INSERT INTO `ats_permission`(`public_id`, `code`, `name`) VALUES('4RStGXR8_Z6k','iptc','evaluation plan template create');
+INSERT INTO `ats_permission`(`public_id`, `code`, `name`) VALUES('V1StGXR8_Z6l','ipte','evaluation plan template edit');
+INSERT INTO `ats_permission`(`public_id`, `code`, `name`) VALUES('V1StGXR8_Z6m','ipts','evaluation plan template search');
 -- recruitment pipeline
 INSERT INTO `ats_permission`(`public_id`, `code`, `name`) VALUES('t3StGXR8_Z6k','rptsa','recruitment pipeline template super admin');#write access to system templates for recruitment pipeline
 INSERT INTO `ats_permission`(`public_id`, `code`, `name`) VALUES('6fStGXR8_Z6k','rpta','recruitment pipeline template admin');
@@ -57,6 +57,13 @@ INSERT INTO `ats_permission`(`public_id`, `code`, `name`) VALUES('ulStGXR8_Z6k',
 INSERT INTO `ats_permission`(`public_id`, `code`, `name`) VALUES('aRStGXR8_Z6k','rptc','recruitment pipeline template create');
 INSERT INTO `ats_permission`(`public_id`, `code`, `name`) VALUES('q1ynGXR8_Z6l','rpte','recruitment pipeline template edit');
 INSERT INTO `ats_permission`(`public_id`, `code`, `name`) VALUES('b1sgGXR8_Z6m','rpts','recruitment pipeline template search');
+-- screening question template
+INSERT INTO `ats_permission`(`public_id`, `code`, `name`) VALUES('n3StGXR8_Z6k','sqtsa','screening question template super admin');#write access to system templates for screening questions
+INSERT INTO `ats_permission`(`public_id`, `code`, `name`) VALUES('n1StGXR8_Z6k','sqta','screening question template admin');
+INSERT INTO `ats_permission`(`public_id`, `code`, `name`) VALUES('V1StGXR8_Z6k','sqtm','screening question template menu');
+INSERT INTO `ats_permission`(`public_id`, `code`, `name`) VALUES('4RStGXR8_Z6k','sqtc','screening question template create');
+INSERT INTO `ats_permission`(`public_id`, `code`, `name`) VALUES('V1StGXR8_Z6l','sqte','screening question template edit');
+INSERT INTO `ats_permission`(`public_id`, `code`, `name`) VALUES('V1StGXR8_Z6m','sqts','screening question template search');
 -- interview
 INSERT INTO `ats_permission`(`public_id`, `code`, `name`) VALUES('V1StGXR8_Z6n','ic','interview create');
 INSERT INTO `ats_permission`(`public_id`, `code`, `name`) VALUES('V1StGXR8_Z6o','is','interview search');
@@ -130,6 +137,12 @@ INSERT INTO `ats_role_permission` (`role_id`, `permission_code`, `permission_id`
 INSERT INTO `ats_role_permission` (`role_id`, `permission_code`, `permission_id`) SELECT 1, 'rptc', `id` FROM `ats_permission` WHERE `code` = 'rptc'; 
 INSERT INTO `ats_role_permission` (`role_id`, `permission_code`, `permission_id`) SELECT 1, 'rpte', `id` FROM `ats_permission` WHERE `code` = 'rpte'; 
 INSERT INTO `ats_role_permission` (`role_id`, `permission_code`, `permission_id`) SELECT 1, 'rpts', `id` FROM `ats_permission` WHERE `code` = 'rpts';
+INSERT INTO `ats_role_permission` (`role_id`, `permission_code`, `permission_id`) SELECT 1, 'sqtsa', `id` FROM `ats_permission` WHERE `code` = 'sqtsa'; #not available to HR admin - screening question template super admin - write access to system termplates for interview plan
+INSERT INTO `ats_role_permission` (`role_id`, `permission_code`, `permission_id`) SELECT 1, 'sqta', `id` FROM `ats_permission` WHERE `code` = 'sqta'; 
+INSERT INTO `ats_role_permission` (`role_id`, `permission_code`, `permission_id`) SELECT 1, 'sqtm', `id` FROM `ats_permission` WHERE `code` = 'sqtm'; 
+INSERT INTO `ats_role_permission` (`role_id`, `permission_code`, `permission_id`) SELECT 1, 'sqtc', `id` FROM `ats_permission` WHERE `code` = 'sqtc'; 
+INSERT INTO `ats_role_permission` (`role_id`, `permission_code`, `permission_id`) SELECT 1, 'sqte', `id` FROM `ats_permission` WHERE `code` = 'sqte'; 
+INSERT INTO `ats_role_permission` (`role_id`, `permission_code`, `permission_id`) SELECT 1, 'sqts', `id` FROM `ats_permission` WHERE `code` = 'sqts';
 INSERT INTO `ats_role_permission` (`role_id`, `permission_code`, `permission_id`) SELECT 1, 'ic', `id` FROM `ats_permission` WHERE `code` = 'ic';
 INSERT INTO `ats_role_permission` (`role_id`, `permission_code`, `permission_id`) SELECT 1, 'is', `id` FROM `ats_permission` WHERE `code` = 'is';
 INSERT INTO `ats_role_permission` (`role_id`, `permission_code`, `permission_id`) SELECT 1, 'ifc', `id` FROM `ats_permission` WHERE `code` = 'ifc';
@@ -189,6 +202,11 @@ INSERT INTO `ats_role_permission` (`role_id`, `permission_code`, `permission_id`
 INSERT INTO `ats_role_permission` (`role_id`, `permission_code`, `permission_id`) SELECT 2, 'rptc', `id` FROM `ats_permission` WHERE `code` = 'rptc'; #not available to HR Recruiter - recruitment pipeline template create
 INSERT INTO `ats_role_permission` (`role_id`, `permission_code`, `permission_id`) SELECT 2, 'rpte', `id` FROM `ats_permission` WHERE `code` = 'rpte'; #not available to HR Recruiter - recruitment pipeline template edit
 INSERT INTO `ats_role_permission` (`role_id`, `permission_code`, `permission_id`) SELECT 2, 'rpts', `id` FROM `ats_permission` WHERE `code` = 'rpts'; 
+INSERT INTO `ats_role_permission` (`role_id`, `permission_code`, `permission_id`) SELECT 2, 'sqta', `id` FROM `ats_permission` WHERE `code` = 'sqta'; #not available to HR Recruiter - screening question template admin
+INSERT INTO `ats_role_permission` (`role_id`, `permission_code`, `permission_id`) SELECT 2, 'sqtm', `id` FROM `ats_permission` WHERE `code` = 'sqtm'; 
+INSERT INTO `ats_role_permission` (`role_id`, `permission_code`, `permission_id`) SELECT 2, 'sqtc', `id` FROM `ats_permission` WHERE `code` = 'sqtc'; 
+INSERT INTO `ats_role_permission` (`role_id`, `permission_code`, `permission_id`) SELECT 2, 'sqte', `id` FROM `ats_permission` WHERE `code` = 'sqte'; 
+INSERT INTO `ats_role_permission` (`role_id`, `permission_code`, `permission_id`) SELECT 2, 'sqts', `id` FROM `ats_permission` WHERE `code` = 'sqts';
 INSERT INTO `ats_role_permission` (`role_id`, `permission_code`, `permission_id`) SELECT 2, 'ic', `id` FROM `ats_permission` WHERE `code` = 'ic';
 INSERT INTO `ats_role_permission` (`role_id`, `permission_code`, `permission_id`) SELECT 2, 'is', `id` FROM `ats_permission` WHERE `code` = 'is';
 INSERT INTO `ats_role_permission` (`role_id`, `permission_code`, `permission_id`) SELECT 2, 'ifc', `id` FROM `ats_permission` WHERE `code` = 'ifc';
@@ -240,6 +258,10 @@ INSERT INTO `ats_role_permission` (`role_id`, `permission_code`, `permission_id`
 INSERT INTO `ats_role_permission` (`role_id`, `permission_code`, `permission_id`) SELECT 3, 'ipts', `id` FROM `ats_permission` WHERE `code` = 'ipts';
 INSERT INTO `ats_role_permission` (`role_id`, `permission_code`, `permission_id`) SELECT 3, 'rptm', `id` FROM `ats_permission` WHERE `code` = 'rptm';
 INSERT INTO `ats_role_permission` (`role_id`, `permission_code`, `permission_id`) SELECT 3, 'rpts', `id` FROM `ats_permission` WHERE `code` = 'rpts';  
+INSERT INTO `ats_role_permission` (`role_id`, `permission_code`, `permission_id`) SELECT 3, 'sqtm', `id` FROM `ats_permission` WHERE `code` = 'sqtm'; 
+INSERT INTO `ats_role_permission` (`role_id`, `permission_code`, `permission_id`) SELECT 3, 'sqtc', `id` FROM `ats_permission` WHERE `code` = 'sqtc'; 
+INSERT INTO `ats_role_permission` (`role_id`, `permission_code`, `permission_id`) SELECT 3, 'sqte', `id` FROM `ats_permission` WHERE `code` = 'sqte'; 
+INSERT INTO `ats_role_permission` (`role_id`, `permission_code`, `permission_id`) SELECT 3, 'sqts', `id` FROM `ats_permission` WHERE `code` = 'sqts';
 INSERT INTO `ats_role_permission` (`role_id`, `permission_code`, `permission_id`) SELECT 3, 'ic', `id` FROM `ats_permission` WHERE `code` = 'ic';
 INSERT INTO `ats_role_permission` (`role_id`, `permission_code`, `permission_id`) SELECT 3, 'is', `id` FROM `ats_permission` WHERE `code` = 'is';
 INSERT INTO `ats_role_permission` (`role_id`, `permission_code`, `permission_id`) SELECT 3, 'ifc', `id` FROM `ats_permission` WHERE `code` = 'ifc';
@@ -256,6 +278,8 @@ INSERT INTO `ats_role_permission` (`role_id`, `permission_code`, `permission_id`
 INSERT INTO `ats_role_permission` (`role_id`, `permission_code`, `permission_id`) SELECT 3, 'ats', `id` FROM `ats_permission` WHERE `code` = 'ats';
 
 -- Hiring Managers
+INSERT INTO `ats_role_permission` (`role_id`, `permission_code`, `permission_id`) SELECT 4, 'jpm', `id` FROM `ats_permission` WHERE `code` = 'jpm';
+INSERT INTO `ats_role_permission` (`role_id`, `permission_code`, `permission_id`) SELECT 4, 'jps', `id` FROM `ats_permission` WHERE `code` = 'jps';
 INSERT INTO `ats_role_permission` (`role_id`, `permission_code`, `permission_id`) SELECT 4, 'crs', `id` FROM `ats_permission` WHERE `code` = 'crs'; #candidate resume search
 INSERT INTO `ats_role_permission` (`role_id`, `permission_code`, `permission_id`) SELECT 4, 'fcrf', `id` FROM `ats_permission` WHERE `code` = 'fcrf'; #forward candidate resume
 INSERT INTO `ats_role_permission` (`role_id`, `permission_code`, `permission_id`) SELECT 4, 'crfs', `id` FROM `ats_permission` WHERE `code` = 'crfs'; #candidate resume forward search

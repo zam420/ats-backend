@@ -10,7 +10,7 @@ import com.deepconnect.ats.common.exception.InternalServerException;
 import com.deepconnect.ats.recruitmentpipeline.dto.RecruitmentPipelineReq;
 import com.deepconnect.ats.recruitmentpipeline.model.RecruitmentPipeline;
 import com.deepconnect.ats.recruitmentpipeline.repo.RecruitmentPipelineRepository;
-import com.deepconnect.ats.recruitmentpipeline.repo.RecruitmentPipelineSharedWithUserRepository;
+import com.deepconnect.ats.recruitmentpipeline.repo.RecruitmentPipelineShareRepository;
 import com.deepconnect.ats.dto.AtsPageQuery;
 import com.deepconnect.ats.dto.AtsPageRsp;
 import com.deepconnect.ats.recruitmentpipeline.dto.RecruitmentPipelineRes;
@@ -23,7 +23,7 @@ import com.deepconnect.ats.user.service.UserService;
 import com.deepconnect.ats.common.enums.AccessType;
 import com.deepconnect.ats.common.utils.StringUtils;
 import com.deepconnect.ats.common.utils.HashMapUtils;
-import com.deepconnect.ats.recruitmentpipeline.model.RecruitmentPipelineSharedWithUser;
+import com.deepconnect.ats.recruitmentpipeline.model.RecruitmentPipelineShare;
 import com.deepconnect.ats.common.enums.CustomExceptionType;
 import com.deepconnect.ats.common.enums.ValidationFieldType;
 import com.deepconnect.ats.common.exception.ValidationException;
@@ -56,7 +56,7 @@ public class RecruitmentPipelineService {
     private final RecruitmentPipelineRepository recruitmentPipelineRepository;
     private final RecruitmentPipelineRoundRepository recruitmentPipelineRoundRepository;
     private final RecruitmentPipelineRoundTypeRepository recruitmentPipelineRoundTypeRepository;
-    private final RecruitmentPipelineSharedWithUserRepository recruitmentPipelineSharedWithUserRepository;
+    private final RecruitmentPipelineShareRepository recruitmentPipelineShareRepository;
 
     public List<RecruitmentPipelineRoundType> findAllRoundTypes() {
         return recruitmentPipelineRoundTypeRepository.findAll();
@@ -96,20 +96,20 @@ public class RecruitmentPipelineService {
 
         if(sharedWithUsersChanged) {
             if(!CollectionUtils.isEmpty(plan.getSharedWithUsers())) {
-                recruitmentPipelineSharedWithUserRepository.deleteByRecruitmentPipelineId(plan.getId());
+                recruitmentPipelineShareRepository.deleteByRecruitmentPipelineId(plan.getId());
             }
             if(!CollectionUtils.isEmpty(req.getSharedWithUserIds())){
                 Set<User> sharedWithUsers = userService.getByPublicIds(req.getSharedWithUserIds());
-                List<RecruitmentPipelineSharedWithUser> sharedWithUserList = new ArrayList<>();
+                List<RecruitmentPipelineShare> sharedWithUserList = new ArrayList<>();
                 for(User user : sharedWithUsers) {
-                    RecruitmentPipelineSharedWithUser sharedWithUser = new RecruitmentPipelineSharedWithUser();
+                    RecruitmentPipelineShare sharedWithUser = new RecruitmentPipelineShare();
                     sharedWithUser.setRecruitmentPipelineId(plan.getId());
                     sharedWithUser.setRecruitmentPipelinePublicId(plan.getPublicId());
                     sharedWithUser.setUserId(user.getId());
                     sharedWithUser.setUserPublicId(user.getPublicId());
                     sharedWithUserList.add(sharedWithUser);
                 }
-                recruitmentPipelineSharedWithUserRepository.saveAll(sharedWithUserList);
+                recruitmentPipelineShareRepository.saveAll(sharedWithUserList);
             }
         }
 
@@ -178,7 +178,7 @@ public class RecruitmentPipelineService {
      * @return
      */
     @Transactional
-    public String createTemplate(RecruitmentPipelineReq req) {
+    public String createSystemTemplate(RecruitmentPipelineReq req) {
         LoggedInUserDetails loggedInUser = AuthService.getLoggedInUser();
         this.assertUniqueWithinAllForCreation(req.getName());
         RecruitmentPipeline plan = new RecruitmentPipeline();
@@ -200,7 +200,7 @@ public class RecruitmentPipelineService {
      * @return
      */
     @Transactional
-    public String updateTemplate(RecruitmentPipelineReq req) {        
+    public String updateSystemTemplate(RecruitmentPipelineReq req) {        
         if (req.getId() == null) 
             throw new InternalServerException("Invalid Interview Process Id: " + req.getId());
 
@@ -323,11 +323,11 @@ public class RecruitmentPipelineService {
      * @param userIdsIncoming the set of incoming user IDs to compare against
      * @return true if the existing shared users match the incoming set of user IDs, false otherwise
      */
-    private boolean sharedWithUsersEqual(List<RecruitmentPipelineSharedWithUser> existing, Set<String> userIdsIncoming) {
-        List<RecruitmentPipelineSharedWithUser> a = existing == null ? List.of() : existing;
+    private boolean sharedWithUsersEqual(List<RecruitmentPipelineShare> existing, Set<String> userIdsIncoming) {
+        List<RecruitmentPipelineShare> a = existing == null ? List.of() : existing;
         if (a.size() != userIdsIncoming.size())
             return false;
-        for (RecruitmentPipelineSharedWithUser planSharedWithUser : a) {
+        for (RecruitmentPipelineShare planSharedWithUser : a) {
             if (!userIdsIncoming.contains(planSharedWithUser.getUserPublicId()))
                 return false;
         }

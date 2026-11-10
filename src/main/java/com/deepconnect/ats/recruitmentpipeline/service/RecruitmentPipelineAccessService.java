@@ -9,7 +9,7 @@ import com.deepconnect.ats.common.exception.InternalServerException;
 import com.deepconnect.ats.common.enums.PermissionType;
 import com.deepconnect.ats.recruitmentpipeline.model.RecruitmentPipeline;
 import com.deepconnect.ats.common.enums.AccessType;
-import com.deepconnect.ats.recruitmentpipeline.model.RecruitmentPipelineSharedWithUser;
+import com.deepconnect.ats.recruitmentpipeline.model.RecruitmentPipelineShare;
 
 @Service
 @RequiredArgsConstructor
@@ -38,7 +38,7 @@ public class RecruitmentPipelineAccessService {
 
             //user is not the owner but plan is shared with him
             if(!CollectionUtils.isEmpty(plan.getSharedWithUsers())) {
-                for (RecruitmentPipelineSharedWithUser sharedWithUser : plan.getSharedWithUsers()) {
+                for (RecruitmentPipelineShare sharedWithUser : plan.getSharedWithUsers()) {
                     if (sharedWithUser.getUserPublicId().equals(user.getPublicId())) {
                         return AccessType.READ;
                     }

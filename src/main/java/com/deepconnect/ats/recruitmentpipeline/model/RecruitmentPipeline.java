@@ -58,7 +58,7 @@ public class RecruitmentPipeline extends OperatableBaseWithTenantEntity {
     @Valid
     @JsonManagedReference("sharedWithUsers")
     @OneToMany(mappedBy = "recruitmentPipeline", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<RecruitmentPipelineSharedWithUser> sharedWithUsers;
+    private List<RecruitmentPipelineShare> sharedWithUsers;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ownerId", referencedColumnName = "id", insertable = false, updatable = false)
