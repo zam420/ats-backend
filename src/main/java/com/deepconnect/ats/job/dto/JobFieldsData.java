@@ -10,7 +10,7 @@ import com.deepconnect.ats.recruitmentpipeline.dto.RecruitmentPipelineRes;
 import com.deepconnect.ats.recruitmentpipeline.dto.RecruitmentPipelineResMin;
 import com.deepconnect.ats.recruitmentpipeline.model.RecruitmentPipelineRoundType;
 import com.deepconnect.ats.user.dto.UserSummary;
-import com.deepconnect.ats.screeningquestiontemplate.model.ScreeningQuestionType;
+import com.deepconnect.ats.screeningquestionsform.model.ScreeningQuestionType;
 
 import com.deepconnect.ats.job.model.JobEmploymentType;
 import com.deepconnect.ats.job.model.JobWorkArrangementType;

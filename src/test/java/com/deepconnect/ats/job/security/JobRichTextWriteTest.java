@@ -1,6 +1,6 @@
 package com.deepconnect.ats.job.security;
 import com.deepconnect.ats.job.service.JobPositionAccessService;
-import com.deepconnect.ats.screeningquestiontemplate.repo.ScreeningQuestionTypeRepository;
+import com.deepconnect.ats.screeningquestionsform.repo.ScreeningQuestionTypeRepository;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;

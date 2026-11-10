@@ -20,8 +20,8 @@ import com.deepconnect.ats.job.enums.JobStatus;
 import com.deepconnect.ats.evaluationplan.model.EvaluationPlan;
 import com.deepconnect.ats.recruitmentpipeline.model.RecruitmentPipeline;
 import com.deepconnect.ats.job.dto.JobPositionRes;
-import com.deepconnect.ats.screeningquestiontemplate.model.ScreeningQuestionType;
-import com.deepconnect.ats.screeningquestiontemplate.repo.ScreeningQuestionTypeRepository;
+import com.deepconnect.ats.screeningquestionsform.model.ScreeningQuestionType;
+import com.deepconnect.ats.screeningquestionsform.repo.ScreeningQuestionTypeRepository;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

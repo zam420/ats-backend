@@ -1,4 +1,4 @@
-package com.deepconnect.ats.screeningquestiontemplate.model;
+package com.deepconnect.ats.screeningquestionsform.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
@@ -71,10 +71,10 @@ public class ScreeningQuestion  extends BaseEntity {
 
     @JsonBackReference("questions")
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
-    @JoinColumn(name = "screeningQuestionTemplate", referencedColumnName = "id", nullable = false, insertable = false, updatable = false)
-    private ScreeningQuestionTemplate screeningQuestionTemplate;
+    @JoinColumn(name = "screeningQuestionsForm", referencedColumnName = "id", nullable = false, insertable = false, updatable = false)
+    private ScreeningQuestionsForm screeningQuestionsForm;
 
-    @Column(name = "screeningQuestionTemplate", nullable = false)
-    private Long screeningQuestionTemplateId;
+    @Column(name = "screeningQuestionsForm", nullable = false)
+    private Long screeningQuestionsFormId;
 
 }

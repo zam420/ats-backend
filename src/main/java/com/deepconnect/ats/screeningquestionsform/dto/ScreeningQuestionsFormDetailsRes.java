@@ -1,4 +1,4 @@
-package com.deepconnect.ats.screeningquestiontemplate.dto;
+package com.deepconnect.ats.screeningquestionsform.dto;
 
 import lombok.Data;
 
@@ -6,11 +6,11 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import com.deepconnect.ats.screeningquestiontemplate.model.ScreeningQuestionTemplate;
+import com.deepconnect.ats.screeningquestionsform.model.ScreeningQuestionsForm;
 import com.nimbusds.oauth2.sdk.util.CollectionUtils;
 
 @Data
-public class ScreeningQuestionTemplateDetailsRes {
+public class ScreeningQuestionsFormDetailsRes {
     private String id;
     private String name;
     private String description;
@@ -20,10 +20,10 @@ public class ScreeningQuestionTemplateDetailsRes {
     private Set<String> sharedWithUserIds;
     private String ownerId;
 
-    public static ScreeningQuestionTemplateDetailsRes from(ScreeningQuestionTemplate entity) {
+    public static ScreeningQuestionsFormDetailsRes from(ScreeningQuestionsForm entity) {
         if(entity == null)
             return null;
-        ScreeningQuestionTemplateDetailsRes res = new ScreeningQuestionTemplateDetailsRes();
+        ScreeningQuestionsFormDetailsRes res = new ScreeningQuestionsFormDetailsRes();
         res.setId(entity.getPublicId());
         res.setName(entity.getName());
         res.setDescription(entity.getDescription());
@@ -46,7 +46,7 @@ public class ScreeningQuestionTemplateDetailsRes {
         return res;
     }
 
-    public static List<ScreeningQuestionTemplateDetailsRes> fromList(List<ScreeningQuestionTemplate> entities) {
-        return entities.stream().map(ScreeningQuestionTemplateDetailsRes::from).toList();
+    public static List<ScreeningQuestionsFormDetailsRes> fromList(List<ScreeningQuestionsForm> entities) {
+        return entities.stream().map(ScreeningQuestionsFormDetailsRes::from).toList();
     }
 }

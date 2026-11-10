@@ -1,16 +1,16 @@
-package com.deepconnect.ats.screeningquestiontemplate.dto;
+package com.deepconnect.ats.screeningquestionsform.dto;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 import org.hibernate.validator.constraints.Length;
-import com.deepconnect.ats.screeningquestiontemplate.model.ScreeningQuestion;
+import com.deepconnect.ats.screeningquestionsform.model.ScreeningQuestion;
 
 import java.util.List;
 import java.util.Set;
 
 @Data
-public class ScreeningQuestionTemplateReq {
+public class ScreeningQuestionsFormReq {
     private String id;
 
     @Length(max = 100, message = "{field.evaluationPlan.name}{validation.lengthMax}")

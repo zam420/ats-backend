@@ -1,4 +1,4 @@
-package com.deepconnect.ats.screeningquestiontemplate.service;
+package com.deepconnect.ats.screeningquestionsform.service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
@@ -16,17 +16,17 @@ import org.springframework.beans.factory.annotation.Value;
 import com.deepconnect.ats.common.enums.ValidationFieldType;
 import com.deepconnect.ats.common.exception.ValidationException;
 import com.deepconnect.ats.common.enums.CustomExceptionType;
-import com.deepconnect.ats.screeningquestiontemplate.repo.ScreeningQuestionTemplateRepository;
-import com.deepconnect.ats.screeningquestiontemplate.repo.ScreeningQuestionRepository;
-import com.deepconnect.ats.screeningquestiontemplate.repo.ScreeningQuestionTypeRepository;
-import com.deepconnect.ats.screeningquestiontemplate.repo.ScreeningQuestionTemplateShareRepository;
-import com.deepconnect.ats.screeningquestiontemplate.model.ScreeningQuestionType;
-import com.deepconnect.ats.screeningquestiontemplate.model.ScreeningQuestionTemplate;
-import com.deepconnect.ats.screeningquestiontemplate.dto.ScreeningQuestionTemplateRes;
-import com.deepconnect.ats.screeningquestiontemplate.dto.ScreeningQuestionTemplateReq;
-import com.deepconnect.ats.screeningquestiontemplate.model.ScreeningQuestion;
-import com.deepconnect.ats.screeningquestiontemplate.model.ScreeningQuestionTemplateShare;
-import com.deepconnect.ats.screeningquestiontemplate.dto.ScreeningQuestionTemplateDetailsRes;
+import com.deepconnect.ats.screeningquestionsform.repo.ScreeningQuestionsFormRepository;
+import com.deepconnect.ats.screeningquestionsform.repo.ScreeningQuestionRepository;
+import com.deepconnect.ats.screeningquestionsform.repo.ScreeningQuestionTypeRepository;
+import com.deepconnect.ats.screeningquestionsform.repo.ScreeningQuestionsFormShareRepository;
+import com.deepconnect.ats.screeningquestionsform.model.ScreeningQuestionType;
+import com.deepconnect.ats.screeningquestionsform.model.ScreeningQuestionsForm;
+import com.deepconnect.ats.screeningquestionsform.dto.ScreeningQuestionsFormRes;
+import com.deepconnect.ats.screeningquestionsform.dto.ScreeningQuestionsFormReq;
+import com.deepconnect.ats.screeningquestionsform.model.ScreeningQuestion;
+import com.deepconnect.ats.screeningquestionsform.model.ScreeningQuestionsFormShare;
+import com.deepconnect.ats.screeningquestionsform.dto.ScreeningQuestionsFormDetailsRes;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -43,24 +43,24 @@ import java.util.Set;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class ScreeningQuestionTemplateService {
+public class ScreeningQuestionsFormService {
 
     @Value("${plans.maxRounds}")
     private int maxRounds;
 
     private final UserService userService;
-    private final ScreeningQuestionTemplateAccessService screeningQuestionTemplateAccessService;
+    private final ScreeningQuestionsFormAccessService screeningQuestionTemplateAccessService;
 
-    private final ScreeningQuestionTemplateRepository screeningQuestionTemplateRepository;
+    private final ScreeningQuestionsFormRepository screeningQuestionTemplateRepository;
     private final ScreeningQuestionRepository screeningQuestionRepository;
     private final ScreeningQuestionTypeRepository screeningQuestionTypeRepository;
-    private final ScreeningQuestionTemplateShareRepository screeningQuestionTemplateShareRepository;
+    private final ScreeningQuestionsFormShareRepository screeningQuestionTemplateShareRepository;
 
     public List<ScreeningQuestionType> findAllScreeningQuestionTypes() {
         return screeningQuestionTypeRepository.findAll();
     }
 
-    private String save(ScreeningQuestionTemplate template, ScreeningQuestionTemplateReq req, boolean questionsChanged, boolean sharedWithUsersChanged, boolean isPublicForTenant, boolean isPublicForAll) {
+    private String save(ScreeningQuestionsForm template, ScreeningQuestionsFormReq req, boolean questionsChanged, boolean sharedWithUsersChanged, boolean isPublicForTenant, boolean isPublicForAll) {
         LoggedInUserDetails loggedInUser = AuthService.getLoggedInUser();
         if(isPublicForAll && isPublicForTenant) {
             throw new InternalServerException(String.format("Cannot specify both isPublicForAll and isPublicForTenant. User: %s, Plan: %s", loggedInUser.getPublicId(), template.getPublicId()));
@@ -85,8 +85,8 @@ public class ScreeningQuestionTemplateService {
             }
             HashMap<Integer, ScreeningQuestionType> questionTypesById = HashMapUtils.getMapFromList(this.findAllScreeningQuestionTypes(), "Id", Integer.class, ScreeningQuestionType.class);
             for (ScreeningQuestion question : req.getQuestions()) {
-                question.setScreeningQuestionTemplate(template);
-                question.setScreeningQuestionTemplateId(template.getId());
+                question.setScreeningQuestionsForm(template);
+                question.setScreeningQuestionsFormId(template.getId());
                 if(!StringUtils.hasText(question.getName())) {
                     ScreeningQuestionType questionType = questionTypesById.get(question.getScreeningQuestionTypeId());
                     if(questionType != null)
@@ -98,15 +98,15 @@ public class ScreeningQuestionTemplateService {
         
         if(sharedWithUsersChanged) {
             if(!CollectionUtils.isEmpty(template.getSharedWithUsers())) {
-                screeningQuestionTemplateShareRepository.deleteByScreeningQuestionTemplateId(template.getId());
+                screeningQuestionTemplateShareRepository.deleteByScreeningQuestionsFormId(template.getId());
             }
             if(!CollectionUtils.isEmpty(req.getSharedWithUserIds())){
                 Set<User> sharedWithUsers = userService.getByPublicIds(req.getSharedWithUserIds());
-                List<ScreeningQuestionTemplateShare> sharedWithUserList = new ArrayList<>();
+                List<ScreeningQuestionsFormShare> sharedWithUserList = new ArrayList<>();
                 for(User user : sharedWithUsers) {
-                    ScreeningQuestionTemplateShare sharedWithUser = new ScreeningQuestionTemplateShare();
-                    sharedWithUser.setScreeningQuestionTemplateId(template.getId());
-                    sharedWithUser.setScreeningQuestionTemplatePublicId(template.getPublicId());
+                    ScreeningQuestionsFormShare sharedWithUser = new ScreeningQuestionsFormShare();
+                    sharedWithUser.setScreeningQuestionsFormId(template.getId());
+                    sharedWithUser.setScreeningQuestionsFormPublicId(template.getPublicId());
                     sharedWithUser.setUserId(user.getId());
                     sharedWithUser.setUserPublicId(user.getPublicId());
                     sharedWithUserList.add(sharedWithUser);
@@ -119,10 +119,10 @@ public class ScreeningQuestionTemplateService {
     }
 
     @Transactional
-    public String create(ScreeningQuestionTemplateReq req) {
+    public String create(ScreeningQuestionsFormReq req) {
         LoggedInUserDetails loggedInUser = AuthService.getLoggedInUser();
         this.assertUniqueWithinTenantForCreation(loggedInUser.getTenantId(), req.getName());
-        ScreeningQuestionTemplate template = new ScreeningQuestionTemplate();
+        ScreeningQuestionsForm template = new ScreeningQuestionsForm();
         template.setCreatedByUserId(loggedInUser.getUserId());
         template.setCreatedByUserPublicId(loggedInUser.getPublicId());
         template.setTenantId(loggedInUser.getTenantId());
@@ -138,11 +138,11 @@ public class ScreeningQuestionTemplateService {
     }
 
     @Transactional
-    public String update(ScreeningQuestionTemplateReq req) {        
+    public String update(ScreeningQuestionsFormReq req) {        
         if (req.getId() == null) 
             throw new InternalServerException(String.format("Invalid Screening Question Template Id: User: %s, Process: %s", AuthService.getLoggedInUser().getPublicId(), req.getId()));
 
-        ScreeningQuestionTemplate template = screeningQuestionTemplateRepository.findByPublicId(req.getId())
+        ScreeningQuestionsForm template = screeningQuestionTemplateRepository.findByPublicId(req.getId())
                 .orElseThrow(() -> new InternalServerException(String.format("Screening Question Template not found: User: %s, Plan: %s", AuthService.getLoggedInUser().getPublicId(), req.getId())));
 
         LoggedInUserDetails loggedInUser = AuthService.getLoggedInUser();
@@ -154,7 +154,7 @@ public class ScreeningQuestionTemplateService {
 
         boolean roundsChanged = !questionsEqual(template.getQuestions(), req.getQuestions());
         if (roundsChanged) {
-            screeningQuestionRepository.deleteByScreeningQuestionTemplateId(template.getId());
+            screeningQuestionRepository.deleteByScreeningQuestionsFormId(template.getId());
         }
 
         boolean isPublicForTenant = req.getIsPublic() == null ? false : req.getIsPublic();
@@ -180,10 +180,10 @@ public class ScreeningQuestionTemplateService {
      * @return
      */
     @Transactional
-    public String createSystemTemplate(ScreeningQuestionTemplateReq req) {
+    public String createSystemTemplate(ScreeningQuestionsFormReq req) {
         LoggedInUserDetails loggedInUser = AuthService.getLoggedInUser();
         this.assertUniqueWithinAllForCreation(req.getName());
-        ScreeningQuestionTemplate template = new ScreeningQuestionTemplate();
+        ScreeningQuestionsForm template = new ScreeningQuestionsForm();
         template.setCreatedByUserId(loggedInUser.getUserId());
         template.setCreatedByUserPublicId(loggedInUser.getPublicId());
         template.setTenantId(loggedInUser.getTenantId());
@@ -202,11 +202,11 @@ public class ScreeningQuestionTemplateService {
      * @return
      */
     @Transactional
-    public String updateSystemTemplate(ScreeningQuestionTemplateReq req) {        
+    public String updateSystemTemplate(ScreeningQuestionsFormReq req) {        
         if (req.getId() == null) 
             throw new InternalServerException("Invalid Evaluation Plan Id: " + req.getId());
 
-        ScreeningQuestionTemplate template = screeningQuestionTemplateRepository.findByPublicId(req.getId())
+        ScreeningQuestionsForm template = screeningQuestionTemplateRepository.findByPublicId(req.getId())
                 .orElseThrow(() -> new InternalServerException("Screening Question Template not found: " + req.getId()));
 
         LoggedInUserDetails loggedInUser = AuthService.getLoggedInUser();
@@ -214,7 +214,7 @@ public class ScreeningQuestionTemplateService {
         screeningQuestionTemplateAccessService.assertWriteAccess(loggedInUser, template);
         boolean roundsChanged = !questionsEqual(template.getQuestions(), req.getQuestions());
         if (roundsChanged) {
-            screeningQuestionRepository.deleteByScreeningQuestionTemplateId(template.getId());
+            screeningQuestionRepository.deleteByScreeningQuestionsFormId(template.getId());
         }
 
         return this.save(template, req, roundsChanged, false, false, true);
@@ -222,7 +222,7 @@ public class ScreeningQuestionTemplateService {
 
     @Transactional
     public boolean deactivate(String publicId) {
-        ScreeningQuestionTemplate plan = screeningQuestionTemplateRepository.findByPublicId(publicId).orElseThrow(() -> new InternalServerException(String.format("Screening Question Template not found: User: %s, Plan: %s", AuthService.getLoggedInUser().getPublicId(), publicId)));
+        ScreeningQuestionsForm plan = screeningQuestionTemplateRepository.findByPublicId(publicId).orElseThrow(() -> new InternalServerException(String.format("Screening Question Template not found: User: %s, Plan: %s", AuthService.getLoggedInUser().getPublicId(), publicId)));
         LoggedInUserDetails loggedInUser = AuthService.getLoggedInUser();
         screeningQuestionTemplateAccessService.assertWriteAccess(loggedInUser, plan);
         plan.setDeactivated(true);
@@ -233,19 +233,19 @@ public class ScreeningQuestionTemplateService {
     }
 
     @Transactional(readOnly = true)
-    public ScreeningQuestionTemplateDetailsRes findByPublicIdForTenant(String publicId) {
-        ScreeningQuestionTemplate plan = screeningQuestionTemplateRepository.findByPublicIdAndTenantId(publicId, AuthService.getLoggedInTenantId()).orElseThrow(() -> new InternalServerException("Screening Question Template not found: " + publicId));
+    public ScreeningQuestionsFormDetailsRes findByPublicIdForTenant(String publicId) {
+        ScreeningQuestionsForm plan = screeningQuestionTemplateRepository.findByPublicIdAndTenantId(publicId, AuthService.getLoggedInTenantId()).orElseThrow(() -> new InternalServerException("Screening Question Template not found: " + publicId));
         screeningQuestionTemplateAccessService.assertReadAccess(AuthService.getLoggedInUser(), plan);
-        return ScreeningQuestionTemplateDetailsRes.from(plan);
+        return ScreeningQuestionsFormDetailsRes.from(plan);
     }
 
     @Transactional(readOnly = true)
-    public AtsPageRsp<ScreeningQuestionTemplateRes> findAll(AtsPageQuery query) {
-        boolean isAdmin = screeningQuestionTemplateAccessService.isUserInScreeningQuestionTemplateAdminRole(AuthService.getLoggedInUser());
-        Page<ScreeningQuestionTemplate> page = isAdmin 
+    public AtsPageRsp<ScreeningQuestionsFormRes> findAll(AtsPageQuery query) {
+        boolean isAdmin = screeningQuestionTemplateAccessService.isUserInScreeningQuestionsFormAdminRole(AuthService.getLoggedInUser());
+        Page<ScreeningQuestionsForm> page = isAdmin 
             ? screeningQuestionTemplateRepository.findAllForTenantAdmin(AuthService.getLoggedInTenantId(), query.toPageable()) 
             : screeningQuestionTemplateRepository.findAllForTenantNonAdmin(AuthService.getLoggedInTenantId(), AuthService.getLoggedInUser().getUserId(), query.toPageable());
-        return AtsPageRsp.of(page.map(ScreeningQuestionTemplateRes::from));
+        return AtsPageRsp.of(page.map(ScreeningQuestionsFormRes::from));
     }
 
     /**
@@ -254,18 +254,18 @@ public class ScreeningQuestionTemplateService {
      * @return
      */
     @Transactional(readOnly = true)
-    public List<ScreeningQuestionTemplateRes> findAllAsList() {
-        boolean isAdmin = screeningQuestionTemplateAccessService.isUserInScreeningQuestionTemplateAdminRole(AuthService.getLoggedInUser());
-        List<ScreeningQuestionTemplate> plans = isAdmin 
+    public List<ScreeningQuestionsFormRes> findAllAsList() {
+        boolean isAdmin = screeningQuestionTemplateAccessService.isUserInScreeningQuestionsFormAdminRole(AuthService.getLoggedInUser());
+        List<ScreeningQuestionsForm> plans = isAdmin 
             ? screeningQuestionTemplateRepository.findAllForTenantAdminAsList(AuthService.getLoggedInTenantId()) 
             : screeningQuestionTemplateRepository.findAllForTenantNonAdminAsList(AuthService.getLoggedInTenantId(), AuthService.getLoggedInUser().getUserId());
-        return plans.stream().map(ScreeningQuestionTemplateRes::from).toList();
+        return plans.stream().map(ScreeningQuestionsFormRes::from).toList();
     }
 
     @Transactional(readOnly = true)
-    public AtsPageRsp<ScreeningQuestionTemplateRes> findAllSystemTemplates(AtsPageQuery query) {
-        Page<ScreeningQuestionTemplate> page = screeningQuestionTemplateRepository.findByDeactivatedFalseAndIsPublicForAllTrue(query.toPageable());
-        return AtsPageRsp.of(page.map(ScreeningQuestionTemplateRes::from));
+    public AtsPageRsp<ScreeningQuestionsFormRes> findAllSystemTemplates(AtsPageQuery query) {
+        Page<ScreeningQuestionsForm> page = screeningQuestionTemplateRepository.findByDeactivatedFalseAndIsPublicForAllTrue(query.toPageable());
+        return AtsPageRsp.of(page.map(ScreeningQuestionsFormRes::from));
     }
 
     /**
@@ -275,9 +275,9 @@ public class ScreeningQuestionTemplateService {
      * @return a paginated response containing interview plans for the tenant
      */
     @Transactional(readOnly = true)
-    public AtsPageRsp<ScreeningQuestionTemplateRes> findAllSharedWithUser(AtsPageQuery query) {
-        Page<ScreeningQuestionTemplate> page = screeningQuestionTemplateRepository.findPublicOrSharedForTenant(AuthService.getLoggedInTenantId(), query.toPageable());
-        return AtsPageRsp.of(page.map(ScreeningQuestionTemplateRes::from));
+    public AtsPageRsp<ScreeningQuestionsFormRes> findAllSharedWithUser(AtsPageQuery query) {
+        Page<ScreeningQuestionsForm> page = screeningQuestionTemplateRepository.findPublicOrSharedForTenant(AuthService.getLoggedInTenantId(), query.toPageable());
+        return AtsPageRsp.of(page.map(ScreeningQuestionsFormRes::from));
     }
 
     /**
@@ -287,10 +287,10 @@ public class ScreeningQuestionTemplateService {
      * @return a paginated response containing interview plans for the tenant
      */
     @Transactional(readOnly = true)
-    public AtsPageRsp<ScreeningQuestionTemplateRes> findAllForPlanOwner(AtsPageQuery query) {
+    public AtsPageRsp<ScreeningQuestionsFormRes> findAllForPlanOwner(AtsPageQuery query) {
         LoggedInUserDetails loggedInUser = AuthService.getLoggedInUser();
-        Page<ScreeningQuestionTemplate> page = screeningQuestionTemplateRepository.findByDeactivatedFalseAndTenantIdAndOwnerId(loggedInUser.getTenantId(), loggedInUser.getUserId(), query.toPageable());
-        return AtsPageRsp.of(page.map(ScreeningQuestionTemplateRes::from));
+        Page<ScreeningQuestionsForm> page = screeningQuestionTemplateRepository.findByDeactivatedFalseAndTenantIdAndOwnerId(loggedInUser.getTenantId(), loggedInUser.getUserId(), query.toPageable());
+        return AtsPageRsp.of(page.map(ScreeningQuestionsFormRes::from));
     }
 
     /**
@@ -299,13 +299,13 @@ public class ScreeningQuestionTemplateService {
      * @param query the pagination and status filter query
      * @return a paginated response containing interview plans for the tenant
      */
-    private AtsPageRsp<ScreeningQuestionTemplateRes> findAllForTenant(AtsPageQuery query) {
+    private AtsPageRsp<ScreeningQuestionsFormRes> findAllForTenant(AtsPageQuery query) {
         Long tenantId = AuthService.getLoggedInTenantId();
-        Page<ScreeningQuestionTemplate> page = screeningQuestionTemplateRepository.findByDeactivatedFalseAndTenantId(tenantId, query.toPageable());
-        return AtsPageRsp.of(page.map(ScreeningQuestionTemplateRes::from));
+        Page<ScreeningQuestionsForm> page = screeningQuestionTemplateRepository.findByDeactivatedFalseAndTenantId(tenantId, query.toPageable());
+        return AtsPageRsp.of(page.map(ScreeningQuestionsFormRes::from));
     }
 
-    private void setAnotherUserAsOwner(ScreeningQuestionTemplate template, AccessType loggedInUserAccessType, String ownerId) {
+    private void setAnotherUserAsOwner(ScreeningQuestionsForm template, AccessType loggedInUserAccessType, String ownerId) {
         LoggedInUserDetails loggedInUser = AuthService.getLoggedInUser();
         if(loggedInUserAccessType != AccessType.TENANT_ADMIN && loggedInUserAccessType != AccessType.SYSTEM_ADMIN) {
             throw new InternalServerException("Attempt to set another user as owner without permission by " + loggedInUser.getPublicId());
@@ -325,11 +325,11 @@ public class ScreeningQuestionTemplateService {
      * @param userIdsIncoming the set of incoming user IDs to compare against
      * @return true if the existing shared users match the incoming set of user IDs, false otherwise
      */
-    private boolean sharedWithUsersEqual(List<ScreeningQuestionTemplateShare> existing, Set<String> userIdsIncoming) {
-        List<ScreeningQuestionTemplateShare> a = existing == null ? List.of() : existing;
+    private boolean sharedWithUsersEqual(List<ScreeningQuestionsFormShare> existing, Set<String> userIdsIncoming) {
+        List<ScreeningQuestionsFormShare> a = existing == null ? List.of() : existing;
         if (a.size() != userIdsIncoming.size())
             return false;
-        for (ScreeningQuestionTemplateShare planSharedWithUser : a) {
+        for (ScreeningQuestionsFormShare planSharedWithUser : a) {
             if (!userIdsIncoming.contains(planSharedWithUser.getUserPublicId()))
                 return false;
         }
@@ -395,7 +395,7 @@ public class ScreeningQuestionTemplateService {
         }
     }
 
-    public Optional<ScreeningQuestionTemplate> findByPublicId(String publicId) {
+    public Optional<ScreeningQuestionsForm> findByPublicId(String publicId) {
         return screeningQuestionTemplateRepository.findByPublicId(publicId);
     }
 

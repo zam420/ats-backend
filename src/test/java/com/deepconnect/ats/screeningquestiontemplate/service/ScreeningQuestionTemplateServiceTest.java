@@ -13,11 +13,12 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import com.deepconnect.ats.screeningquestiontemplate.model.ScreeningQuestion;
+import com.deepconnect.ats.screeningquestionsform.model.ScreeningQuestion;
+import com.deepconnect.ats.screeningquestionsform.service.ScreeningQuestionsFormService;
 
 class ScreeningQuestionTemplateServiceTest {
-    private final ScreeningQuestionTemplateService service =
-            new ScreeningQuestionTemplateService(null, null, null, null, null, null);
+    private final ScreeningQuestionsFormService service =
+            new ScreeningQuestionsFormService(null, null, null, null, null, null);
 
     private ScreeningQuestion question() {
         return ScreeningQuestion.builder()

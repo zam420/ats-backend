@@ -1,10 +1,10 @@
-package com.deepconnect.ats.screeningquestiontemplate.dto;
+package com.deepconnect.ats.screeningquestionsform.dto;
 
 import lombok.Data;
 
 import java.util.List;
 
-import com.deepconnect.ats.screeningquestiontemplate.model.ScreeningQuestion;
+import com.deepconnect.ats.screeningquestionsform.model.ScreeningQuestion;
 
 @Data
 public class ScreeningQuestionRes {

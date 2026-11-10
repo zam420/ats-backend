@@ -1,4 +1,4 @@
-package com.deepconnect.ats.screeningquestiontemplate.model;
+package com.deepconnect.ats.screeningquestionsform.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.Valid;
@@ -16,8 +16,8 @@ import org.hibernate.validator.constraints.Length;
 import com.deepconnect.ats.user.model.User;
 
 @Entity
-@Table(name = "screening_question_template", uniqueConstraints = {
-        @UniqueConstraint(name = "uk_screening_question_template_name_tenant_deactivated",
+@Table(name = "screening_questions_form", uniqueConstraints = {
+        @UniqueConstraint(name = "uk_screening_questions_form_name_tenant_deactivated",
                 columnNames = {"name", "tenantId", "deactivated"})
 })
 @Getter
@@ -25,15 +25,15 @@ import com.deepconnect.ats.user.model.User;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ScreeningQuestionTemplate extends OperatableBaseWithTenantEntity {
+public class ScreeningQuestionsForm extends OperatableBaseWithTenantEntity {
 
     @Column(nullable = false, length = 100)
-    @Length(max = 100, message = "{field.screeningQuestionTemplate.name}{validation.lengthMax}")
-    @NotBlank(message = "{field.screeningQuestionTemplate.name}{validation.notBlank}")
+    @Length(max = 100, message = "{field.screeningQuestions.form.name}{validation.lengthMax}")
+    @NotBlank(message = "{field.screeningQuestions.form.name}{validation.notBlank}")
     private String name;
 
     @Column(nullable = true, length = 300)
-    @Length(max = 300, message = "{field.screeningQuestionTemplate.description}{validation.lengthMax}")
+    @Length(max = 300, message = "{field.screeningQuestions.form.description}{validation.lengthMax}")
     private String description;
 
     @Column(columnDefinition = "tinyint(1) default false")
@@ -42,7 +42,7 @@ public class ScreeningQuestionTemplate extends OperatableBaseWithTenantEntity {
 
     @Valid
     @JsonManagedReference("questions")
-    @OneToMany(mappedBy = "screeningQuestionTemplate", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "screeningQuestionsForm", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ScreeningQuestion> questions;
 
     @JsonIgnore
@@ -57,8 +57,8 @@ public class ScreeningQuestionTemplate extends OperatableBaseWithTenantEntity {
 
     @Valid
     @JsonManagedReference("sharedWithUsers")
-    @OneToMany(mappedBy = "screeningQuestionTemplate", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ScreeningQuestionTemplateShare> sharedWithUsers;
+    @OneToMany(mappedBy = "screeningQuestionsForm", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ScreeningQuestionsFormShare> sharedWithUsers;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ownerId", referencedColumnName = "id", insertable = false, updatable = false)

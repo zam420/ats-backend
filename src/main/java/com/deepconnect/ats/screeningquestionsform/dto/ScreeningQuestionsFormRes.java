@@ -1,4 +1,4 @@
-package com.deepconnect.ats.screeningquestiontemplate.dto;
+package com.deepconnect.ats.screeningquestionsform.dto;
 
 import lombok.Data;
 
@@ -6,11 +6,11 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.deepconnect.ats.screeningquestiontemplate.model.ScreeningQuestionTemplate;
-import com.deepconnect.ats.screeningquestiontemplate.model.ScreeningQuestion;
+import com.deepconnect.ats.screeningquestionsform.model.ScreeningQuestionsForm;
+import com.deepconnect.ats.screeningquestionsform.model.ScreeningQuestion;
 
 @Data
-public class ScreeningQuestionTemplateRes {
+public class ScreeningQuestionsFormRes {
     private String id;
     private String name;
     private String description;
@@ -20,8 +20,8 @@ public class ScreeningQuestionTemplateRes {
     // Round names in order, joined as "name1 -> name2"; generated on the fly, never stored
     private String questionSequence;
     
-    public static ScreeningQuestionTemplateRes from(ScreeningQuestionTemplate entity) {
-        ScreeningQuestionTemplateRes res = new ScreeningQuestionTemplateRes();
+    public static ScreeningQuestionsFormRes from(ScreeningQuestionsForm entity) {
+        ScreeningQuestionsFormRes res = new ScreeningQuestionsFormRes();
         res.setId(entity.getPublicId());
         res.setName(entity.getName());
         res.setDescription(entity.getDescription());
@@ -38,7 +38,7 @@ public class ScreeningQuestionTemplateRes {
         return res;
     }
 
-    public static List<ScreeningQuestionTemplateRes> fromList(List<ScreeningQuestionTemplate> entities) {
-        return entities.stream().map(ScreeningQuestionTemplateRes::from).toList();
+    public static List<ScreeningQuestionsFormRes> fromList(List<ScreeningQuestionsForm> entities) {
+        return entities.stream().map(ScreeningQuestionsFormRes::from).toList();
     }
 }

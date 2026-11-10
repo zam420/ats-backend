@@ -1,4 +1,4 @@
-package com.deepconnect.ats.screeningquestiontemplate.model;
+package com.deepconnect.ats.screeningquestionsform.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
