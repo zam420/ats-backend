@@ -9,7 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import com.deepconnect.ats.auth.dto.LoggedInUserDetails;
 import com.deepconnect.ats.common.exception.InternalServerException;
-import com.deepconnect.ats.common.enums.PermissionType;
+import com.deepconnect.ats.rbac.enums.PermissionType;
 import com.deepconnect.ats.common.enums.AccessType;
 import com.deepconnect.ats.screeningquestionsform.model.ScreeningQuestionsFormShare;
 import com.deepconnect.ats.screeningquestionsform.model.ScreeningQuestionsForm;

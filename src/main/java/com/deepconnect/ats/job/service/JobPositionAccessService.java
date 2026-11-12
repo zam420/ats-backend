@@ -6,7 +6,7 @@ import lombok.RequiredArgsConstructor;
 
 import com.deepconnect.ats.auth.dto.LoggedInUserDetails;
 import com.deepconnect.ats.common.exception.InternalServerException;
-import com.deepconnect.ats.common.enums.PermissionType;
+import com.deepconnect.ats.rbac.enums.PermissionType;
 import com.deepconnect.ats.common.enums.AccessType;
 import com.deepconnect.ats.job.model.JobPosition;
 

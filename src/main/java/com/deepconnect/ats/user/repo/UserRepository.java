@@ -20,7 +20,7 @@ public interface UserRepository extends BaseRepository<User, Long>, JpaSpecifica
     List<User> findByIdIn(Set<Long> ids);
 
     @Modifying
-    @Query(value = "delete from ats_user where email=?1",nativeQuery = true)
+    @Query(value = "delete from rbac_user where email=?1",nativeQuery = true)
     void deleteUser(String email);
 
     // ZAM: all methods below this are new and safe. Above this line are old and need review.

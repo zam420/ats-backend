@@ -14,7 +14,7 @@ import com.deepconnect.ats.job.repo.JobWorkArrangementTypeRepository;
 import com.deepconnect.ats.evaluationplan.service.EvaluationPlanService;
 import com.deepconnect.ats.recruitmentpipeline.service.RecruitmentPipelineService;
 import com.deepconnect.ats.user.service.UserServiceV2;
-import com.deepconnect.ats.common.enums.RoleType;
+import com.deepconnect.ats.rbac.enums.RoleType;
 import com.deepconnect.ats.job.dto.JobPositionReq;
 import com.deepconnect.ats.job.enums.JobStatus;
 import com.deepconnect.ats.evaluationplan.model.EvaluationPlan;

@@ -1,6 +1,9 @@
-package com.deepconnect.ats.common.enums;
+package com.deepconnect.ats.rbac.enums;
 
 public enum PermissionType {
+
+    TENANT_SYSTEM_ADMIN("clnsa"),
+    TENANT_ADMIN("clna"),
 
     INTERVIEW_PLAN_TEMPLATE_SYSTEM_ADMIN("iptsa"),
     INTERVIEW_PLAN_TEMPLATE_ADMIN("ipta"),

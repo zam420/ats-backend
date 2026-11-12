@@ -7,7 +7,7 @@ import lombok.RequiredArgsConstructor;
 
 import com.deepconnect.ats.auth.dto.LoggedInUserDetails;
 import com.deepconnect.ats.common.exception.InternalServerException;
-import com.deepconnect.ats.common.enums.PermissionType;
+import com.deepconnect.ats.rbac.enums.PermissionType;
 import com.deepconnect.ats.recruitmentpipeline.model.RecruitmentPipeline;
 import com.deepconnect.ats.common.enums.AccessType;
 import com.deepconnect.ats.recruitmentpipeline.model.RecruitmentPipelineShare;

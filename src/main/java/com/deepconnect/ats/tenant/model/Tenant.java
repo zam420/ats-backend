@@ -1,11 +1,14 @@
 package com.deepconnect.ats.tenant.model;
 
+import org.hibernate.validator.constraints.Length;
+import jakarta.validation.constraints.NotBlank;
+
 import com.deepconnect.ats.common.model.OperatableBaseEntity;
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.deepconnect.ats.user.model.User;
+import com.deepconnect.ats.tenant.enums.TenantType;
+
 import jakarta.persistence.*;
 import lombok.*;
-
-import com.deepconnect.ats.tenant.enums.TenantType;
 
 @Entity
 @Table(name = "tenant")
@@ -16,13 +19,15 @@ import com.deepconnect.ats.tenant.enums.TenantType;
 @Builder
 public class Tenant extends OperatableBaseEntity {
 
-    @Column(nullable = false, unique = true, length = 50)
+    @Column(nullable = false, length = 100)
+    @Length(max = 100, message = "{field.common.name}{validation.lengthMax}")
+    @NotBlank(message = "{field.common.name}{validation.notBlank}")
     private String name;
 
-     @Column(nullable = true, length = 400)
+    @Column(nullable = true, length = 300)
+    @Length(max = 300, message = "{field.common.description}{validation.lengthMax}")
     private String description;
 
-    @JsonIgnore
     @Column(columnDefinition = "tinyint(1) default false")
     @Builder.Default
     private Boolean deactivated = false;
@@ -30,5 +35,15 @@ public class Tenant extends OperatableBaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 30)
     private TenantType type;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "ownerId", referencedColumnName = "id", insertable = false, updatable = false)
+    private User owner; // By default, the user who created this record. Can be changed.
+
+    @Column(name = "ownerId", nullable = false)
+    private Long ownerId;
+
+    @Column(nullable = false)
+    private String ownerPublicId;
 
 }

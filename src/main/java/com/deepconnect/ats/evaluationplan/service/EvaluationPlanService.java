@@ -27,6 +27,7 @@ import org.springframework.beans.factory.annotation.Value;
 import com.deepconnect.ats.common.enums.ValidationFieldType;
 import com.deepconnect.ats.common.exception.ValidationException;
 import com.deepconnect.ats.common.enums.CustomExceptionType;
+import com.deepconnect.ats.common.exception.CustomException;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -380,25 +381,25 @@ public class EvaluationPlanService {
 
     private void assertUniqueWithinTenantForCreation(Long tenantId, String name) {
         if(evaluationPlanRepository.existsByDeactivatedFalseAndTenantIdAndName(tenantId, name)) {
-            throw new InternalServerException("Duplicate evaluation plan within tenant: " + name);
+            throw new CustomException(CustomExceptionType.DUPLICATE_NAME_WITHIN_TENANT, "evaluation plan");
         }
     }
 
     private void assertUniqueWithinTenantForUpdate(Long tenantId, String name, Long planId) {
         if(evaluationPlanRepository.existsByDeactivatedFalseAndTenantIdAndNameAndIdNot(tenantId, name, planId)) {
-            throw new InternalServerException("Duplicate evaluation plan within tenant: " + name);
+            throw new CustomException(CustomExceptionType.DUPLICATE_NAME_WITHIN_TENANT, "evaluation plan");
         }
     }
 
     private void assertUniqueWithinAllForCreation(String name) {
         if(evaluationPlanRepository.existsByDeactivatedFalseAndName(name)) {
-            throw new InternalServerException("Duplicate evaluation plan within all tenants: " + name);
+            throw new CustomException(CustomExceptionType.DUPLICATE_NAME, "evaluation plan");
         }
     }
 
     private void assertUniqueWithinAllForUpdate(String name, Long planId) {
         if(evaluationPlanRepository.existsByDeactivatedFalseAndNameAndIdNot(name, planId)) {
-            throw new InternalServerException("Duplicate evaluation plan within all tenants: " + name);
+            throw new CustomException(CustomExceptionType.DUPLICATE_NAME, "evaluation plan" );
         }
     }
 

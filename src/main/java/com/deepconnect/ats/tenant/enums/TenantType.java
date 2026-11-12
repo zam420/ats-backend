@@ -8,8 +8,8 @@ import lombok.Getter;
 @Getter 
 public enum TenantType {
     PUBLIC(1L),     //for candidates
-    OWNER(2L),
-    OTHERS(3L);      //for ATS owning entity
+    OWNER(2L),      //for ATS owning entity
+    CLIENT(3L);     //for Client Companies
 
     @JsonValue
     private final Long value;

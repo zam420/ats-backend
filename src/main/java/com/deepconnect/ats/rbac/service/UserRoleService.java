@@ -1,6 +1,6 @@
 package com.deepconnect.ats.rbac.service;
 
-import com.deepconnect.ats.common.enums.RoleType;
+import com.deepconnect.ats.rbac.enums.RoleType;
 import com.deepconnect.ats.common.exception.InternalServerException;
 import com.deepconnect.ats.rbac.model.UserRole;
 import com.deepconnect.ats.rbac.repo.UserRoleRepository;

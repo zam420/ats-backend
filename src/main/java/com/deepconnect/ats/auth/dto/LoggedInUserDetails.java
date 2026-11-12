@@ -9,8 +9,8 @@ import java.util.Set;
 import lombok.Data;
 
 import com.deepconnect.ats.user.model.User;
-import com.deepconnect.ats.common.enums.PermissionType;
-import com.deepconnect.ats.common.enums.RoleType;
+import com.deepconnect.ats.rbac.enums.PermissionType;
+import com.deepconnect.ats.rbac.enums.RoleType;
 
 @Data 
 public class LoggedInUserDetails implements UserDetails {

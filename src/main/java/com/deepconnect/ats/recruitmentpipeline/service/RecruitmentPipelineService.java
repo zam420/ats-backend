@@ -27,6 +27,7 @@ import com.deepconnect.ats.recruitmentpipeline.model.RecruitmentPipelineShare;
 import com.deepconnect.ats.common.enums.CustomExceptionType;
 import com.deepconnect.ats.common.enums.ValidationFieldType;
 import com.deepconnect.ats.common.exception.ValidationException;
+import com.deepconnect.ats.common.exception.CustomException;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -404,25 +405,25 @@ public class RecruitmentPipelineService {
 
     private void assertUniqueWithinTenantForCreation(Long tenantId, String name) {
         if(recruitmentPipelineRepository.existsByDeactivatedFalseAndTenantIdAndName(tenantId, name)) {
-            throw new InternalServerException("Duplicate evaluation plan within tenant: " + name);
+            throw new CustomException(CustomExceptionType.DUPLICATE_NAME_WITHIN_TENANT, "recruitment plan");
         }
     }
 
     private void assertUniqueWithinTenantForUpdate(Long tenantId, String name, Long planId) {
         if(recruitmentPipelineRepository.existsByDeactivatedFalseAndTenantIdAndNameAndIdNot(tenantId, name, planId)) {
-            throw new InternalServerException("Duplicate evaluation plan within tenant: " + name);
+            throw new CustomException(CustomExceptionType.DUPLICATE_NAME_WITHIN_TENANT, "recruitment plan");
         }
     }
 
     private void assertUniqueWithinAllForCreation(String name) {
         if(recruitmentPipelineRepository.existsByDeactivatedFalseAndName(name)) {
-            throw new InternalServerException("Duplicate evaluation plan within all tenants: " + name);
+            throw new CustomException(CustomExceptionType.DUPLICATE_NAME, "recruitment plan");
         }
     }
 
     private void assertUniqueWithinAllForUpdate(String name, Long planId) {
         if(recruitmentPipelineRepository.existsByDeactivatedFalseAndNameAndIdNot(name, planId)) {
-            throw new InternalServerException("Duplicate evaluation plan within all tenants: " + name);
+            throw new CustomException(CustomExceptionType.DUPLICATE_NAME, "recruitment plan");
         }
     }
 

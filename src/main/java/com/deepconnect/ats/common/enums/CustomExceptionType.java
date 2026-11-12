@@ -23,6 +23,9 @@ public enum CustomExceptionType {
     REGISTER_EMAIL_IN_USE("registerEmailInUse"),
     REGISTER_ACTIVATION_EMAIL_FAILURE("registerActivationEmailFailure"),
 
+    DUPLICATE_NAME("duplicateName"),
+    DUPLICATE_NAME_WITHIN_TENANT("duplicateNameWithinTenant"),
+
     VALIDATION_RANGE("validation.range"),
     VALIDATION_MUST_ADD("validation.mustAdd"),
     ;

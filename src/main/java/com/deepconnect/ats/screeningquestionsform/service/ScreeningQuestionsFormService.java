@@ -26,6 +26,7 @@ import com.deepconnect.ats.screeningquestionsform.dto.ScreeningQuestionsFormReq;
 import com.deepconnect.ats.screeningquestionsform.model.ScreeningQuestion;
 import com.deepconnect.ats.screeningquestionsform.model.ScreeningQuestionsFormShare;
 import com.deepconnect.ats.screeningquestionsform.dto.ScreeningQuestionsFormDetailsRes;
+import com.deepconnect.ats.common.exception.CustomException;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -369,25 +370,25 @@ public class ScreeningQuestionsFormService {
 
     private void assertUniqueWithinTenantForCreation(Long tenantId, String name) {
         if(screeningQuestionTemplateRepository.existsByDeactivatedFalseAndTenantIdAndName(tenantId, name)) {
-            throw new InternalServerException("Duplicate screening questions template within tenant: " + name);
+            throw new CustomException(CustomExceptionType.DUPLICATE_NAME_WITHIN_TENANT, "screening questions form");
         }
     }
 
     private void assertUniqueWithinTenantForUpdate(Long tenantId, String name, Long planId) {
         if(screeningQuestionTemplateRepository.existsByDeactivatedFalseAndTenantIdAndNameAndIdNot(tenantId, name, planId)) {
-            throw new InternalServerException("Duplicate screening questions template within tenant: " + name);
+            throw new CustomException(CustomExceptionType.DUPLICATE_NAME_WITHIN_TENANT, "screening questions form");
         }
     }
 
     private void assertUniqueWithinAllForCreation(String name) {
         if(screeningQuestionTemplateRepository.existsByDeactivatedFalseAndName(name)) {
-            throw new InternalServerException("Duplicate screening questions template within all tenants: " + name);
+            throw new CustomException(CustomExceptionType.DUPLICATE_NAME, "screening questions form");
         }
     }
 
     private void assertUniqueWithinAllForUpdate(String name, Long planId) {
         if(screeningQuestionTemplateRepository.existsByDeactivatedFalseAndNameAndIdNot(name, planId)) {
-            throw new InternalServerException("Duplicate screening questions template within all tenants: " + name);
+            throw new CustomException(CustomExceptionType.DUPLICATE_NAME, "screening questions form");
         }
     }
 

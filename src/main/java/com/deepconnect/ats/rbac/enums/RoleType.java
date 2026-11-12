@@ -1,4 +1,4 @@
-package com.deepconnect.ats.common.enums;
+package com.deepconnect.ats.rbac.enums;
 
 public enum RoleType {
 

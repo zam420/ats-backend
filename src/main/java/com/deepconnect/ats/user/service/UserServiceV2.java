@@ -11,7 +11,7 @@ import com.deepconnect.ats.common.email.EmailLocalizationService;
 import com.deepconnect.ats.common.email.EmailService;
 import com.deepconnect.ats.common.enums.CustomExceptionType;
 import com.deepconnect.ats.common.enums.EmailType;
-import com.deepconnect.ats.common.enums.RoleType;
+import com.deepconnect.ats.rbac.enums.RoleType;
 import com.deepconnect.ats.common.exception.InternalServerException;
 import com.deepconnect.ats.common.exception.UnauthorizedException;
 import com.deepconnect.ats.common.exception.CustomException;
