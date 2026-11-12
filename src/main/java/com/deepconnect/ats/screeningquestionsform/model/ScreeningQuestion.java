@@ -29,13 +29,13 @@ import lombok.*;
 @Builder
 public class ScreeningQuestion  extends BaseEntity {
 
-    @Column(nullable = false, length = 100)
-    @Length(max = 100, message = "{field.screeningQuestion.label}{validation.lengthMax}")
+    @Column(nullable = false, length = 500)
+    @Length(max = 500, message = "{field.screeningQuestion.label}{validation.lengthMax}")
     @NotBlank(message = "{field.screeningQuestion.label}{validation.notBlank}")
     private String label;//label is for display to candidates e.g. how is this question labaled for candidates
 
-    @Column(length = 200)
-    @Length(max = 200, message = "{field.screeningQuestion.description}{validation.lengthMax}")
+    @Column(length = 500)
+    @Length(max = 500, message = "{field.screeningQuestion.description}{validation.lengthMax}")
     private String description;//description is for additional context or details about the question to be displayed to candidate
 
     //Options for checkbox, radio buttons, or dropdown questions
