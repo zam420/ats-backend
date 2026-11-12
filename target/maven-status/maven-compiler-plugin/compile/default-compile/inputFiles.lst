@@ -57,9 +57,7 @@ C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\common\enu
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\common\enums\JwtType.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\common\enums\LocalizedStringType.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\common\enums\MacAlgoType.java
-C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\common\enums\PermissionType.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\common\enums\ResumeInbox.java
-C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\common\enums\RoleType.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\common\enums\ValidationFieldType.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\common\exception\CustomException.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\common\exception\ErrorRsp.java
@@ -76,6 +74,7 @@ C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\common\mod
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\common\model\OperatableBaseEntity.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\common\model\OperatableBaseWithTenantEntity.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\common\repo\BaseRepository.java
+C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\common\repo\OperatableBaseRepository.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\common\repo\OperatableBaseWithTenantRepository.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\common\security\EncryptionUtil.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\common\security\HashIdUtil.java
@@ -190,6 +189,8 @@ C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\model\Tale
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\model\TaskRecord.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\notification\model\Notification.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\notification\repo\NotificationRepository.java
+C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\rbac\enums\PermissionType.java
+C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\rbac\enums\RoleType.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\rbac\model\Permission.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\rbac\model\Role.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\rbac\model\RolePermission.java
@@ -300,8 +301,16 @@ C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\service\re
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\service\resumeparser\ResumeEmailParserService.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\service\TalentPoolService.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\service\TeamsMeetingScheduleService.java
+C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\tenant\controller\TenantController.java
+C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\tenant\dto\TenantDetailsRes.java
+C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\tenant\dto\TenantReq.java
+C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\tenant\dto\TenantRes.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\tenant\enums\TenantType.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\tenant\model\Tenant.java
+C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\tenant\repo\TenantRepository.java
+C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\tenant\service\TenantAccessService.java
+C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\tenant\service\TenantLogoStorage.java
+C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\tenant\service\TenantService.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\user\controller\UserController.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\user\dto\SaveUserReq.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\user\dto\UserInfoRsp.java

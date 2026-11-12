@@ -338,7 +338,7 @@ public class ScreeningQuestionsFormService {
      * Checks whether two lists of screening questions are equal. Null lists are treated as empty.
      * The lists are equal when they have the same size and, comparing position by position,
      * every pair has the same order, question type, label, description, options, default option,
-     * mandatory flag, multi-select flag and character limit. Label and description
+     * mandatory flag, multi-select flag, character limit and heading level. Label and description
      * are compared with null and blank treated as the same value. Options are compared in sequence.
      *
      * @param existing the screening questions currently stored
@@ -361,7 +361,8 @@ public class ScreeningQuestionsFormService {
                     || !Objects.equals(x.getDefaultOption(), y.getDefaultOption())
                     || !Objects.equals(x.getIsMandatory(), y.getIsMandatory())
                     || !Objects.equals(x.getIsDropDownMultiSelect(), y.getIsDropDownMultiSelect())
-                    || !Objects.equals(x.getMaxChars(), y.getMaxChars())) {
+                    || !Objects.equals(x.getMaxChars(), y.getMaxChars())
+                    || !Objects.equals(x.getHeadingLevel(), y.getHeadingLevel())) {
                 return false;
             }
         }

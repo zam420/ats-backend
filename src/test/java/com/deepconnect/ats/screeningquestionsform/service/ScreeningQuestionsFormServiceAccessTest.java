@@ -94,4 +94,15 @@ class ScreeningQuestionsFormServiceAccessTest {
         incoming.setDefaultOption(null);
         assertEquals(false, ReflectionTestUtils.invokeMethod(service, "questionsEqual", List.of(existing), List.of(incoming)));
     }
+
+    @Test
+    void changedHeadingLevelMakesQuestionsUnequal() {
+        ScreeningQuestion existing = new ScreeningQuestion();
+        existing.setHeadingLevel(1);
+        ScreeningQuestion incoming = new ScreeningQuestion();
+        incoming.setHeadingLevel(1);
+        assertEquals(true, ReflectionTestUtils.invokeMethod(service, "questionsEqual", List.of(existing), List.of(incoming)));
+        incoming.setHeadingLevel(2);
+        assertEquals(false, ReflectionTestUtils.invokeMethod(service, "questionsEqual", List.of(existing), List.of(incoming)));
+    }
 }

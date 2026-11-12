@@ -19,6 +19,7 @@ public class ScreeningQuestionRes {
     private Boolean isMandatory;
     private Boolean isDropDownMultiSelect;
     private Integer maxChars;
+    private Integer headingLevel;
 
     public static ScreeningQuestionRes from(ScreeningQuestion entity) {
         if(entity == null)
@@ -35,6 +36,7 @@ public class ScreeningQuestionRes {
         res.setIsMandatory(entity.getIsMandatory());
         res.setIsDropDownMultiSelect(entity.getIsDropDownMultiSelect());
         res.setMaxChars(entity.getMaxChars());
+        res.setHeadingLevel(entity.getHeadingLevel());
         return res;
     }
 

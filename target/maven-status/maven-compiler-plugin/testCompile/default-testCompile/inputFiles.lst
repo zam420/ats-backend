@@ -5,3 +5,7 @@ C:\Work\Espressif\Code\java_backend\src\test\java\com\deepconnect\ats\screeningq
 C:\Work\Espressif\Code\java_backend\src\test\java\com\deepconnect\ats\screeningquestionsform\service\ScreeningQuestionsFormAccessServiceTest.java
 C:\Work\Espressif\Code\java_backend\src\test\java\com\deepconnect\ats\screeningquestionsform\service\ScreeningQuestionsFormServiceAccessTest.java
 C:\Work\Espressif\Code\java_backend\src\test\java\com\deepconnect\ats\screeningquestiontemplate\service\ScreeningQuestionTemplateServiceTest.java
+C:\Work\Espressif\Code\java_backend\src\test\java\com\deepconnect\ats\tenant\controller\CurrentLogoSecurityTest.java
+C:\Work\Espressif\Code\java_backend\src\test\java\com\deepconnect\ats\tenant\controller\TenantControllerTest.java
+C:\Work\Espressif\Code\java_backend\src\test\java\com\deepconnect\ats\tenant\service\TenantLogoStorageTest.java
+C:\Work\Espressif\Code\java_backend\src\test\java\com\deepconnect\ats\tenant\service\TenantServiceLogoTest.java
