@@ -16,7 +16,13 @@ import com.deepconnect.ats.tenant.dto.TenantReq;
 import com.deepconnect.ats.tenant.dto.TenantRes;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.multipart.MultipartFile;
+import java.nio.file.Path;
 
 @RestController
 @RequestMapping("/api/tenant")
@@ -27,15 +33,42 @@ public class TenantController {
     private final TenantService tenantService;
 
     @PreAuthorize("hasAuthority('clnc')")
-    @PostMapping("/create")
+    @PostMapping(value = "/create", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ApiResult<Map<String, String>> create(@RequestBody @Valid TenantReq req) {
         return ApiResult.success(Collections.singletonMap("id", tenantService.create(req)));
     }
 
     @PreAuthorize("hasAuthority('clne')")
-    @PostMapping("/update")
+    @PostMapping(value = "/update", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ApiResult<Map<String, String>> update(@RequestBody @Valid TenantReq req) {
         return ApiResult.success(Collections.singletonMap("id", tenantService.update(req)));
+    }
+
+    @PreAuthorize("hasAuthority('clnc')")
+    @PostMapping(value = "/create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ApiResult<Map<String, String>> createWithLogo(@RequestPart("tenant") @Valid TenantReq req,
+            @RequestPart(value = "logo", required = false) MultipartFile logo) {
+        return ApiResult.success(Collections.singletonMap("id", tenantService.create(req, logo)));
+    }
+
+    @PreAuthorize("hasAuthority('clne')")
+    @PostMapping(value = "/update", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ApiResult<Map<String, String>> updateWithLogo(@RequestPart("tenant") @Valid TenantReq req,
+            @RequestPart(value = "logo", required = false) MultipartFile logo) {
+        return ApiResult.success(Collections.singletonMap("id", tenantService.update(req, logo)));
+    }
+
+    @PreAuthorize("hasAuthority('clns')")
+    @GetMapping("/{id}/logo")
+    public ResponseEntity<FileSystemResource> logo(@PathVariable @NotBlank String id) {
+        Path path = tenantService.getLogo(id);
+        String fileName = path.getFileName().toString();
+        MediaType type = fileName.endsWith(".svg") ? MediaType.parseMediaType("image/svg+xml")
+                : fileName.endsWith(".png") ? MediaType.IMAGE_PNG : MediaType.IMAGE_JPEG;
+        return ResponseEntity.ok().contentType(type)
+                .header("Content-Security-Policy", "default-src 'none'; sandbox")
+                .header("X-Content-Type-Options", "nosniff")
+                .body(new FileSystemResource(path));
     }
 
     @PreAuthorize("hasAuthority('clne')")
@@ -55,7 +88,7 @@ public class TenantController {
     @GetMapping("/{id}")
     public ApiResult<TenantDetailsRes> findById(
         @PathVariable @NotBlank(message = "{field.common.id}{validation.notBlank}")String id) {
-        return ApiResult.success(tenantService.findByPublicId(id));
+        return ApiResult.success(tenantService.findByDeactivatedFalseAndPublicId(id));
     }
 
     /**
@@ -64,10 +97,10 @@ public class TenantController {
      * @param query
      * @return
      */
-    // @PreAuthorize("hasAuthority('clns')")
-    // @GetMapping("/list")
-    // public ApiResult<List<TenantRes>> findAllAsList() {
-    //     return ApiResult.success(tenantService.findAllAsList());
-    // }
+    @PreAuthorize("hasAuthority('clns')")
+    @GetMapping("/list")
+    public ApiResult<List<TenantRes>> findAllAsList() {
+        return ApiResult.success(tenantService.findAllAsList());
+    }
 
 }

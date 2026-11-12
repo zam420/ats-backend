@@ -11,6 +11,7 @@ public class TenantDetailsRes {
     private String id;
     private String name;
     private String description;
+    private boolean hasLogo;
     private String ownerId;
     
     public static TenantDetailsRes from(Tenant entity) {
@@ -18,6 +19,7 @@ public class TenantDetailsRes {
         res.setId(entity.getPublicId());
         res.setName(entity.getName());
         res.setDescription(entity.getDescription());
+        res.setHasLogo(entity.getLogoPath() != null);
         res.setOwnerId(entity.getOwnerPublicId());
         return res;
     }

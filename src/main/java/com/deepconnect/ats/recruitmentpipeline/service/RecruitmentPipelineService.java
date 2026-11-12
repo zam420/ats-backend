@@ -19,7 +19,7 @@ import com.deepconnect.ats.recruitmentpipeline.model.RecruitmentPipelineRound;
 import com.deepconnect.ats.recruitmentpipeline.model.RecruitmentPipelineRoundType;
 import com.deepconnect.ats.recruitmentpipeline.repo.RecruitmentPipelineRoundRepository;
 import com.deepconnect.ats.user.model.User;
-import com.deepconnect.ats.user.service.UserService;
+import com.deepconnect.ats.user.service.UserServiceV2;
 import com.deepconnect.ats.common.enums.AccessType;
 import com.deepconnect.ats.common.utils.StringUtils;
 import com.deepconnect.ats.common.utils.HashMapUtils;
@@ -51,7 +51,7 @@ public class RecruitmentPipelineService {
     @Value("${plans.maxRounds}")
     private int maxRounds;
 
-    private final UserService userService;
+    private final UserServiceV2 userService;
     private final RecruitmentPipelineAccessService recruitmentPipelineAccessService;
 
     private final RecruitmentPipelineRepository recruitmentPipelineRepository;
@@ -103,7 +103,7 @@ public class RecruitmentPipelineService {
                 recruitmentPipelineShareRepository.deleteByRecruitmentPipelineId(plan.getId());
             }
             if(!CollectionUtils.isEmpty(req.getSharedWithUserIds())){
-                Set<User> sharedWithUsers = userService.getByPublicIds(req.getSharedWithUserIds());
+                Set<User> sharedWithUsers = userService.findByPublicIdInAndDeactivatedFalseAndLockedFalse(req.getSharedWithUserIds());
                 List<RecruitmentPipelineShare> sharedWithUserList = new ArrayList<>();
                 for(User user : sharedWithUsers) {
                     RecruitmentPipelineShare sharedWithUser = new RecruitmentPipelineShare();
@@ -144,7 +144,7 @@ public class RecruitmentPipelineService {
         if (req.getId() == null) 
             throw new InternalServerException("Invalid Interview Process Id: " + req.getId());
 
-        RecruitmentPipeline plan = recruitmentPipelineRepository.findByPublicId(req.getId())
+        RecruitmentPipeline plan = recruitmentPipelineRepository.findByPublicIdAndTenantIdAndDeactivatedFalse(req.getId(), AuthService.getLoggedInTenantId())
                 .orElseThrow(() -> new InternalServerException("Interview Process not found: " + req.getId()));
 
         LoggedInUserDetails loggedInUser = AuthService.getLoggedInUser();
@@ -208,7 +208,7 @@ public class RecruitmentPipelineService {
         if (req.getId() == null) 
             throw new InternalServerException("Invalid Interview Process Id: " + req.getId());
 
-        RecruitmentPipeline plan = recruitmentPipelineRepository.findByPublicId(req.getId())
+        RecruitmentPipeline plan = recruitmentPipelineRepository.findByDeactivatedFalseAndPublicId(req.getId())
                 .orElseThrow(() -> new InternalServerException("Interview Process not found: " + req.getId()));
 
         LoggedInUserDetails loggedInUser = AuthService.getLoggedInUser();
@@ -224,7 +224,7 @@ public class RecruitmentPipelineService {
 
     @Transactional
     public boolean deactivate(String publicId) {
-        RecruitmentPipeline plan = recruitmentPipelineRepository.findByPublicId(publicId).orElseThrow(() -> new InternalServerException("Interview Process not found: " + publicId));
+        RecruitmentPipeline plan = recruitmentPipelineRepository.findByDeactivatedFalseAndPublicId(publicId).orElseThrow(() -> new InternalServerException("Interview Process not found: " + publicId));
         LoggedInUserDetails loggedInUser = AuthService.getLoggedInUser();
         recruitmentPipelineAccessService.assertWriteAccess(loggedInUser, plan);
         plan.setDeactivated(true);
@@ -236,7 +236,7 @@ public class RecruitmentPipelineService {
 
     @Transactional(readOnly = true)
     public RecruitmentPipelineDetailsRes findByPublicIdForTenant(String publicId) {
-        RecruitmentPipeline plan = recruitmentPipelineRepository.findByPublicIdAndTenantId(publicId, AuthService.getLoggedInTenantId()).orElseThrow(() -> new InternalServerException("Evaluation plan not found: " + publicId));
+        RecruitmentPipeline plan = recruitmentPipelineRepository.findByPublicIdAndTenantIdAndDeactivatedFalse(publicId, AuthService.getLoggedInTenantId()).orElseThrow(() -> new InternalServerException("Evaluation plan not found: " + publicId));
         recruitmentPipelineAccessService.assertReadAccess(AuthService.getLoggedInUser(), plan);
         return RecruitmentPipelineDetailsRes.from(plan);
     }
@@ -314,7 +314,7 @@ public class RecruitmentPipelineService {
             throw new InternalServerException("Attempt to set another user as owner without permission by " + loggedInUser.getPublicId());
         }
 
-        User user = userService.findByPublicId(ownerId).orElseThrow(() -> new InternalServerException("Owner not found: " + ownerId));
+        User user = userService.findByPublicIdAndDeactivatedFalseAndLockedFalse(ownerId).orElseThrow(() -> new InternalServerException("Owner not found: " + ownerId));
         if(!user.getTenantId().equals(loggedInUser.getTenantId())) {
             throw new InternalServerException("Owner must belong to the same tenant as the logged in user. Owner: " + ownerId + ", Request by: " + loggedInUser.getPublicId());
         }
@@ -427,7 +427,7 @@ public class RecruitmentPipelineService {
         }
     }
 
-    public Optional<RecruitmentPipeline> findByPublicId(String publicId) {
-        return recruitmentPipelineRepository.findByPublicId(publicId);
+    public Optional<RecruitmentPipeline> findByDeactivatedFalseAndPublicId(String publicId) {
+        return recruitmentPipelineRepository.findByDeactivatedFalseAndPublicId(publicId);
     }
 }

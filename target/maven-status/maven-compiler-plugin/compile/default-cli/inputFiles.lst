@@ -76,7 +76,7 @@ C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\common\mod
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\common\model\OperatableBaseEntity.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\common\model\OperatableBaseWithTenantEntity.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\common\repo\BaseRepository.java
-C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\common\repo\BaseWithTenantRepository.java
+C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\common\repo\OperatableBaseWithTenantRepository.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\common\security\EncryptionUtil.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\common\security\HashIdUtil.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\common\security\JwtAuthFilter.java

@@ -107,6 +107,7 @@ INSERT INTO `rbac_permission`(`public_id`, `code`, `name`) VALUES('3NStGXR8_Z6J'
 -- role-permission
 -- System admin
 INSERT INTO `rbac_role_permission` (`role_id`, `permission_code`, `permission_id`) SELECT 1, 'clnsa', `id` FROM `rbac_permission` WHERE `code` = 'clnsa'; #Only available to System Admin - Client System admin
+INSERT INTO `rbac_role_permission` (`role_id`, `permission_code`, `permission_id`) SELECT 1, 'clnm', `id` FROM `rbac_permission` WHERE `code` = 'clnm'; #Only available to Client Admin and System Admin - Client admin
 INSERT INTO `rbac_role_permission` (`role_id`, `permission_code`, `permission_id`) SELECT 1, 'clna', `id` FROM `rbac_permission` WHERE `code` = 'clna'; #Only available to Client Admin and System Admin - Client admin
 INSERT INTO `rbac_role_permission` (`role_id`, `permission_code`, `permission_id`) SELECT 1, 'clnc', `id` FROM `rbac_permission` WHERE `code` = 'clnc'; #Only available to Client Admin and System Admin - Client create
 INSERT INTO `rbac_role_permission` (`role_id`, `permission_code`, `permission_id`) SELECT 1, 'clne', `id` FROM `rbac_permission` WHERE `code` = 'clne'; #Only available to Client Admin and System Admin - Client edit
@@ -179,6 +180,7 @@ INSERT INTO `rbac_role_permission` (`role_id`, `permission_code`, `permission_id
 
 --Client Admin
 INSERT INTO `rbac_role_permission` (`role_id`, `permission_code`, `permission_id`) SELECT 2, 'clna', `id` FROM `rbac_permission` WHERE `code` = 'clna'; #Only available to Client Admin and System Admin - Client admin
+INSERT INTO `rbac_role_permission` (`role_id`, `permission_code`, `permission_id`) SELECT 2, 'clnm', `id` FROM `rbac_permission` WHERE `code` = 'clnm'; #Only available to Client Admin and System Admin - Client admin
 INSERT INTO `rbac_role_permission` (`role_id`, `permission_code`, `permission_id`) SELECT 2, 'clnc', `id` FROM `rbac_permission` WHERE `code` = 'clnc'; #Only available to Client Admin and System Admin - Client create
 INSERT INTO `rbac_role_permission` (`role_id`, `permission_code`, `permission_id`) SELECT 2, 'clne', `id` FROM `rbac_permission` WHERE `code` = 'clne'; #Only available to Client Admin and System Admin - Client edit
 INSERT INTO `rbac_role_permission` (`role_id`, `permission_code`, `permission_id`) SELECT 2, 'clns', `id` FROM `rbac_permission` WHERE `code` = 'clns'; #Only available to Client Admin and System Admin - Client search

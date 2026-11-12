@@ -1,7 +1,7 @@
 package com.deepconnect.ats.screeningquestionsform.repo;
 
 import com.deepconnect.ats.screeningquestionsform.model.ScreeningQuestionsForm;
-import com.deepconnect.ats.common.repo.BaseWithTenantRepository;
+import com.deepconnect.ats.common.repo.OperatableBaseWithTenantRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -12,7 +12,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 @Repository
-public interface ScreeningQuestionsFormRepository extends BaseWithTenantRepository<ScreeningQuestionsForm, Long> {
+public interface ScreeningQuestionsFormRepository extends OperatableBaseWithTenantRepository<ScreeningQuestionsForm, Long> {
 
     Boolean existsByDeactivatedFalseAndName(String name);
 

@@ -1,7 +1,7 @@
 package com.deepconnect.ats.evaluationplan.repo;
 
 import com.deepconnect.ats.evaluationplan.model.EvaluationPlan;
-import com.deepconnect.ats.common.repo.BaseWithTenantRepository;
+import com.deepconnect.ats.common.repo.OperatableBaseWithTenantRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -12,7 +12,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 @Repository
-public interface EvaluationPlanRepository extends BaseWithTenantRepository<EvaluationPlan, Long> {
+public interface EvaluationPlanRepository extends OperatableBaseWithTenantRepository<EvaluationPlan, Long> {
 
     Boolean existsByDeactivatedFalseAndName(String name);
 
@@ -21,10 +21,6 @@ public interface EvaluationPlanRepository extends BaseWithTenantRepository<Evalu
     Boolean existsByDeactivatedFalseAndTenantIdAndName(Long tenantId, String name);
 
     Boolean existsByDeactivatedFalseAndTenantIdAndNameAndIdNot(Long tenantId, String name, Long Id);
-    
-    Page<EvaluationPlan> findByDeactivatedFalse(Pageable pageable);
-
-    Page<EvaluationPlan> findByDeactivatedFalseAndTenantId(Long tenantId, Pageable pageable);
 
     Page<EvaluationPlan> findByDeactivatedFalseAndTenantIdAndOwnerId(Long tenantId, Long ownerId, Pageable pageable);
 

@@ -160,6 +160,10 @@ public class JobPosition extends OperatableBaseWithTenantEntity {
     @Builder.Default
     private JobStatus status = JobStatus.DRAFT;
 
+    @Column(columnDefinition = "tinyint(1) default false")
+    @Builder.Default
+    private Boolean deactivated = false;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "publishedByUserId", referencedColumnName = "id", insertable = false, updatable = false)
     private User publishedByUser; // The user who published this record

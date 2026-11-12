@@ -69,9 +69,9 @@ public class JobPositionService {
         position.setHiringManagers(req.getHiringManagers());
         position.setRecruitmentPipelinePublicId(req.getRecruitmentPipeline());
         position.setEvaluationPlanPublicId(req.getEvaluationPlan());
-        EvaluationPlan evaluationPlan = evaluationPlanService.findByPublicId(position.getEvaluationPlanPublicId()).orElseThrow(() -> new InternalServerException(String.format("Evaluation plan not found: User: %s, Evaluation Plan: %s", loggedInUser.getPublicId(), position.getEvaluationPlanPublicId())));
+        EvaluationPlan evaluationPlan = evaluationPlanService.findByDeactivatedFalseAndPublicId(position.getEvaluationPlanPublicId()).orElseThrow(() -> new InternalServerException(String.format("Evaluation plan not found: User: %s, Evaluation Plan: %s", loggedInUser.getPublicId(), position.getEvaluationPlanPublicId())));
         position.setEvaluationPlanId(evaluationPlan.getId());
-        RecruitmentPipeline recruitmentPipeline = recruitmentPipelineService.findByPublicId(position.getRecruitmentPipelinePublicId()).orElseThrow(() -> new InternalServerException(String.format("Recruitment pipeline not found: User: %s, Recruitment Pipeline: %s", loggedInUser.getPublicId(), position.getRecruitmentPipelinePublicId())));
+        RecruitmentPipeline recruitmentPipeline = recruitmentPipelineService.findByDeactivatedFalseAndPublicId(position.getRecruitmentPipelinePublicId()).orElseThrow(() -> new InternalServerException(String.format("Recruitment pipeline not found: User: %s, Recruitment Pipeline: %s", loggedInUser.getPublicId(), position.getRecruitmentPipelinePublicId())));
         position.setRecruitmentPipelineId(recruitmentPipeline.getId());
         return jobPositionRepository.save(position).getPublicId();
     }
@@ -102,7 +102,7 @@ public class JobPositionService {
         if (req.getId() == null) 
             throw new InternalServerException(String.format("Invalid Job Position Id: User: %s, Position: %s", AuthService.getLoggedInUser().getPublicId(), req.getId()));
 
-        JobPosition jobPosition = jobPositionRepository.findByPublicId(req.getId())
+        JobPosition jobPosition = jobPositionRepository.findByDeactivatedFalseAndPublicId(req.getId())
                 .orElseThrow(() -> new InternalServerException(String.format("Job Position not found: User: %s, Position: %s", AuthService.getLoggedInUser().getPublicId(), req.getId())));
 
         LoggedInUserDetails loggedInUser = AuthService.getLoggedInUser();
@@ -123,7 +123,7 @@ public class JobPositionService {
     @Transactional
     public void publish(String positionId, Integer status) {
         LoggedInUserDetails loggedInUser = AuthService.getLoggedInUser();
-        JobPosition position = jobPositionRepository.findByPublicId(positionId)
+        JobPosition position = jobPositionRepository.findByDeactivatedFalseAndPublicId(positionId)
                 .orElseThrow(() -> new InternalServerException("Position not found: " + positionId));
         position.setStatus(JobStatus.OPEN);
         position.setPublishedByUserId(loggedInUser.getUserId());
@@ -141,7 +141,7 @@ public class JobPositionService {
 
     @Transactional(readOnly = true)
     public JobPositionRes findByPublicIdForTenant(String publicId) {
-        JobPosition position = jobPositionRepository.findByPublicIdAndTenantId(publicId, AuthService.getLoggedInTenantId()).orElseThrow(() -> new InternalServerException(String.format("Job position not found: User: %s, Position: %s", AuthService.getLoggedInUser().getPublicId(), publicId)));
+        JobPosition position = jobPositionRepository.findByPublicIdAndTenantIdAndDeactivatedFalse(publicId, AuthService.getLoggedInTenantId()).orElseThrow(() -> new InternalServerException(String.format("Job position not found: User: %s, Position: %s", AuthService.getLoggedInUser().getPublicId(), publicId)));
         jobPositionAccessService.assertReadAccess(AuthService.getLoggedInUser(), position);
         return JobPositionRes.from(position);
     }

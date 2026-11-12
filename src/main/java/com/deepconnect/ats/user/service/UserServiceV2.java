@@ -12,21 +12,14 @@ import com.deepconnect.ats.common.email.EmailService;
 import com.deepconnect.ats.common.enums.CustomExceptionType;
 import com.deepconnect.ats.common.enums.EmailType;
 import com.deepconnect.ats.rbac.enums.RoleType;
-import com.deepconnect.ats.common.exception.InternalServerException;
 import com.deepconnect.ats.common.exception.UnauthorizedException;
 import com.deepconnect.ats.common.exception.CustomException;
 import com.deepconnect.ats.common.security.PasswordEncoderService;
-import com.deepconnect.ats.notification.model.Notification;
 import com.deepconnect.ats.notification.repo.NotificationRepository;
-import com.deepconnect.ats.dto.AtsPageQuery;
-import com.deepconnect.ats.dto.AtsPageRsp;
-import com.deepconnect.ats.user.dto.SaveUserReq;
 import com.deepconnect.ats.user.dto.UserSummary;
 import com.deepconnect.ats.user.model.*;
 import com.deepconnect.ats.rbac.service.RoleService;
 import com.deepconnect.ats.user.repo.*;
-import com.deepconnect.ats.rbac.model.UserRole;
-import com.deepconnect.ats.rbac.model.RolePermission;
 import com.deepconnect.ats.tenant.enums.TenantType;
 
 import com.deepconnect.ats.rbac.repo.UserRoleRepository;
@@ -38,10 +31,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Page;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import java.nio.charset.StandardCharsets;
@@ -52,7 +43,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -76,13 +66,8 @@ public class UserServiceV2 {
     private final EmailLocalizationService emailLocalizationService;
     private final EmailService emailService;
     private final UserRoleService userRoleService;
-    private final RoleService roleService;
 
     private final UserRepository userRepository;
-    private final UserRoleRepository userRoleRepository;
-    private final RolePermissionRepository rolePermissionRepository;
-    private final UserSettingsRepository userSettingsRepository;
-    private final NotificationRepository notificationRepository;
 
     private String generateActivationCode(int length) {
         String CHARACTERS = "ABCDEFGHJKL12345abcdMNPQRSTUVWXYZefghijk6789mnpqrstuvwxyz";//we don't include L, l, 0, O and o to avoid confusion for user
@@ -242,12 +227,12 @@ public class UserServiceV2 {
         return userRepository.findById(userId);
     }
 
-    public Optional<User> findByPublicId(String publicId){
-        return userRepository.findByPublicId(publicId);
+    public Optional<User> findByPublicIdAndDeactivatedFalseAndLockedFalse(String publicId){
+        return userRepository.findByPublicIdAndDeactivatedFalseAndLockedFalse(publicId);
     }
 
-    public Set<User> findByPublicIds(Set<String> publicIds) {
-        return userRepository.findByPublicIdIn(publicIds);
+    public Set<User> findByPublicIdInAndDeactivatedFalseAndLockedFalse(Set<String> publicIds) {
+        return userRepository.findByPublicIdInAndDeactivatedFalseAndLockedFalse(publicIds);
     }
 
     public Set<String> findRoleCodesByUserId(Long userId) {

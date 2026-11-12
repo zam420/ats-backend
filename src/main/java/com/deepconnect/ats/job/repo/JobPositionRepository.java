@@ -4,7 +4,7 @@ import com.deepconnect.ats.job.model.JobPosition;
 import com.deepconnect.ats.job.enums.JobStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.JpaRepository;
+import com.deepconnect.ats.common.repo.OperatableBaseRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -14,11 +14,11 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface JobPositionRepository extends JpaRepository<JobPosition, Long>, JpaSpecificationExecutor<JobPosition> {
-    Optional<JobPosition> findByPublicId(String publicId);
-    Optional<JobPosition> findByPublicIdAndTenantId(String publicId, Long tenantId);
-    List<JobPosition> findByStatus(JobStatus status);
-    Optional<JobPosition> findByTitle(String title);
+public interface JobPositionRepository extends OperatableBaseRepository<JobPosition, Long>, JpaSpecificationExecutor<JobPosition> {
+    //Optional<JobPosition> findByPublicId(String publicId);
+    Optional<JobPosition> findByPublicIdAndTenantIdAndDeactivatedFalse(String publicId, Long tenantId);
+    // List<JobPosition> findByStatus(JobStatus status);
+    // Optional<JobPosition> findByTitle(String title);
 
     @Query("SELECT jp FROM JobPosition jp WHERE jp.tenantId = :tenantId")
     Page<JobPosition> findAllForTenantAdmin(@Param("tenantId") Long tenantId, Pageable pageable);

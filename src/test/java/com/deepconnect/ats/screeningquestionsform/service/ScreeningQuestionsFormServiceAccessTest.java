@@ -26,12 +26,12 @@ import com.deepconnect.ats.screeningquestionsform.repo.ScreeningQuestionReposito
 import com.deepconnect.ats.screeningquestionsform.repo.ScreeningQuestionTypeRepository;
 import com.deepconnect.ats.screeningquestionsform.repo.ScreeningQuestionsFormRepository;
 import com.deepconnect.ats.screeningquestionsform.repo.ScreeningQuestionsFormShareRepository;
-import com.deepconnect.ats.user.service.UserService;
+import com.deepconnect.ats.user.service.UserServiceV2;
 
 class ScreeningQuestionsFormServiceAccessTest {
     private final ScreeningQuestionsFormRepository repository = mock(ScreeningQuestionsFormRepository.class);
     private final ScreeningQuestionsFormService service = new ScreeningQuestionsFormService(
-            mock(UserService.class), new ScreeningQuestionsFormAccessService(), repository,
+            mock(UserServiceV2.class), new ScreeningQuestionsFormAccessService(), repository,
             mock(ScreeningQuestionRepository.class), mock(ScreeningQuestionTypeRepository.class),
             mock(ScreeningQuestionsFormShareRepository.class));
     private final LoggedInUserDetails user = new LoggedInUserDetails(
@@ -61,7 +61,7 @@ class ScreeningQuestionsFormServiceAccessTest {
         form.setTenantId(3000L);
         form.setOwnerId(4000L);
         form.setIsPublicForAll(true);
-        when(repository.findByPublicId("system-form")).thenReturn(Optional.of(form));
+        when(repository.findByDeactivatedFalseAndPublicId("system-form")).thenReturn(Optional.of(form));
         try (MockedStatic<AuthService> auth = Mockito.mockStatic(AuthService.class)) {
             auth.when(AuthService::getLoggedInUser).thenReturn(user);
             assertEquals("system-form", service.findByPublicIdForTenant("system-form").getId());

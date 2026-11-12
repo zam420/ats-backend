@@ -1,7 +1,7 @@
 package com.deepconnect.ats.recruitmentpipeline.repo;
 
 import com.deepconnect.ats.recruitmentpipeline.model.RecruitmentPipeline;
-import com.deepconnect.ats.common.repo.BaseWithTenantRepository;
+import com.deepconnect.ats.common.repo.OperatableBaseWithTenantRepository;
 
 import org.springframework.stereotype.Repository;
 
@@ -13,7 +13,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 @Repository
-public interface RecruitmentPipelineRepository extends BaseWithTenantRepository<RecruitmentPipeline, Long> {
+public interface RecruitmentPipelineRepository extends OperatableBaseWithTenantRepository<RecruitmentPipeline, Long> {
 
     Boolean existsByDeactivatedFalseAndName(String name);
 

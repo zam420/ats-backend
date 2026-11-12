@@ -1,5 +1,6 @@
 package com.deepconnect.ats.user.repo;
 
+import com.deepconnect.ats.user.model.User;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -10,11 +11,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import com.deepconnect.ats.user.model.User;
-import com.deepconnect.ats.common.repo.BaseRepository;
+import com.deepconnect.ats.common.repo.OperatableBaseRepository;
 
 @Repository
-public interface UserRepository extends BaseRepository<User, Long>, JpaSpecificationExecutor<User> {
+public interface UserRepository extends OperatableBaseRepository<User, Long>, JpaSpecificationExecutor<User> {
     List<User> findByType(Integer type);
     List<User> findByStatus(Integer status);
     List<User> findByIdIn(Set<Long> ids);
@@ -24,6 +24,9 @@ public interface UserRepository extends BaseRepository<User, Long>, JpaSpecifica
     void deleteUser(String email);
 
     // ZAM: all methods below this are new and safe. Above this line are old and need review.
+
+    Optional<User> findByPublicIdAndDeactivatedFalseAndLockedFalse(String publicId);
+    Set<User> findByPublicIdInAndDeactivatedFalseAndLockedFalse(Set<String> publicIds);
 
     Optional<User> findByEmail(String email);
 

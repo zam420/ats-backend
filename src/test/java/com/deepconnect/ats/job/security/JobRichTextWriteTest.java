@@ -50,10 +50,10 @@ class JobRichTextWriteTest {
         plan.setId(3L);
         RecruitmentPipeline pipeline = new RecruitmentPipeline();
         pipeline.setId(4L);
-        when(plans.findByPublicId("plan")).thenReturn(Optional.of(plan));
-        when(pipelines.findByPublicId("pipeline")).thenReturn(Optional.of(pipeline));
+        when(plans.findByDeactivatedFalseAndPublicId("plan")).thenReturn(Optional.of(plan));
+        when(pipelines.findByDeactivatedFalseAndPublicId("pipeline")).thenReturn(Optional.of(pipeline));
         when(positions.save(any(JobPosition.class))).thenAnswer(invocation -> invocation.getArgument(0));
-        when(positions.findByPublicId(eq("job"))).thenReturn(Optional.of(new JobPosition()));
+        when(positions.findByDeactivatedFalseAndPublicId(eq("job"))).thenReturn(Optional.of(new JobPosition()));
 
         JobPositionReq req = new JobPositionReq();
         req.setId("job");

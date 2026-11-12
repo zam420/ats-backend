@@ -19,7 +19,7 @@ import com.deepconnect.ats.evaluationplan.repo.EvaluationPlanRoundRepository;
 import com.deepconnect.ats.evaluationplan.model.EvaluationPlanShare;
 import com.deepconnect.ats.evaluationplan.repo.EvaluationPlanShareRepository;
 import com.deepconnect.ats.user.model.User;
-import com.deepconnect.ats.user.service.UserService;
+import com.deepconnect.ats.user.service.UserServiceV2;
 import com.deepconnect.ats.common.enums.AccessType;
 import com.deepconnect.ats.common.utils.StringUtils;
 import com.deepconnect.ats.common.utils.HashMapUtils;
@@ -49,7 +49,7 @@ public class EvaluationPlanService {
     @Value("${plans.maxRounds}")
     private int maxRounds;
 
-    private final UserService userService;
+    private final UserServiceV2 userService;
     private final EvaluationPlanAccessService evaluationPlanAccessService;
 
     private final EvaluationPlanRepository evaluationPlanRepository;
@@ -105,7 +105,7 @@ public class EvaluationPlanService {
                 evaluationPlanShareRepository.deleteByEvaluationPlanId(plan.getId());
             }
             if(!CollectionUtils.isEmpty(req.getSharedWithUserIds())){
-                Set<User> sharedWithUsers = userService.getByPublicIds(req.getSharedWithUserIds());
+                Set<User> sharedWithUsers = userService.findByPublicIdInAndDeactivatedFalseAndLockedFalse(req.getSharedWithUserIds());
                 List<EvaluationPlanShare> sharedWithUserList = new ArrayList<>();
                 for(User user : sharedWithUsers) {
                     EvaluationPlanShare sharedWithUser = new EvaluationPlanShare();
@@ -146,7 +146,7 @@ public class EvaluationPlanService {
         if (req.getId() == null) 
             throw new InternalServerException(String.format("Invalid Evaluation Plan Id: User: %s, Process: %s", AuthService.getLoggedInUser().getPublicId(), req.getId()));
 
-        EvaluationPlan plan = evaluationPlanRepository.findByPublicId(req.getId())
+        EvaluationPlan plan = evaluationPlanRepository.findByDeactivatedFalseAndPublicId(req.getId())
                 .orElseThrow(() -> new InternalServerException(String.format("Evaluation Plan not found: User: %s, Plan: %s", AuthService.getLoggedInUser().getPublicId(), req.getId())));
 
         LoggedInUserDetails loggedInUser = AuthService.getLoggedInUser();
@@ -210,7 +210,7 @@ public class EvaluationPlanService {
         if (req.getId() == null) 
             throw new InternalServerException("Invalid Evaluation Plan Id: " + req.getId());
 
-        EvaluationPlan plan = evaluationPlanRepository.findByPublicId(req.getId())
+        EvaluationPlan plan = evaluationPlanRepository.findByDeactivatedFalseAndPublicId(req.getId())
                 .orElseThrow(() -> new InternalServerException("Evaluation Plan not found: " + req.getId()));
 
         LoggedInUserDetails loggedInUser = AuthService.getLoggedInUser();
@@ -226,7 +226,7 @@ public class EvaluationPlanService {
 
     @Transactional
     public boolean deactivate(String publicId) {
-        EvaluationPlan plan = evaluationPlanRepository.findByPublicId(publicId).orElseThrow(() -> new InternalServerException(String.format("Evaluation Plan not found: User: %s, Plan: %s", AuthService.getLoggedInUser().getPublicId(), publicId)));
+        EvaluationPlan plan = evaluationPlanRepository.findByDeactivatedFalseAndPublicId(publicId).orElseThrow(() -> new InternalServerException(String.format("Evaluation Plan not found: User: %s, Plan: %s", AuthService.getLoggedInUser().getPublicId(), publicId)));
         LoggedInUserDetails loggedInUser = AuthService.getLoggedInUser();
         evaluationPlanAccessService.assertWriteAccess(loggedInUser, plan);
         plan.setDeactivated(true);
@@ -238,7 +238,7 @@ public class EvaluationPlanService {
 
     @Transactional(readOnly = true)
     public EvaluationPlanDetailsRes findByPublicIdForTenant(String publicId) {
-        EvaluationPlan plan = evaluationPlanRepository.findByPublicIdAndTenantId(publicId, AuthService.getLoggedInTenantId()).orElseThrow(() -> new InternalServerException("Evaluation plan not found: " + publicId));
+        EvaluationPlan plan = evaluationPlanRepository.findByPublicIdAndTenantIdAndDeactivatedFalse(publicId, AuthService.getLoggedInTenantId()).orElseThrow(() -> new InternalServerException("Evaluation plan not found: " + publicId));
         evaluationPlanAccessService.assertReadAccess(AuthService.getLoggedInUser(), plan);
         return EvaluationPlanDetailsRes.from(plan);
     }
@@ -316,7 +316,7 @@ public class EvaluationPlanService {
             throw new InternalServerException("Attempt to set another user as owner without permission by " + loggedInUser.getPublicId());
         }
 
-        User user = userService.findByPublicId(ownerId).orElseThrow(() -> new InternalServerException("Owner not found: " + ownerId));
+        User user = userService.findByPublicIdAndDeactivatedFalseAndLockedFalse(ownerId).orElseThrow(() -> new InternalServerException("Owner not found: " + ownerId));
         if(!user.getTenantId().equals(loggedInUser.getTenantId())) {
             throw new InternalServerException("Owner must belong to the same tenant as the logged in user. Owner: " + ownerId + ", Request by: " + loggedInUser.getPublicId());
         }
@@ -403,8 +403,8 @@ public class EvaluationPlanService {
         }
     }
 
-    public Optional<EvaluationPlan> findByPublicId(String publicId) {
-        return evaluationPlanRepository.findByPublicId(publicId);
+    public Optional<EvaluationPlan> findByDeactivatedFalseAndPublicId(String publicId) {
+        return evaluationPlanRepository.findByDeactivatedFalseAndPublicId(publicId);
     }
 
 }

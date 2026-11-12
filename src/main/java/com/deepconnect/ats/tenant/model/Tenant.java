@@ -28,6 +28,9 @@ public class Tenant extends OperatableBaseEntity {
     @Length(max = 300, message = "{field.common.description}{validation.lengthMax}")
     private String description;
 
+    @Column(length = 255)
+    private String logoPath;
+
     @Column(columnDefinition = "tinyint(1) default false")
     @Builder.Default
     private Boolean deactivated = false;

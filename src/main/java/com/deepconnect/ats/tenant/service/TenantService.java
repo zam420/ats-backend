@@ -21,6 +21,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import java.util.List;
 import org.springframework.data.domain.Page;
+import org.springframework.web.multipart.MultipartFile;
+import java.nio.file.Path;
 
 @Slf4j
 @Service
@@ -29,6 +31,7 @@ public class TenantService {
 
     private final TenantRepository tenantRepository;
     private final TenantAccessService tenantAccessService;
+    private final TenantLogoStorage logoStorage;
 
     private String save(Tenant plan, TenantReq req) {
         LoggedInUserDetails loggedInUser = AuthService.getLoggedInUser();
@@ -42,6 +45,11 @@ public class TenantService {
 
     @Transactional
     public String create(TenantReq req) {
+        return create(req, null);
+    }
+
+    @Transactional
+    public String create(TenantReq req, MultipartFile logo) {
         LoggedInUserDetails loggedInUser = AuthService.getLoggedInUser();
         this.assertUniqueWithinAllForCreation(req.getName());
         Tenant tenant = new Tenant();
@@ -49,26 +57,33 @@ public class TenantService {
         tenant.setCreatedByUserPublicId(loggedInUser.getPublicId());
         tenant.setOwnerId(loggedInUser.getUserId());
         tenant.setOwnerPublicId(loggedInUser.getPublicId());
+        if (logo != null) tenant.setLogoPath(logoStorage.store(logo, null));
         return this.save(tenant, req);
     }
 
     @Transactional
     public String update(TenantReq req) {        
+        return update(req, null);
+    }
+
+    @Transactional
+    public String update(TenantReq req, MultipartFile logo) {
         if (req.getId() == null) 
             throw new InternalServerException(String.format("Invalid Evaluation Plan Id: User: %s, Process: %s", AuthService.getLoggedInUser().getPublicId(), req.getId()));
 
-        Tenant tenant = tenantRepository.findByPublicId(req.getId())
+        Tenant tenant = tenantRepository.findByDeactivatedFalseAndPublicIdAndType(req.getId(), TenantType.CLIENT)
                 .orElseThrow(() -> new InternalServerException(String.format("Evaluation Plan not found: User: %s, Plan: %s", AuthService.getLoggedInUser().getPublicId(), req.getId())));
 
         LoggedInUserDetails loggedInUser = AuthService.getLoggedInUser();
         this.assertUniqueWithinAllForUpdate(req.getName(), tenant.getId());
         tenantAccessService.assertWriteAccess(loggedInUser, tenant);
+        if (logo != null) tenant.setLogoPath(logoStorage.store(logo, tenant.getLogoPath()));
         return this.save(tenant, req);
     }
 
     @Transactional
     public boolean deactivate(String publicId) {
-        Tenant tenant = tenantRepository.findByPublicId(publicId).orElseThrow(() -> new InternalServerException(String.format("Tenant not found: User: %s, Tenant: %s", AuthService.getLoggedInUser().getPublicId(), publicId)));
+        Tenant tenant = tenantRepository.findByDeactivatedFalseAndPublicId(publicId).orElseThrow(() -> new InternalServerException(String.format("Tenant not found: User: %s, Tenant: %s", AuthService.getLoggedInUser().getPublicId(), publicId)));
         LoggedInUserDetails loggedInUser = AuthService.getLoggedInUser();
         tenantAccessService.assertWriteAccess(loggedInUser, tenant);
         tenant.setDeactivated(true);
@@ -79,18 +94,26 @@ public class TenantService {
     }
 
     @Transactional(readOnly = true)
-    public TenantDetailsRes findByPublicId(String publicId) {
-        Tenant tenant = tenantRepository.findByPublicId(publicId).orElseThrow(() -> new InternalServerException("Tenant not found: " + publicId));
+    public TenantDetailsRes findByDeactivatedFalseAndPublicId(String publicId) {
+        Tenant tenant = tenantRepository.findByDeactivatedFalseAndPublicId(publicId).orElseThrow(() -> new InternalServerException("Tenant not found: " + publicId));
         tenantAccessService.assertReadAccess(AuthService.getLoggedInUser(), tenant);
         return TenantDetailsRes.from(tenant);
+    }
+
+    @Transactional(readOnly = true)
+    public Path getLogo(String publicId) {
+        Tenant tenant = tenantRepository.findByDeactivatedFalseAndPublicIdAndType(publicId, TenantType.CLIENT)
+                .orElseThrow(() -> new InternalServerException("Tenant not found: " + publicId));
+        tenantAccessService.assertReadAccess(AuthService.getLoggedInUser(), tenant);
+        return logoStorage.getPath(tenant.getLogoPath());
     }
 
     @Transactional(readOnly = true)
     public AtsPageRsp<TenantRes> findAll(AtsPageQuery query) {
         boolean isAdmin = tenantAccessService.isUserInTenantSystemAdminRole(AuthService.getLoggedInUser());
         Page<Tenant> page = isAdmin 
-            ? tenantRepository.findAllForTenantAdmin(query.toPageable()) 
-            : tenantRepository.findAllForTenantNonAdmin(AuthService.getLoggedInUser().getUserId(), query.toPageable());
+            ? tenantRepository.findAllForTenantAdmin(TenantType.CLIENT, query.toPageable()) 
+            : tenantRepository.findAllForTenantNonAdmin(TenantType.CLIENT, AuthService.getLoggedInUser().getUserId(), query.toPageable());
         return AtsPageRsp.of(page.map(TenantRes::from));
     }
 
@@ -103,8 +126,8 @@ public class TenantService {
     public List<TenantRes> findAllAsList() {
         boolean isAdmin = tenantAccessService.isUserInTenantSystemAdminRole(AuthService.getLoggedInUser());
         List<Tenant> tenants = isAdmin 
-            ? tenantRepository.findAllForTenantAdminAsList() 
-            : tenantRepository.findAllForTenantNonAdminAsList(AuthService.getLoggedInUser().getUserId());
+            ? tenantRepository.findAllForTenantAdminAsList(TenantType.CLIENT) 
+            : tenantRepository.findAllForTenantNonAdminAsList(TenantType.CLIENT, AuthService.getLoggedInUser().getUserId());
         return tenants.stream().map(TenantRes::from).toList();
     }
 
@@ -122,4 +145,3 @@ public class TenantService {
     }
 
 }
-
