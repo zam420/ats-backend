@@ -54,8 +54,8 @@ class JobRichTextSanitizerTest {
     void sanitizesLegacyValuesInDtoAndEntitySerialization() {
         JobPosition position = new JobPosition();
         position.setDescription("<p onclick=\"alert(1)\">Description</p>");
-        position.setMandatoryRequirements("<img src=x onerror=alert(1)><p>Required</p>");
-        position.setPreferredRequirements("<script>alert(1)</script><p>Preferred</p>");
+        // position.setMandatoryRequirements("<img src=x onerror=alert(1)><p>Required</p>");
+        // position.setPreferredRequirements("<script>alert(1)</script><p>Preferred</p>");
 
         JobPositionRes dto = JobPositionRes.from(position);
         assertEquals("<p>Description</p>", dto.getDescription());

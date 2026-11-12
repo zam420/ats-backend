@@ -1,7 +1,6 @@
 package com.deepconnect.ats.job.repo;
 
 import com.deepconnect.ats.job.model.JobPosition;
-import com.deepconnect.ats.job.enums.JobStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import com.deepconnect.ats.common.repo.OperatableBaseRepository;

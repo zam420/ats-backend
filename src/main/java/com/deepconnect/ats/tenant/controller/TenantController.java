@@ -19,10 +19,17 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import org.springframework.core.io.FileSystemResource;
+import org.springframework.http.CacheControl;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.HexFormat;
 
 @RestController
 @RequestMapping("/api/tenant")
@@ -61,7 +68,7 @@ public class TenantController {
     @PreAuthorize("hasAuthority('clns')")
     @GetMapping("/{id}/logo")
     public ResponseEntity<FileSystemResource> logo(@PathVariable @NotBlank String id) {
-        Path path = tenantService.getLogo(id);
+        Path path = tenantService.findLogoByDeactivatedFalseAndPublicId(id);
         String fileName = path.getFileName().toString();
         MediaType type = fileName.endsWith(".svg") ? MediaType.parseMediaType("image/svg+xml")
                 : fileName.endsWith(".png") ? MediaType.IMAGE_PNG : MediaType.IMAGE_JPEG;
@@ -89,6 +96,30 @@ public class TenantController {
     public ApiResult<TenantDetailsRes> findById(
         @PathVariable @NotBlank(message = "{field.common.id}{validation.notBlank}")String id) {
         return ApiResult.success(tenantService.findByDeactivatedFalseAndPublicId(id));
+    }
+
+    @PreAuthorize("hasAuthority('clncur')")
+    @GetMapping("/current")
+    public ApiResult<TenantDetailsRes> findCurrent() {
+        return ApiResult.success(tenantService.findCurrent());
+    }
+
+    @PreAuthorize("hasAuthority('clncur')")
+    @GetMapping("/current/logo")
+    public ResponseEntity<byte[]> currentLogo() throws IOException, NoSuchAlgorithmException {
+        Path path = tenantService.findCurrentLogo();
+        byte[] content = Files.readAllBytes(path);
+        String fileName = path.getFileName().toString();
+        MediaType type = fileName.endsWith(".svg") ? MediaType.parseMediaType("image/svg+xml")
+                : fileName.endsWith(".png") ? MediaType.IMAGE_PNG : MediaType.IMAGE_JPEG;
+        return ResponseEntity.ok()
+                .contentType(type)
+                .cacheControl(CacheControl.noCache().cachePrivate().mustRevalidate())
+                .varyBy(HttpHeaders.AUTHORIZATION)
+                .eTag(HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(content)))
+                .header("Content-Security-Policy", "default-src 'none'; sandbox")
+                .header("X-Content-Type-Options", "nosniff")
+                .body(content);
     }
 
     /**

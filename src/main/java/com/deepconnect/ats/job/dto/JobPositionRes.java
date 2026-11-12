@@ -34,8 +34,8 @@ public class JobPositionRes {
         res.setId(entity.getPublicId());
         res.setTitle(entity.getTitle());
         res.setDescription(JobRichTextSanitizer.sanitize(entity.getDescription()));
-        res.setMandatoryRequirements(JobRichTextSanitizer.sanitize(entity.getMandatoryRequirements()));
-        res.setPreferredRequirements(JobRichTextSanitizer.sanitize(entity.getPreferredRequirements()));
+        // res.setMandatoryRequirements(JobRichTextSanitizer.sanitize(entity.getMandatoryRequirements()));
+        // res.setPreferredRequirements(JobRichTextSanitizer.sanitize(entity.getPreferredRequirements()));
         res.setEmploymentType(entity.getEmploymentTypeId());
         res.setWorkArrangementType(entity.getWorkArrangementTypeId());
         res.setWorkLocation(entity.getWorkLocation());

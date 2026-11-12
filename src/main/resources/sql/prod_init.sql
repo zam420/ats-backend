@@ -16,6 +16,7 @@ INSERT INTO `rbac_permission`(`public_id`, `code`, `name`) VALUES('R1StPos8_Z5r'
 INSERT INTO `rbac_permission`(`public_id`, `code`, `name`) VALUES('VwStGFN8_Z5b','clnc','Client Create'); 
 INSERT INTO `rbac_permission`(`public_id`, `code`, `name`) VALUES('uzpRGBH8_Anw','clne','Client Edit'); 
 INSERT INTO `rbac_permission`(`public_id`, `code`, `name`) VALUES('V9YtXRG8_Z5n','clns','Client Search');
+INSERT INTO `rbac_permission`(`public_id`, `code`, `name`) VALUES('VpTtXRG8_Z5n','clncur','Client Current');#get logged in user's tenant's own logo-available to all roles except Candidate
 -- job position
 INSERT INTO `rbac_permission`(`public_id`, `code`, `name`) VALUES('V1StPos8_Z5r','jpm','job position menu');
 INSERT INTO `rbac_permission`(`public_id`, `code`, `name`) VALUES('V9StGFN8_Z5b','jpc','job position create'); 
@@ -112,6 +113,7 @@ INSERT INTO `rbac_role_permission` (`role_id`, `permission_code`, `permission_id
 INSERT INTO `rbac_role_permission` (`role_id`, `permission_code`, `permission_id`) SELECT 1, 'clnc', `id` FROM `rbac_permission` WHERE `code` = 'clnc'; #Only available to Client Admin and System Admin - Client create
 INSERT INTO `rbac_role_permission` (`role_id`, `permission_code`, `permission_id`) SELECT 1, 'clne', `id` FROM `rbac_permission` WHERE `code` = 'clne'; #Only available to Client Admin and System Admin - Client edit
 INSERT INTO `rbac_role_permission` (`role_id`, `permission_code`, `permission_id`) SELECT 1, 'clns', `id` FROM `rbac_permission` WHERE `code` = 'clns'; #Only available to Client Admin and System Admin - Client search
+INSERT INTO `rbac_role_permission` (`role_id`, `permission_code`, `permission_id`) SELECT 1, 'clncur', `id` FROM `rbac_permission` WHERE `code` = 'clncur'; #available to all roles except Candidate
 INSERT INTO `rbac_role_permission` (`role_id`, `permission_code`, `permission_id`) SELECT 1, 'rpm', `id` FROM `rbac_permission` WHERE `code` = 'rpm'; #not available to HR Recruiter-Recruitment project menu
 INSERT INTO `rbac_role_permission` (`role_id`, `permission_code`, `permission_id`) SELECT 1, 'rpe', `id` FROM `rbac_permission` WHERE `code` = 'rpe'; #not available to HR Recruiter-Recruitment project edit
 INSERT INTO `rbac_role_permission` (`role_id`, `permission_code`, `permission_id`) SELECT 1, 'rps', `id` FROM `rbac_permission` WHERE `code` = 'rps';
@@ -184,8 +186,10 @@ INSERT INTO `rbac_role_permission` (`role_id`, `permission_code`, `permission_id
 INSERT INTO `rbac_role_permission` (`role_id`, `permission_code`, `permission_id`) SELECT 2, 'clnc', `id` FROM `rbac_permission` WHERE `code` = 'clnc'; #Only available to Client Admin and System Admin - Client create
 INSERT INTO `rbac_role_permission` (`role_id`, `permission_code`, `permission_id`) SELECT 2, 'clne', `id` FROM `rbac_permission` WHERE `code` = 'clne'; #Only available to Client Admin and System Admin - Client edit
 INSERT INTO `rbac_role_permission` (`role_id`, `permission_code`, `permission_id`) SELECT 2, 'clns', `id` FROM `rbac_permission` WHERE `code` = 'clns'; #Only available to Client Admin and System Admin - Client search
+INSERT INTO `rbac_role_permission` (`role_id`, `permission_code`, `permission_id`) SELECT 2, 'clncur', `id` FROM `rbac_permission` WHERE `code` = 'clncur'; #available to all roles except Candidate
 
 -- HR Admin
+INSERT INTO `rbac_role_permission` (`role_id`, `permission_code`, `permission_id`) SELECT 101, 'clncur', `id` FROM `rbac_permission` WHERE `code` = 'clncur'; #available to all roles except Candidate
 INSERT INTO `rbac_role_permission` (`role_id`, `permission_code`, `permission_id`) SELECT 101, 'rpm', `id` FROM `rbac_permission` WHERE `code` = 'rpm'; #not available to HR Recruiter-Recruitment project menu
 INSERT INTO `rbac_role_permission` (`role_id`, `permission_code`, `permission_id`) SELECT 101, 'rpe', `id` FROM `rbac_permission` WHERE `code` = 'rpe'; #not available to HR Recruiter-Recruitment project edit
 INSERT INTO `rbac_role_permission` (`role_id`, `permission_code`, `permission_id`) SELECT 101, 'rps', `id` FROM `rbac_permission` WHERE `code` = 'rps';
@@ -251,6 +255,7 @@ INSERT INTO `rbac_role_permission` (`role_id`, `permission_code`, `permission_id
 
 ```sql
 -- HR Recruiters
+INSERT INTO `rbac_role_permission` (`role_id`, `permission_code`, `permission_id`) SELECT 102, 'clncur', `id` FROM `rbac_permission` WHERE `code` = 'clncur'; #available to all roles except Candidate
 INSERT INTO `rbac_role_permission` (`role_id`, `permission_code`, `permission_id`) SELECT 102, 'rps', `id` FROM `rbac_permission` WHERE `code` = 'rps';
 INSERT INTO `rbac_role_permission` (`role_id`, `permission_code`, `permission_id`) SELECT 102, 'jpm', `id` FROM `rbac_permission` WHERE `code` = 'jpm';
 INSERT INTO `rbac_role_permission` (`role_id`, `permission_code`, `permission_id`) SELECT 102, 'jpc', `id` FROM `rbac_permission` WHERE `code` = 'jpc'; 
@@ -299,6 +304,7 @@ INSERT INTO `rbac_role_permission` (`role_id`, `permission_code`, `permission_id
 INSERT INTO `rbac_role_permission` (`role_id`, `permission_code`, `permission_id`) SELECT 102, 'ats', `id` FROM `rbac_permission` WHERE `code` = 'ats';
 
 -- Hiring Managers
+INSERT INTO `rbac_role_permission` (`role_id`, `permission_code`, `permission_id`) SELECT 103, 'clncur', `id` FROM `rbac_permission` WHERE `code` = 'clncur'; #available to all roles except Candidate
 INSERT INTO `rbac_role_permission` (`role_id`, `permission_code`, `permission_id`) SELECT 103, 'jpm', `id` FROM `rbac_permission` WHERE `code` = 'jpm';
 INSERT INTO `rbac_role_permission` (`role_id`, `permission_code`, `permission_id`) SELECT 103, 'jps', `id` FROM `rbac_permission` WHERE `code` = 'jps';
 INSERT INTO `rbac_role_permission` (`role_id`, `permission_code`, `permission_id`) SELECT 103, 'crs', `id` FROM `rbac_permission` WHERE `code` = 'crs'; #candidate resume search
@@ -315,6 +321,7 @@ INSERT INTO `rbac_role_permission` (`role_id`, `permission_code`, `permission_id
 INSERT INTO `rbac_role_permission` (`role_id`, `permission_code`, `permission_id`) SELECT 103, 'ats', `id` FROM `rbac_permission` WHERE `code` = 'ats';
 
 -- Interviewers
+INSERT INTO `rbac_role_permission` (`role_id`, `permission_code`, `permission_id`) SELECT 104, 'clncur', `id` FROM `rbac_permission` WHERE `code` = 'clncur'; #available to all roles except Candidate
 INSERT INTO `rbac_role_permission` (`role_id`, `permission_code`, `permission_id`) SELECT 104, 'crs', `id` FROM `rbac_permission` WHERE `code` = 'crs';
 INSERT INTO `rbac_role_permission` (`role_id`, `permission_code`, `permission_id`) SELECT 104, 'fcrf', `id` FROM `rbac_permission` WHERE `code` = 'fcrf';
 INSERT INTO `rbac_role_permission` (`role_id`, `permission_code`, `permission_id`) SELECT 104, 'crfs', `id` FROM `rbac_permission` WHERE `code` = 'crfs';

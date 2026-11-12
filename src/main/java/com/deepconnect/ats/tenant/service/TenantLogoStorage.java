@@ -33,7 +33,7 @@ import java.util.regex.Pattern;
 @Service
 public class TenantLogoStorage {
     private static final long MAX_BYTES = 1024 * 1024;
-    private static final int MAX_DIMENSION = 140;
+    private static final int MAX_DIMENSION = 280;
     private static final Pattern FILE_NAME = Pattern.compile("[0-9a-f-]{36}\\.(png|jpg|svg)");
     private static final Pattern SVG_LENGTH = Pattern.compile("(?:\\d+(?:\\.\\d+)?|\\.\\d+)(?:px)?");
     private final Path directory;
@@ -168,7 +168,7 @@ public class TenantLogoStorage {
     private void checkDimensions(double width, double height) {
         if (!Double.isFinite(width) || !Double.isFinite(height) || width <= 0 || height <= 0
                 || width > MAX_DIMENSION || height > MAX_DIMENSION) {
-            throw new IllegalArgumentException("Logo dimensions must not exceed 140 x 140 pixels");
+            throw new IllegalArgumentException("Logo dimensions must not exceed 280 x 280 pixels");
         }
     }
 

@@ -11,6 +11,7 @@ import com.deepconnect.ats.tenant.model.Tenant;
 import com.deepconnect.ats.tenant.enums.TenantType;
 
 import java.util.List;
+import java.util.Set;
 
 @Repository
 public interface TenantRepository extends OperatableBaseRepository<Tenant, Long> {
@@ -21,11 +22,11 @@ public interface TenantRepository extends OperatableBaseRepository<Tenant, Long>
 
     java.util.Optional<Tenant> findByDeactivatedFalseAndPublicIdAndType(String publicId, TenantType type);
 
-    @Query("SELECT ip FROM Tenant ip WHERE ip.deactivated = false AND ip.type = :type")
-    Page<Tenant> findAllForTenantAdmin(@Param("type") TenantType type, Pageable pageable);
+    @Query("SELECT ip FROM Tenant ip WHERE ip.deactivated = false AND ip.type IN :type")
+    Page<Tenant> findAllForTenantAdmin(@Param("type") Set<TenantType> type, Pageable pageable);
 
-    @Query("SELECT ip FROM Tenant ip WHERE ip.deactivated = false AND ip.type = :type")
-    List<Tenant> findAllForTenantAdminAsList(@Param("type") TenantType type);
+    @Query("SELECT ip FROM Tenant ip WHERE ip.deactivated = false AND ip.type IN :type")
+    List<Tenant> findAllForTenantAdminAsList(@Param("type") Set<TenantType> type);
 
     @Query("SELECT ip FROM Tenant ip WHERE ip.deactivated = false AND  ip.type = :type AND ip.ownerId = :loggedInUserId")                                                             
     Page<Tenant> findAllForTenantNonAdmin(@Param("type") TenantType type, @Param("loggedInUserId") Long loggedInUserId, Pageable pageable);

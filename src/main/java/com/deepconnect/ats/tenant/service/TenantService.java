@@ -20,6 +20,8 @@ import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import java.util.List;
+import java.util.Set;
+
 import org.springframework.data.domain.Page;
 import org.springframework.web.multipart.MultipartFile;
 import java.nio.file.Path;
@@ -69,10 +71,10 @@ public class TenantService {
     @Transactional
     public String update(TenantReq req, MultipartFile logo) {
         if (req.getId() == null) 
-            throw new InternalServerException(String.format("Invalid Evaluation Plan Id: User: %s, Process: %s", AuthService.getLoggedInUser().getPublicId(), req.getId()));
+            throw new InternalServerException(String.format("Invalid Tenant Id: User: %s, Tenant: %s", AuthService.getLoggedInUser().getPublicId(), req.getId()));
 
-        Tenant tenant = tenantRepository.findByDeactivatedFalseAndPublicIdAndType(req.getId(), TenantType.CLIENT)
-                .orElseThrow(() -> new InternalServerException(String.format("Evaluation Plan not found: User: %s, Plan: %s", AuthService.getLoggedInUser().getPublicId(), req.getId())));
+        Tenant tenant = tenantRepository.findByDeactivatedFalseAndPublicId(req.getId())
+                .orElseThrow(() -> new InternalServerException(String.format("Tenant not found: User: %s, Tenant: %s", AuthService.getLoggedInUser().getPublicId(), req.getId())));
 
         LoggedInUserDetails loggedInUser = AuthService.getLoggedInUser();
         this.assertUniqueWithinAllForUpdate(req.getName(), tenant.getId());
@@ -101,9 +103,25 @@ public class TenantService {
     }
 
     @Transactional(readOnly = true)
-    public Path getLogo(String publicId) {
-        Tenant tenant = tenantRepository.findByDeactivatedFalseAndPublicIdAndType(publicId, TenantType.CLIENT)
-                .orElseThrow(() -> new InternalServerException("Tenant not found: " + publicId));
+    public TenantDetailsRes findCurrent() {
+        return TenantDetailsRes.from(getCurrentTenant());
+    }
+
+    @Transactional(readOnly = true)
+    public Path findCurrentLogo() {
+        return logoStorage.getPath(getCurrentTenant().getLogoPath());
+    }
+
+    private Tenant getCurrentTenant() {
+        Tenant tenant = tenantRepository.findByDeactivatedFalseAndId(AuthService.getLoggedInUser().getTenantId())
+                .orElseThrow(() -> new InternalServerException("Tenant not found: User:" + AuthService.getLoggedInUser().getPublicId()));
+        return tenant;
+    }
+
+    @Transactional(readOnly = true)
+    public Path findLogoByDeactivatedFalseAndPublicId(String tenantPublicId) {
+        Tenant tenant = tenantRepository.findByDeactivatedFalseAndPublicIdAndType(tenantPublicId, TenantType.CLIENT)
+                .orElseThrow(() -> new InternalServerException("Tenant not found: " + tenantPublicId));
         tenantAccessService.assertReadAccess(AuthService.getLoggedInUser(), tenant);
         return logoStorage.getPath(tenant.getLogoPath());
     }
@@ -112,7 +130,7 @@ public class TenantService {
     public AtsPageRsp<TenantRes> findAll(AtsPageQuery query) {
         boolean isAdmin = tenantAccessService.isUserInTenantSystemAdminRole(AuthService.getLoggedInUser());
         Page<Tenant> page = isAdmin 
-            ? tenantRepository.findAllForTenantAdmin(TenantType.CLIENT, query.toPageable()) 
+            ? tenantRepository.findAllForTenantAdmin(Set.of(TenantType.CLIENT, TenantType.OWNER), query.toPageable()) 
             : tenantRepository.findAllForTenantNonAdmin(TenantType.CLIENT, AuthService.getLoggedInUser().getUserId(), query.toPageable());
         return AtsPageRsp.of(page.map(TenantRes::from));
     }
@@ -126,7 +144,7 @@ public class TenantService {
     public List<TenantRes> findAllAsList() {
         boolean isAdmin = tenantAccessService.isUserInTenantSystemAdminRole(AuthService.getLoggedInUser());
         List<Tenant> tenants = isAdmin 
-            ? tenantRepository.findAllForTenantAdminAsList(TenantType.CLIENT) 
+            ? tenantRepository.findAllForTenantAdminAsList(Set.of(TenantType.CLIENT, TenantType.OWNER)) 
             : tenantRepository.findAllForTenantNonAdminAsList(TenantType.CLIENT, AuthService.getLoggedInUser().getUserId());
         return tenants.stream().map(TenantRes::from).toList();
     }

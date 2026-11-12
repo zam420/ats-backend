@@ -54,16 +54,16 @@ public class JobPosition extends OperatableBaseWithTenantEntity {
     @Length(max = 10000, message = "{field.job.description}{validation.lengthMax}")
     private String description;
 
-    @Column(nullable = false, length = 5000, columnDefinition = "TEXT")
-    @JsonSerialize(using = JobRichTextSerializer.class)
-    @NotBlank(message = "{field.job.mandatoryRequirements}{validation.notBlank}")
-    @Length(max = 5000, message = "{field.job.mandatoryRequirements}{validation.lengthMax}")
-    private String mandatoryRequirements;
+    // @Column(nullable = false, length = 5000, columnDefinition = "TEXT")
+    // @JsonSerialize(using = JobRichTextSerializer.class)
+    // @NotBlank(message = "{field.job.mandatoryRequirements}{validation.notBlank}")
+    // @Length(max = 5000, message = "{field.job.mandatoryRequirements}{validation.lengthMax}")
+    // private String mandatoryRequirements;
 
-    @Column(nullable = true, length = 5000, columnDefinition = "TEXT")
-    @JsonSerialize(using = JobRichTextSerializer.class)
-    @Length(max = 5000, message = "{field.job.preferredRequirements}{validation.lengthMax}")
-    private String preferredRequirements;
+    // @Column(nullable = true, length = 5000, columnDefinition = "TEXT")
+    // @JsonSerialize(using = JobRichTextSerializer.class)
+    // @Length(max = 5000, message = "{field.job.preferredRequirements}{validation.lengthMax}")
+    // private String preferredRequirements;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "employmentTypeId", referencedColumnName = "id", insertable = false, updatable = false)

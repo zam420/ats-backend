@@ -4,22 +4,29 @@ import com.deepconnect.ats.tenant.dto.TenantReq;
 import com.deepconnect.ats.tenant.service.TenantService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 class TenantControllerTest {
+    @TempDir Path tempDir;
     private TenantService service;
     private MockMvc mvc;
 
@@ -60,5 +67,35 @@ class TenantControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.result.id", is("tenant-id")));
         verify(service).update(argThat(req -> req.getId().equals("tenant-id")), isNull());
+    }
+
+    @Test
+    void currentLogoUsesPrivateRevalidatingCacheAndUpdatesEtag() throws Exception {
+        Path logo = tempDir.resolve("logo.svg");
+        byte[] first = "<svg>first</svg>".getBytes(StandardCharsets.UTF_8);
+        Files.write(logo, first);
+        when(service.findCurrentLogo()).thenReturn(logo);
+
+        var response = mvc.perform(get("/api/tenant/current/logo"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("image/svg+xml"))
+                .andExpect(content().bytes(first))
+                .andExpect(header().string(HttpHeaders.CACHE_CONTROL, "no-cache, must-revalidate, private"))
+                .andExpect(header().string(HttpHeaders.VARY, HttpHeaders.AUTHORIZATION))
+                .andExpect(header().string("X-Content-Type-Options", "nosniff"))
+                .andExpect(header().string("Content-Security-Policy", "default-src 'none'; sandbox"))
+                .andReturn().getResponse();
+        String etag = response.getHeader(HttpHeaders.ETAG);
+        assertNotNull(etag);
+
+        mvc.perform(get("/api/tenant/current/logo").header(HttpHeaders.IF_NONE_MATCH, etag))
+                .andExpect(status().isNotModified())
+                .andExpect(content().string(""))
+                .andExpect(header().string(HttpHeaders.ETAG, etag));
+        Files.writeString(logo, "<svg>changed</svg>");
+        mvc.perform(get("/api/tenant/current/logo").header(HttpHeaders.IF_NONE_MATCH, etag))
+                .andExpect(status().isOk())
+                .andExpect(content().string("<svg>changed</svg>"));
+        verify(service, times(3)).findCurrentLogo();
     }
 }

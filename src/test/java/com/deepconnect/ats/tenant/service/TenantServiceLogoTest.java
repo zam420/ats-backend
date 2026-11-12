@@ -5,6 +5,7 @@ import com.deepconnect.ats.auth.service.AuthService;
 import com.deepconnect.ats.common.exception.InternalServerException;
 import com.deepconnect.ats.tenant.dto.TenantReq;
 import com.deepconnect.ats.tenant.model.Tenant;
+import com.deepconnect.ats.tenant.enums.TenantType;
 import com.deepconnect.ats.tenant.repo.TenantRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
@@ -32,14 +33,14 @@ class TenantServiceLogoTest {
         Tenant tenant = new Tenant();
         tenant.setOwnerId(3L);
         tenant.setLogoPath("logo.png");
-        when(repository.findByDeactivatedFalseAndPublicId("tenant")).thenReturn(Optional.of(tenant));
+        when(repository.findByDeactivatedFalseAndPublicIdAndType("tenant", TenantType.CLIENT)).thenReturn(Optional.of(tenant));
         try (MockedStatic<AuthService> auth = Mockito.mockStatic(AuthService.class)) {
             auth.when(AuthService::getLoggedInUser).thenReturn(user);
-            assertThrows(InternalServerException.class, () -> service.getLogo("tenant"));
+            assertThrows(InternalServerException.class, () -> service.findLogoByDeactivatedFalseAndPublicId("tenant"));
             verifyNoInteractions(logos);
             tenant.setOwnerId(2L);
             when(logos.getPath("logo.png")).thenReturn(Path.of("logo.png"));
-            assertEquals(Path.of("logo.png"), service.getLogo("tenant"));
+            assertEquals(Path.of("logo.png"), service.findLogoByDeactivatedFalseAndPublicId("tenant"));
         }
     }
 
@@ -53,14 +54,51 @@ class TenantServiceLogoTest {
         TenantReq req = new TenantReq();
         req.setId("tenant");
         req.setName("New name");
-        when(repository.findByDeactivatedFalseAndPublicId("tenant")).thenReturn(Optional.of(tenant));
+        when(repository.findByDeactivatedFalseAndPublicIdAndType("tenant", TenantType.CLIENT)).thenReturn(Optional.of(tenant));
         when(repository.save(any(Tenant.class))).thenAnswer(invocation -> invocation.getArgument(0));
         try (MockedStatic<AuthService> auth = Mockito.mockStatic(AuthService.class)) {
             auth.when(AuthService::getLoggedInUser).thenReturn(user);
             assertEquals("tenant", service.update(req, null));
         }
+
         assertEquals("old-logo.png", tenant.getLogoPath());
         verifyNoInteractions(logos);
+    }
+
+    @Test
+    void currentLogoUsesAuthenticatedUsersActiveTenant() {
+        Tenant tenant = new Tenant();
+        tenant.setOwnerId(99L);
+        tenant.setLogoPath("current-logo.png");
+        when(repository.findByDeactivatedFalseAndId(1L)).thenReturn(Optional.of(tenant));
+        when(logos.getPath("current-logo.png")).thenReturn(Path.of("current-logo.png"));
+        try (MockedStatic<AuthService> auth = Mockito.mockStatic(AuthService.class)) {
+            auth.when(AuthService::getLoggedInUser).thenReturn(user);
+            assertEquals(Path.of("current-logo.png"), service.findCurrentLogo());
+        }
+        verify(repository).findByDeactivatedFalseAndId(1L);
+        verifyNoMoreInteractions(repository);
+    }
+
+    @Test
+    void currentLogoFailsWhenTenantIsNotActiveOrMissing() {
+        when(repository.findByDeactivatedFalseAndId(1L)).thenReturn(Optional.empty());
+        try (MockedStatic<AuthService> auth = Mockito.mockStatic(AuthService.class)) {
+            auth.when(AuthService::getLoggedInUser).thenReturn(user);
+            assertThrows(InternalServerException.class, service::findCurrentLogo);
+        }
+        verifyNoInteractions(logos);
+    }
+
+    @Test
+    void currentLogoPropagatesMissingLogoFailure() {
+        Tenant tenant = new Tenant();
+        when(repository.findByDeactivatedFalseAndId(1L)).thenReturn(Optional.of(tenant));
+        when(logos.getPath(null)).thenThrow(new IllegalArgumentException("Tenant has no logo"));
+        try (MockedStatic<AuthService> auth = Mockito.mockStatic(AuthService.class)) {
+            auth.when(AuthService::getLoggedInUser).thenReturn(user);
+            assertThrows(IllegalArgumentException.class, service::findCurrentLogo);
+        }
     }
 
     @Test

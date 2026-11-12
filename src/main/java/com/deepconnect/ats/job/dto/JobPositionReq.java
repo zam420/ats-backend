@@ -22,12 +22,12 @@ public class JobPositionReq {
     @Length(max = 10000, message = "{field.job.description}{validation.lengthMax}")
     private String description;
 
-    @NotBlank(message = "{field.job.mandatoryRequirements}{validation.notBlank}")
-    @Length(max = 5000, message = "{field.job.mandatoryRequirements}{validation.lengthMax}")
-    private String mandatoryRequirements;
+    // @NotBlank(message = "{field.job.mandatoryRequirements}{validation.notBlank}")
+    // @Length(max = 5000, message = "{field.job.mandatoryRequirements}{validation.lengthMax}")
+    // private String mandatoryRequirements;
 
-    @Length(max = 5000, message = "{field.job.preferredRequirements}{validation.lengthMax}")
-    private String preferredRequirements;
+    // @Length(max = 5000, message = "{field.job.preferredRequirements}{validation.lengthMax}")
+    // private String preferredRequirements;
 
     @NotNull(message = "{field.job.employmentType}{validation.notBlank}")
     private Integer employmentType;

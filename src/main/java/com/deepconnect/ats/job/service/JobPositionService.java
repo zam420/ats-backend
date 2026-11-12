@@ -56,8 +56,8 @@ public class JobPositionService {
         LoggedInUserDetails loggedInUser = AuthService.getLoggedInUser();
         position.setTitle(req.getTitle());
         position.setDescription(JobRichTextSanitizer.sanitize(req.getDescription()));
-        position.setMandatoryRequirements(JobRichTextSanitizer.sanitize(req.getMandatoryRequirements()));
-        position.setPreferredRequirements(JobRichTextSanitizer.sanitize(req.getPreferredRequirements()));
+        // position.setMandatoryRequirements(JobRichTextSanitizer.sanitize(req.getMandatoryRequirements()));
+        // position.setPreferredRequirements(JobRichTextSanitizer.sanitize(req.getPreferredRequirements()));
         position.setEmploymentTypeId(req.getEmploymentType());
         position.setWorkArrangementTypeId(req.getWorkArrangementType());
         position.setWorkLocation(req.getWorkLocation());
