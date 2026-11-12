@@ -19,6 +19,8 @@ import com.deepconnect.ats.recruitmentpipeline.model.RecruitmentPipeline;
 import com.deepconnect.ats.user.model.User;
 import com.deepconnect.ats.common.model.OperatableBaseWithTenantEntity;
 import com.deepconnect.ats.job.enums.JobStatus;
+import com.deepconnect.ats.screeningquestionsform.model.ScreeningQuestionsForm;
+
 import com.deepconnect.ats.job.security.JobRichTextSerializer;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
@@ -127,6 +129,20 @@ public class JobPosition extends OperatableBaseWithTenantEntity {
     @Column(columnDefinition = "json", nullable = false)
     @NotEmpty(message = "{field.job.hiringManagers}{validation.notEmpty}")
     private List<String> hiringManagers;
+
+
+    /* SCREENING QUESTION FORMS FIELDS */
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "screeningQuestionsFormId", referencedColumnName = "id", insertable = false, updatable = false)
+    private ScreeningQuestionsForm screeningQuestionsForm;
+
+    @Column(name = "screeningQuestionsFormId", nullable = false)
+    @NotNull(message = "{field.job.screeningQuestionsForm}{validation.notBlank}")
+    private Long screeningQuestionsFormId;
+
+    @Column(name = "screeningQuestionsFormPublicId", nullable = false)
+    private String screeningQuestionsFormPublicId;
 
 
     /* RECRUITMENT PIPELINE FIELDS */

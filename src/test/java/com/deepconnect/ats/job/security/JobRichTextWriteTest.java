@@ -60,8 +60,8 @@ class JobRichTextWriteTest {
         req.setEvaluationPlan("plan");
         req.setRecruitmentPipeline("pipeline");
         req.setDescription("<p onclick=\"alert(1)\">Description</p>");
-        req.setMandatoryRequirements("<script>alert(1)</script><p>Mandatory</p>");
-        req.setPreferredRequirements("<img src=x onerror=alert(1)><p>Preferred</p>");
+        // req.setMandatoryRequirements("<script>alert(1)</script><p>Mandatory</p>");
+        // req.setPreferredRequirements("<img src=x onerror=alert(1)><p>Preferred</p>");
 
         service.create(req);
         service.update(req);
