@@ -9,6 +9,7 @@ import com.deepconnect.ats.auth.dto.LoggedInUserDetails;
 import com.deepconnect.ats.common.exception.InternalServerException;
 import com.deepconnect.ats.tenant.dto.TenantReq;
 import com.deepconnect.ats.tenant.dto.TenantRes;
+import com.deepconnect.ats.tenant.enums.TenantType;
 import com.deepconnect.ats.tenant.dto.TenantDetailsRes;
 import com.deepconnect.ats.dto.AtsPageQuery;
 import com.deepconnect.ats.dto.AtsPageRsp;
@@ -35,6 +36,7 @@ public class TenantService {
         plan.setModifiedByUserPublicId(loggedInUser.getPublicId());
         plan.setName(req.getName());
         plan.setDescription(req.getDescription());
+        plan.setType(TenantType.CLIENT);
         return tenantRepository.save(plan).getPublicId();
     }
 
