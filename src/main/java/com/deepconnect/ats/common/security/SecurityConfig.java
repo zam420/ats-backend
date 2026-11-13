@@ -81,7 +81,7 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
         //config.setAllowedOriginPatterns(Collections.singletonList("*"));
-        config.addAllowedOrigin("http://localhost:3001");     // local React dev server
+        config.addAllowedOriginPattern("http://localhost:*");     // local React dev server
         config.addAllowedOriginPattern("http://127.0.0.1:*");
         config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "Accept", "X-Requested-With"));
