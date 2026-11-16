@@ -4,11 +4,15 @@ import lombok.Data;
 
 import java.util.List;
 import jakarta.validation.constraints.NotNull;
+import jakarta.persistence.Column;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.Range;
 
+import com.deepconnect.ats.job.enums.JobQuestionsDisplayMode;
 import com.deepconnect.ats.job.model.JobEvaluationPlanRound;
 import com.deepconnect.ats.job.model.JobRecruitmentPipelineRound;
 import com.deepconnect.ats.job.model.JobScreeningQuestion;
@@ -56,6 +60,8 @@ public class JobPositionReq {
 
     @NotEmpty(message = "{field.job.hiringManagers}{validation.notEmpty}")
     private List<String> hiringManagers;
+
+    private JobQuestionsDisplayMode applicationQuestionsDisplayMode;
 
     private List<JobScreeningQuestion> screeningQuestions;
 

@@ -9,6 +9,7 @@ import com.deepconnect.ats.job.model.JobPosition;
 import com.deepconnect.ats.job.model.JobRecruitmentPipelineRound;
 import com.deepconnect.ats.job.model.JobScreeningQuestion;
 import com.deepconnect.ats.job.security.JobRichTextSanitizer;
+import com.deepconnect.ats.job.enums.JobQuestionsDisplayMode;
 import com.deepconnect.ats.job.enums.JobStatus;
 
 @Data
@@ -28,6 +29,7 @@ public class JobPositionRes {
     private String department;
     private List<String> recruiters;
     private List<String> hiringManagers;
+    private JobQuestionsDisplayMode applicationQuestionsDisplayMode;
     private List<ScreeningQuestion> screeningQuestions;
     private List<RecruitmentRound> recruitmentPipelineRounds;
     private List<EvaluationRound> evaluationPlanRounds;
@@ -76,6 +78,7 @@ public class JobPositionRes {
         res.setDepartment(entity.getDepartment());
         res.setRecruiters(entity.getRecruiters());
         res.setHiringManagers(entity.getHiringManagers());
+        res.setApplicationQuestionsDisplayMode(entity.getApplicationQuestionsDisplayMode());
         if(!CollectionUtils.isEmpty(entity.getScreeningQuestions())) {
             res.setScreeningQuestions(entity.getScreeningQuestions().stream().map(ScreeningQuestion::from).toList());
         }

@@ -17,6 +17,7 @@ import java.util.List;
 
 import com.deepconnect.ats.user.model.User;
 import com.deepconnect.ats.common.model.OperatableBaseWithTenantEntity;
+import com.deepconnect.ats.job.enums.JobQuestionsDisplayMode;
 import com.deepconnect.ats.job.enums.JobStatus;
 
 import com.deepconnect.ats.job.security.JobRichTextSerializer;
@@ -117,6 +118,13 @@ public class JobPosition extends OperatableBaseWithTenantEntity {
     @Column(columnDefinition = "json", nullable = false)
     @NotEmpty(message = "{field.job.hiringManagers}{validation.notEmpty}")
     private List<String> hiringManagers;
+
+
+    // FOR JOB DISPLAY CONFIGURATION
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 30)
+    @Builder.Default
+    private JobQuestionsDisplayMode applicationQuestionsDisplayMode = JobQuestionsDisplayMode.WITH_DESCRIPTION;
 
 
     /* SCREENING QUESTION FORMS FIELDS */

@@ -87,6 +87,7 @@ public class JobPositionService {
         position.setDepartment(req.getDepartment());
         position.setRecruiters(req.getRecruiters());
         position.setHiringManagers(req.getHiringManagers());
+        position.setApplicationQuestionsDisplayMode(req.getApplicationQuestionsDisplayMode());
 
         position = jobPositionRepository.save(position);
         if (evaluationPlanRoundsChanged){
