@@ -5,6 +5,7 @@ import java.util.stream.Collectors;
 import java.util.Locale;
 
 import com.deepconnect.ats.auth.service.AuthService;
+import com.deepconnect.ats.common.enums.CustomExceptionType;
 import com.deepconnect.ats.auth.dto.LoggedInUserDetails;
 
 import org.apache.commons.lang3.ArrayUtils;
@@ -82,7 +83,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<ErrorRsp> handleBadCredentialsException(BadCredentialsException ex, HttpServletRequest request) {
-        String message = messageSource.getMessage("exception.authInvalid", null, request.getLocale());
+    String message = messageSource.getMessage(CustomException.getFullMessageKey(CustomExceptionType.AUTH_INVALID), null, request.getLocale());
         log.warn("Invalid username/password | Reason: {} | URI: {} | IP: {} | Info: {}", 
             message,
             request.getRequestURI(),
@@ -104,7 +105,7 @@ public class GlobalExceptionHandler {
         Locale locale = request.getLocale();
         String fieldName = messageSource.getMessage(ex.getFieldKey(), null, locale);
         String message = messageSource.getMessage(ex.getMessageKey(), ArrayUtils.addFirst(ex.getArgs(), fieldName), locale);
-        return new ResponseEntity<>(ErrorRsp.of(message, HttpStatus.BAD_REQUEST.value()), HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(ErrorRsp.of(message + fieldName, HttpStatus.BAD_REQUEST.value()), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(SocketException.class)
@@ -132,7 +133,9 @@ public class GlobalExceptionHandler {
             ex.getMessage()
             ,ex     //uncomment the following if we want to log the full stack trace of the exception
         );
-        return new ResponseEntity<>(ErrorRsp.of(ex.getMessage() != null ? ex.getMessage() : "Internal server error", HttpStatus.INTERNAL_SERVER_ERROR.value()), HttpStatus.INTERNAL_SERVER_ERROR);
+        Locale locale = request.getLocale();
+        String message = messageSource.getMessage(CustomException.getFullMessageKey(CustomExceptionType.INTERNAL_SERVER_ERROR), null, locale);
+        return new ResponseEntity<>(ErrorRsp.of(message, HttpStatus.INTERNAL_SERVER_ERROR.value()), HttpStatus.INTERNAL_SERVER_ERROR);
     }
     /*
     

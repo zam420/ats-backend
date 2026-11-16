@@ -54,7 +54,7 @@ public class ScreeningQuestionsFormController {
     }
 
     @PreAuthorize("hasAuthority('sqts')")
-    @GetMapping("/roundtypes")
+    @GetMapping("/controltypes")
     public ApiResult<List<ScreeningQuestionType>> findAllScreeningQuestionTypes() throws Exception {
         return ApiResult.success(screeningQuestionTemplateService.findAllScreeningQuestionTypes());
     }

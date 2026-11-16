@@ -1,6 +1,5 @@
 package com.deepconnect.ats.tenant.service;
 
-import org.springframework.util.CollectionUtils;
 import java.util.Objects;
 import org.springframework.stereotype.Service;
 

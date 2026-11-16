@@ -1,6 +1,8 @@
 package com.deepconnect.ats.job.security;
 import com.deepconnect.ats.job.service.JobPositionAccessService;
 import com.deepconnect.ats.screeningquestionsform.repo.ScreeningQuestionTypeRepository;
+import com.deepconnect.ats.screeningquestionsform.service.ScreeningQuestionsFormService;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -26,14 +28,20 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
+import com.deepconnect.ats.job.repo.JobEvaluationPlanRoundRepository;
+import com.deepconnect.ats.job.repo.JobRecruitmentPipelineRoundRepository;
+import com.deepconnect.ats.job.repo.JobScreeningQuestionRepository;
 
 class JobRichTextWriteTest {
     private final EvaluationPlanService plans = mock(EvaluationPlanService.class);
     private final RecruitmentPipelineService pipelines = mock(RecruitmentPipelineService.class);
     private final JobPositionRepository positions = mock(JobPositionRepository.class);
     private final JobPositionService service = new JobPositionService(plans, pipelines,
-            mock(JobPositionAccessService.class), mock(UserServiceV2.class), positions, mock(JobEmploymentTypeRepository.class),
-            mock(JobWorkArrangementTypeRepository.class),  mock(ScreeningQuestionTypeRepository.class));
+            mock(JobPositionAccessService.class), mock(ScreeningQuestionsFormService.class), 
+            mock(UserServiceV2.class), positions, mock(JobEmploymentTypeRepository.class),
+            mock(JobWorkArrangementTypeRepository.class),  
+            mock(JobEvaluationPlanRoundRepository.class), mock(JobRecruitmentPipelineRoundRepository.class), 
+            mock(JobScreeningQuestionRepository.class));
 
     @AfterEach
     void clearAuthentication() {
@@ -57,8 +65,8 @@ class JobRichTextWriteTest {
 
         JobPositionReq req = new JobPositionReq();
         req.setId("job");
-        req.setEvaluationPlan("plan");
-        req.setRecruitmentPipeline("pipeline");
+        // req.setEvaluationPlan("plan");
+        // req.setRecruitmentPipeline("pipeline");
         req.setDescription("<p onclick=\"alert(1)\">Description</p>");
         // req.setMandatoryRequirements("<script>alert(1)</script><p>Mandatory</p>");
         // req.setPreferredRequirements("<img src=x onerror=alert(1)><p>Preferred</p>");

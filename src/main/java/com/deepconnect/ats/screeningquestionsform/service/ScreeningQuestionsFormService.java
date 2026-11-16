@@ -10,7 +10,6 @@ import com.deepconnect.ats.dto.AtsPageRsp;
 import com.deepconnect.ats.user.model.User;
 import com.deepconnect.ats.user.service.UserServiceV2;
 import com.deepconnect.ats.common.enums.AccessType;
-import com.deepconnect.ats.common.utils.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import com.deepconnect.ats.common.enums.ValidationFieldType;
 import com.deepconnect.ats.common.exception.ValidationException;
@@ -35,7 +34,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
@@ -148,7 +146,7 @@ public class ScreeningQuestionsFormService {
             setAnotherUserAsOwner(template, screeningQuestionTemplateAccessService.getAccessType(loggedInUser, template), req.getOwnerId());
         }
 
-        boolean roundsChanged = !questionsEqual(template.getQuestions(), req.getQuestions());
+        boolean roundsChanged = !ScreeningQuestionHelper.questionsEqual(template.getQuestions(), req.getQuestions());
         if (roundsChanged) {
             screeningQuestionRepository.deleteByScreeningQuestionsFormId(template.getId());
         }
@@ -208,7 +206,7 @@ public class ScreeningQuestionsFormService {
         LoggedInUserDetails loggedInUser = AuthService.getLoggedInUser();
         this.assertUniqueWithinAllForUpdate(req.getName(), template.getId());
         screeningQuestionTemplateAccessService.assertWriteAccess(loggedInUser, template);
-        boolean roundsChanged = !questionsEqual(template.getQuestions(), req.getQuestions());
+        boolean roundsChanged = !ScreeningQuestionHelper.questionsEqual(template.getQuestions(), req.getQuestions());
         if (roundsChanged) {
             screeningQuestionRepository.deleteByScreeningQuestionsFormId(template.getId());
         }
@@ -331,41 +329,6 @@ public class ScreeningQuestionsFormService {
                 return false;
         }
         
-        return true;
-    }
-
-    /**
-     * Checks whether two lists of screening questions are equal. Null lists are treated as empty.
-     * The lists are equal when they have the same size and, comparing position by position,
-     * every pair has the same order, question type, label, description, options, default option,
-     * mandatory flag, multi-select flag, character limit and heading level. Label and description
-     * are compared with null and blank treated as the same value. Options are compared in sequence.
-     *
-     * @param existing the screening questions currently stored
-     * @param incoming the screening questions from the request
-     * @return true if both lists are equivalent, false otherwise
-     */
-    private boolean questionsEqual(List<ScreeningQuestion> existing, List<ScreeningQuestion> incoming) {
-        List<ScreeningQuestion> a = existing == null ? List.of() : existing;
-        List<ScreeningQuestion> b = incoming == null ? List.of() : incoming;
-        if (a.size() != b.size())
-            return false;
-        for (int i = 0; i < a.size(); i++) {
-            ScreeningQuestion x = a.get(i);
-            ScreeningQuestion y = b.get(i);
-            if (!Objects.equals(x.getOrder(), y.getOrder())
-                    || !Objects.equals(x.getScreeningQuestionTypeId(), y.getScreeningQuestionTypeId())
-                    || !Objects.equals(StringUtils.blankToNullAndTrim(x.getLabel()), StringUtils.blankToNullAndTrim(y.getLabel()))
-                    || !Objects.equals(StringUtils.blankToNullAndTrim(x.getDescription()), StringUtils.blankToNullAndTrim(y.getDescription()))
-                    || !Objects.equals(x.getOptions(), y.getOptions())
-                    || !Objects.equals(x.getDefaultOption(), y.getDefaultOption())
-                    || !Objects.equals(x.getIsMandatory(), y.getIsMandatory())
-                    || !Objects.equals(x.getIsDropDownMultiSelect(), y.getIsDropDownMultiSelect())
-                    || !Objects.equals(x.getMaxChars(), y.getMaxChars())
-                    || !Objects.equals(x.getHeadingLevel(), y.getHeadingLevel())) {
-                return false;
-            }
-        }
         return true;
     }
 

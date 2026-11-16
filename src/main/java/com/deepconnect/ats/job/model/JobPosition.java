@@ -1,6 +1,7 @@
 package com.deepconnect.ats.job.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -14,14 +15,12 @@ import org.hibernate.validator.constraints.Range;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import com.deepconnect.ats.evaluationplan.model.EvaluationPlan;
-import com.deepconnect.ats.recruitmentpipeline.model.RecruitmentPipeline;
 import com.deepconnect.ats.user.model.User;
 import com.deepconnect.ats.common.model.OperatableBaseWithTenantEntity;
 import com.deepconnect.ats.job.enums.JobStatus;
-import com.deepconnect.ats.screeningquestionsform.model.ScreeningQuestionsForm;
 
 import com.deepconnect.ats.job.security.JobRichTextSerializer;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 @Entity
@@ -55,17 +54,6 @@ public class JobPosition extends OperatableBaseWithTenantEntity {
     @NotBlank(message = "{field.job.description}{validation.notBlank}")
     @Length(max = 10000, message = "{field.job.description}{validation.lengthMax}")
     private String description;
-
-    // @Column(nullable = false, length = 5000, columnDefinition = "TEXT")
-    // @JsonSerialize(using = JobRichTextSerializer.class)
-    // @NotBlank(message = "{field.job.mandatoryRequirements}{validation.notBlank}")
-    // @Length(max = 5000, message = "{field.job.mandatoryRequirements}{validation.lengthMax}")
-    // private String mandatoryRequirements;
-
-    // @Column(nullable = true, length = 5000, columnDefinition = "TEXT")
-    // @JsonSerialize(using = JobRichTextSerializer.class)
-    // @Length(max = 5000, message = "{field.job.preferredRequirements}{validation.lengthMax}")
-    // private String preferredRequirements;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "employmentTypeId", referencedColumnName = "id", insertable = false, updatable = false)
@@ -133,43 +121,25 @@ public class JobPosition extends OperatableBaseWithTenantEntity {
 
     /* SCREENING QUESTION FORMS FIELDS */
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "screeningQuestionsFormId", referencedColumnName = "id", insertable = false, updatable = false)
-    private ScreeningQuestionsForm screeningQuestionsForm;
-
-    @Column(name = "screeningQuestionsFormId", nullable = false)
-    @NotNull(message = "{field.job.screeningQuestionsForm}{validation.notBlank}")
-    private Long screeningQuestionsFormId;
-
-    @Column(name = "screeningQuestionsFormPublicId", nullable = false)
-    private String screeningQuestionsFormPublicId;
+    @Valid
+    @JsonManagedReference("screeningQuestions")
+    @OneToMany(mappedBy = "jobPosition", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<JobScreeningQuestion> screeningQuestions;
 
 
     /* RECRUITMENT PIPELINE FIELDS */
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "recruitmentPipelineId", referencedColumnName = "id", insertable = false, updatable = false)
-    private RecruitmentPipeline recruitmentPipeline;
-
-    @Column(name = "recruitmentPipelineId", nullable = false)
-    @NotNull(message = "{field.job.recruitmentPipeline}{validation.notBlank}")
-    private Long recruitmentPipelineId;
-
-    @Column(name = "recruitmentPipelinePublicId", nullable = false)
-    private String recruitmentPipelinePublicId;
+    @Valid
+    @JsonManagedReference("recruitment_pipeline_rounds")
+    @OneToMany(mappedBy = "jobPosition", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<JobRecruitmentPipelineRound> recruitmentPipelineRounds;
 
     /* EVALUATION PLAN FIELDS */
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "evaluationPlanId", referencedColumnName = "id", insertable = false, updatable = false)
-    private EvaluationPlan evaluationPlan;
-
-    @Column(name = "evaluationPlanId", nullable = false)
-    @NotNull(message = "{field.job.evaluationPlan}{validation.notBlank}")
-    private Long evaluationPlanId;
-
-    @Column(name = "evaluationPlanPublicId", nullable = false)
-    private String evaluationPlanPublicId;
+    @Valid
+    @JsonManagedReference("evaluation_plan_rounds")
+    @OneToMany(mappedBy = "jobPosition", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<JobEvaluationPlanRound> evaluationPlanRounds;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 30)

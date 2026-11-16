@@ -1,6 +1,7 @@
 package com.deepconnect.ats.screeningquestiontemplate.service;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
@@ -35,6 +36,22 @@ class ScreeningQuestionTemplateServiceTest {
 
     private boolean equal(List<ScreeningQuestion> existing, List<ScreeningQuestion> incoming) {
         return Boolean.TRUE.equals(ReflectionTestUtils.invokeMethod(service, "questionsEqual", existing, incoming));
+    }
+
+    @Test
+    void builderIncludesInheritedAndQuestionFieldsAndPreservesDefaults() {
+        ScreeningQuestion question = ScreeningQuestion.builder()
+                .id(42L)
+                .label("Label")
+                .screeningQuestionsFormId(12L)
+                .build();
+        assertEquals(42L, question.getId());
+        assertEquals("Label", question.getLabel());
+        assertEquals(12L, question.getScreeningQuestionsFormId());
+        assertFalse(question.getIsMandatory());
+        assertFalse(question.getIsDropDownMultiSelect());
+        assertFalse(new ScreeningQuestion().getIsMandatory());
+        assertFalse(new ScreeningQuestion().getIsDropDownMultiSelect());
     }
 
     @Test

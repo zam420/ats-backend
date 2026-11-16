@@ -9,6 +9,10 @@ import jakarta.validation.constraints.NotEmpty;
 import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.Range;
 
+import com.deepconnect.ats.job.model.JobEvaluationPlanRound;
+import com.deepconnect.ats.job.model.JobRecruitmentPipelineRound;
+import com.deepconnect.ats.job.model.JobScreeningQuestion;
+
 @Data
 public class JobPositionReq {
 
@@ -21,13 +25,6 @@ public class JobPositionReq {
     @NotBlank(message = "{field.job.description}{validation.notBlank}")
     @Length(max = 10000, message = "{field.job.description}{validation.lengthMax}")
     private String description;
-
-    // @NotBlank(message = "{field.job.mandatoryRequirements}{validation.notBlank}")
-    // @Length(max = 5000, message = "{field.job.mandatoryRequirements}{validation.lengthMax}")
-    // private String mandatoryRequirements;
-
-    // @Length(max = 5000, message = "{field.job.preferredRequirements}{validation.lengthMax}")
-    // private String preferredRequirements;
 
     @NotNull(message = "{field.job.employmentType}{validation.notBlank}")
     private Integer employmentType;
@@ -60,11 +57,13 @@ public class JobPositionReq {
     @NotEmpty(message = "{field.job.hiringManagers}{validation.notEmpty}")
     private List<String> hiringManagers;
 
+    private List<JobScreeningQuestion> screeningQuestions;
+
     @NotNull(message = "{field.job.recruitmentPipeline}{validation.notBlank}")
-    private String recruitmentPipeline;
+    private List<JobRecruitmentPipelineRound> recruitmentPipelineRounds;
 
     @NotNull(message = "{field.job.evaluationPlan}{validation.notBlank}")
-    private String evaluationPlan;
+    private List<JobEvaluationPlanRound> evaluationPlanRounds;
 
     private String ownerId;
 

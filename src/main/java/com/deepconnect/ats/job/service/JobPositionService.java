@@ -2,33 +2,50 @@ package com.deepconnect.ats.job.service;
 
 import com.deepconnect.ats.auth.dto.LoggedInUserDetails;
 import com.deepconnect.ats.auth.service.AuthService;
+import com.deepconnect.ats.common.enums.CustomExceptionType;
 import com.deepconnect.ats.common.exception.InternalServerException;
+import com.deepconnect.ats.common.exception.ValidationException;
+import com.deepconnect.ats.common.utils.HashMapUtils;
 import com.deepconnect.ats.dto.AtsPageQuery;
 import com.deepconnect.ats.dto.AtsPageRsp;
 import com.deepconnect.ats.job.dto.JobFieldsData;
+import com.deepconnect.ats.job.model.JobEvaluationPlanRound;
 import com.deepconnect.ats.job.model.JobPosition;
+import com.deepconnect.ats.job.model.JobRecruitmentPipelineRound;
+import com.deepconnect.ats.job.model.JobScreeningQuestion;
 import com.deepconnect.ats.job.security.JobRichTextSanitizer;
 import com.deepconnect.ats.job.repo.JobPositionRepository;
 import com.deepconnect.ats.job.repo.JobEmploymentTypeRepository;
+import com.deepconnect.ats.job.repo.JobEvaluationPlanRoundRepository;
 import com.deepconnect.ats.job.repo.JobWorkArrangementTypeRepository;
+import com.deepconnect.ats.evaluationplan.service.EvaluationPlanRoundHelper;
 import com.deepconnect.ats.evaluationplan.service.EvaluationPlanService;
 import com.deepconnect.ats.recruitmentpipeline.service.RecruitmentPipelineService;
+import com.deepconnect.ats.recruitmentpipeline.service.RecruitmentPipelineRoundHelper;
 import com.deepconnect.ats.user.service.UserServiceV2;
 import com.deepconnect.ats.rbac.enums.RoleType;
 import com.deepconnect.ats.job.dto.JobPositionReq;
 import com.deepconnect.ats.job.enums.JobStatus;
-import com.deepconnect.ats.evaluationplan.model.EvaluationPlan;
-import com.deepconnect.ats.recruitmentpipeline.model.RecruitmentPipeline;
+import com.deepconnect.ats.evaluationplan.model.EvaluationPlanRoundType;
+import com.deepconnect.ats.recruitmentpipeline.model.RecruitmentPipelineRoundType;
+import com.deepconnect.ats.job.repo.JobRecruitmentPipelineRoundRepository;
+import com.deepconnect.ats.job.repo.JobScreeningQuestionRepository;
 import com.deepconnect.ats.job.dto.JobPositionRes;
-import com.deepconnect.ats.screeningquestionsform.model.ScreeningQuestionType;
-import com.deepconnect.ats.screeningquestionsform.repo.ScreeningQuestionTypeRepository;
+import com.deepconnect.ats.screeningquestionsform.service.ScreeningQuestionHelper;
+import com.deepconnect.ats.common.utils.StringUtils;
+import com.deepconnect.ats.common.enums.ValidationFieldType;
+import com.deepconnect.ats.screeningquestionsform.service.ScreeningQuestionsFormService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -38,26 +55,29 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class JobPositionService {
 
+    @Value("${plans.maxRounds}")
+    private int maxRounds;
+
     private final EvaluationPlanService evaluationPlanService;
     private final RecruitmentPipelineService recruitmentPipelineService;
     private final JobPositionAccessService jobPositionAccessService;
+    private final ScreeningQuestionsFormService screeningQuestionsFormService;
     private final UserServiceV2 userService;
 
     private final JobPositionRepository jobPositionRepository;
     private final JobEmploymentTypeRepository jobEmploymentTypeRepository;
     private final JobWorkArrangementTypeRepository jobWorkArrangementTypeRepository;
-    private final ScreeningQuestionTypeRepository screeningQuestionTypeRepository;
+    private final JobEvaluationPlanRoundRepository jobEvaluationPlanRoundRepository;
+    private final JobRecruitmentPipelineRoundRepository jobRecruitmentPipelineRoundRepository;
+    private final JobScreeningQuestionRepository jobScreeningQuestionRepository;
 
-    public List<ScreeningQuestionType> findAllCandidateQuestionTypes() {
-        return screeningQuestionTypeRepository.findAll();
-    }
-
-    private String save(JobPosition position, JobPositionReq req){
+    private String save(JobPosition position, JobPositionReq req, boolean evaluationPlanRoundsChanged, boolean recruitmentPipelineRoundsChanged, boolean screeningQuestionsChanged){
         LoggedInUserDetails loggedInUser = AuthService.getLoggedInUser();
+        position.setModifiedByUserId(loggedInUser.getUserId());
+        position.setModifiedByUserPublicId(loggedInUser.getPublicId());
+        
         position.setTitle(req.getTitle());
         position.setDescription(JobRichTextSanitizer.sanitize(req.getDescription()));
-        // position.setMandatoryRequirements(JobRichTextSanitizer.sanitize(req.getMandatoryRequirements()));
-        // position.setPreferredRequirements(JobRichTextSanitizer.sanitize(req.getPreferredRequirements()));
         position.setEmploymentTypeId(req.getEmploymentType());
         position.setWorkArrangementTypeId(req.getWorkArrangementType());
         position.setWorkLocation(req.getWorkLocation());
@@ -67,19 +87,75 @@ public class JobPositionService {
         position.setDepartment(req.getDepartment());
         position.setRecruiters(req.getRecruiters());
         position.setHiringManagers(req.getHiringManagers());
-        position.setRecruitmentPipelinePublicId(req.getRecruitmentPipeline());
-        position.setEvaluationPlanPublicId(req.getEvaluationPlan());
-        EvaluationPlan evaluationPlan = evaluationPlanService.findByDeactivatedFalseAndPublicId(position.getEvaluationPlanPublicId()).orElseThrow(() -> new InternalServerException(String.format("Evaluation plan not found: User: %s, Evaluation Plan: %s", loggedInUser.getPublicId(), position.getEvaluationPlanPublicId())));
-        position.setEvaluationPlanId(evaluationPlan.getId());
-        RecruitmentPipeline recruitmentPipeline = recruitmentPipelineService.findByDeactivatedFalseAndPublicId(position.getRecruitmentPipelinePublicId()).orElseThrow(() -> new InternalServerException(String.format("Recruitment pipeline not found: User: %s, Recruitment Pipeline: %s", loggedInUser.getPublicId(), position.getRecruitmentPipelinePublicId())));
-        position.setRecruitmentPipelineId(recruitmentPipeline.getId());
+
+        position = jobPositionRepository.save(position);
+        if (evaluationPlanRoundsChanged){
+            if(CollectionUtils.isEmpty(req.getEvaluationPlanRounds())) {
+                throw new ValidationException(CustomExceptionType.VALIDATION_MUST_ADD, ValidationFieldType.EVALUATION_PLAN_ROUND);
+            }
+            else{
+                if (req.getEvaluationPlanRounds().size() > maxRounds) {
+                    throw new InternalServerException(String.format("Too many rounds. User: %s. Plan: %s. Rounds: %d", loggedInUser.getPublicId(), position.getPublicId(), req.getEvaluationPlanRounds().size()));
+                }
+                HashMap<Integer, EvaluationPlanRoundType> roundTypesById = HashMapUtils.getMapFromList(evaluationPlanService.findAllRoundTypes(), "Id", Integer.class, EvaluationPlanRoundType.class);
+                for (JobEvaluationPlanRound roundTemplate : req.getEvaluationPlanRounds()) {
+                    roundTemplate.setJobPosition(position);
+                    roundTemplate.setJobPositionId(position.getId());
+                    if(!StringUtils.hasText(roundTemplate.getName())) {
+                        EvaluationPlanRoundType roundType = roundTypesById.get(roundTemplate.getRoundType());
+                        if(roundType != null)
+                            roundTemplate.setName(roundType.getName());
+                    }
+                }
+                jobEvaluationPlanRoundRepository.saveAll(req.getEvaluationPlanRounds());
+            }
+        }
+
+        if (recruitmentPipelineRoundsChanged) {
+            if(CollectionUtils.isEmpty(req.getRecruitmentPipelineRounds())) {
+                throw new ValidationException(CustomExceptionType.VALIDATION_MUST_ADD, ValidationFieldType.RECRUITMENT_PIPELINE_STAGE);
+            }
+            else{
+                if (req.getRecruitmentPipelineRounds().size() > maxRounds) {
+                    throw new InternalServerException(String.format("Too many rounds. User: %s. Position: %s. Rounds: %d", loggedInUser.getPublicId(), position.getPublicId(), req.getRecruitmentPipelineRounds().size()));
+                }
+                List<RecruitmentPipelineRoundType> allRoundTypes = recruitmentPipelineService.findAllRoundTypes();
+                RecruitmentPipelineRoundHelper.assertRoundTypeOrder(allRoundTypes, req.getRecruitmentPipelineRounds(), loggedInUser.getPublicId(), position.getPublicId());
+                HashMap<Integer, RecruitmentPipelineRoundType> roundTypesById = HashMapUtils.getMapFromList(allRoundTypes, "Id", Integer.class, RecruitmentPipelineRoundType.class);
+                for (JobRecruitmentPipelineRound roundTemplate : req.getRecruitmentPipelineRounds()) {
+                    roundTemplate.setJobPosition(position);
+                    roundTemplate.setJobPositionId(position.getId());
+                    if(!StringUtils.hasText(roundTemplate.getName())) {
+                        RecruitmentPipelineRoundType roundType = roundTypesById.get(roundTemplate.getRoundType());
+                        if(roundType != null)
+                            roundTemplate.setName(roundType.getName());
+                    }
+                }
+                jobRecruitmentPipelineRoundRepository.saveAll(req.getRecruitmentPipelineRounds());
+            }
+        }
+
+        if (screeningQuestionsChanged && !CollectionUtils.isEmpty(req.getScreeningQuestions())) {
+            if (req.getScreeningQuestions().size() > maxRounds) {
+                throw new InternalServerException(String.format("Too many questions. User: %s. Position: %s. Questions: %d", loggedInUser.getPublicId(), position.getPublicId(), req.getScreeningQuestions().size()));
+            }
+            for (JobScreeningQuestion question : req.getScreeningQuestions()) {
+                question.setJobPosition(position);
+                question.setJobPositionId(position.getId());
+            }
+            jobScreeningQuestionRepository.saveAll(req.getScreeningQuestions());
+        }
+
+        // position.setRecruitmentPipelineRounds(req.getRecruitmentPipelineRounds());
+        // position.setEvaluationPlanRounds(req.getEvaluationPlanRounds());
+        // position.setScreeningQuestions(req.getScreeningQuestions());
         return jobPositionRepository.save(position).getPublicId();
     }
 
     @Transactional
     public String create(JobPositionReq req) {
         LoggedInUserDetails loggedInUser = AuthService.getLoggedInUser();
-        //this.assertUniqueWithinTenantForCreation(loggedInUser.getTenantId(), req.getName());
+        //TODO: think about uniqueness criteria and implement //this.assertUniqueWithinTenantForCreation(loggedInUser.getTenantId(), req.getName());
         JobPosition jobPosition = new JobPosition();
         jobPosition.setCreatedByUserId(loggedInUser.getUserId());
         jobPosition.setCreatedByUserPublicId(loggedInUser.getPublicId());
@@ -94,7 +170,7 @@ public class JobPositionService {
         // }
 
         jobPosition.setStatus(JobStatus.DRAFT);
-        return this.save(jobPosition, req);
+        return this.save(jobPosition, req, true, true, true);
     }
 
     @Transactional 
@@ -106,18 +182,29 @@ public class JobPositionService {
                 .orElseThrow(() -> new InternalServerException(String.format("Job Position not found: User: %s, Position: %s", AuthService.getLoggedInUser().getPublicId(), req.getId())));
 
         LoggedInUserDetails loggedInUser = AuthService.getLoggedInUser();
+        //TODO: think about uniqueness criteria and implement //
         //this.assertUniqueWithinTenantForUpdate(loggedInUser.getTenantId(), req.getName(), plan.getId());
         jobPositionAccessService.assertWriteAccess(loggedInUser, jobPosition);
         // if(!loggedInUser.getPublicId().equals(req.getOwnerId())){//if the requested owner is not the logged in user, additional checks are needed
         //     setAnotherUserAsOwner(plan, evaluationPlanAccessService.getAccessType(loggedInUser, plan), req.getOwnerId());
         // }
 
-        //boolean roundsChanged = !roundsEqual(plan.getRounds(), req.getRounds());
-        //if (roundsChanged) {
-        //    evaluationPlanRoundRepository.deleteByEvaluationPlanId(plan.getId());
-        //}
+        boolean evaluationPlanRoundsChanged = !EvaluationPlanRoundHelper.roundsEqual(jobPosition.getEvaluationPlanRounds(), req.getEvaluationPlanRounds());
+        if (evaluationPlanRoundsChanged) {
+           jobEvaluationPlanRoundRepository.deleteByJobPositionId(jobPosition.getId());
+        }
 
-        return this.save(jobPosition, req);
+        boolean recruitmentPipelineRoundsChanged = !RecruitmentPipelineRoundHelper.roundsEqual(jobPosition.getRecruitmentPipelineRounds(), req.getRecruitmentPipelineRounds());
+        if (recruitmentPipelineRoundsChanged) {
+           jobRecruitmentPipelineRoundRepository.deleteByJobPositionId(jobPosition.getId());
+        }
+
+        boolean screeningQuestionsChanged = !ScreeningQuestionHelper.questionsEqual(jobPosition.getScreeningQuestions(), req.getScreeningQuestions());
+        if (screeningQuestionsChanged) {
+           jobScreeningQuestionRepository.deleteByJobPositionId(jobPosition.getId());
+        }
+
+        return this.save(jobPosition, req, evaluationPlanRoundsChanged, recruitmentPipelineRoundsChanged, screeningQuestionsChanged);
     }
 
     @Transactional
@@ -188,11 +275,12 @@ public class JobPositionService {
             jobWorkArrangementTypeRepository.findAll(),
             evaluationPlanService.findAllAsList(),
             recruitmentPipelineService.findAllAsList(),
+            screeningQuestionsFormService.findAllAsList(),
             userService.findActiveByRolesForTenant(Set.of(RoleType.RECRUITER, RoleType.HR_ADMIN)),
             userService.findActiveByRolesForTenant(Set.of(RoleType.HIRING_MANAGER, RoleType.HR_ADMIN, RoleType.RECRUITER)),
             evaluationPlanService.findAllRoundTypes(),
             recruitmentPipelineService.findAllRoundTypes(),
-            this.findAllCandidateQuestionTypes()
+            screeningQuestionsFormService.findAllScreeningQuestionTypes()
         );
     }
 

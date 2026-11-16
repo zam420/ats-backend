@@ -35,13 +35,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -78,12 +75,12 @@ public class RecruitmentPipelineService {
             plan.setIsSharedWithinTenant(!CollectionUtils.isEmpty(req.getSharedWithUserIds()));
         }
         plan = recruitmentPipelineRepository.save(plan);
-        if (roundsChanged && req.getRounds() != null) {
+        if (roundsChanged && !CollectionUtils.isEmpty(req.getRounds())) {
             if (req.getRounds().size() > maxRounds) {
                 throw new InternalServerException(String.format("Too many rounds. User: %s. Plan: %s. Rounds: %d", loggedInUser.getPublicId(), plan.getPublicId(), req.getRounds().size()));
             }
             List<RecruitmentPipelineRoundType> allRoundTypes = this.findAllRoundTypes();
-            this.assertRoundTypeOrder(allRoundTypes, req.getRounds(), loggedInUser.getPublicId(), plan.getPublicId());
+            RecruitmentPipelineRoundHelper.assertRoundTypeOrder(allRoundTypes, req.getRounds(), loggedInUser.getPublicId(), plan.getPublicId());
             HashMap<Integer, RecruitmentPipelineRoundType> roundTypesById = HashMapUtils.getMapFromList(allRoundTypes, "Id", Integer.class, RecruitmentPipelineRoundType.class);
             for (RecruitmentPipelineRound roundTemplate : req.getRounds()) {
                 roundTemplate.setRecruitmentPipeline(plan);
@@ -154,7 +151,7 @@ public class RecruitmentPipelineService {
             setAnotherUserAsOwner(plan, recruitmentPipelineAccessService.getAccessType(loggedInUser, plan), req.getOwnerId());
         }
 
-        boolean roundsChanged = !roundsEqual(plan.getRounds(), req.getRounds());
+        boolean roundsChanged = !RecruitmentPipelineRoundHelper.roundsEqual(plan.getRounds(), req.getRounds());
         if (roundsChanged) {
             recruitmentPipelineRoundRepository.deleteByRecruitmentPipelineId(plan.getId());
         }
@@ -214,7 +211,7 @@ public class RecruitmentPipelineService {
         LoggedInUserDetails loggedInUser = AuthService.getLoggedInUser();
         this.assertUniqueWithinAllForUpdate(req.getName(), plan.getId());
         recruitmentPipelineAccessService.assertWriteAccess(loggedInUser, plan);
-        boolean roundsChanged = !roundsEqual(plan.getRounds(), req.getRounds());
+        boolean roundsChanged = !RecruitmentPipelineRoundHelper.roundsEqual(plan.getRounds(), req.getRounds());
         if (roundsChanged) {
             recruitmentPipelineRoundRepository.deleteByRecruitmentPipelineId(plan.getId());
         }
@@ -338,69 +335,6 @@ public class RecruitmentPipelineService {
         }
         
         return true;
-    }
-
-    /**
-     * Checks whether two lists of rounds are equal. Null lists are treated as empty.
-     * The lists are equal when they have the same size and, comparing position by position,
-     * every pair of rounds has the same order, round type, name, description and interviewers.
-     * Name and description are compared with null and blank treated as the same value.
-     * Interviewers are compared in sequence (same size, same ids in the same order).
-     *
-     * @param existing the rounds currently stored
-     * @param incoming the rounds from the request
-     * @return true if both lists are equivalent, false otherwise
-     */
-    private boolean roundsEqual(List<RecruitmentPipelineRound> existing, List<RecruitmentPipelineRound> incoming) {
-        List<RecruitmentPipelineRound> a = existing == null ? List.of() : existing;
-        List<RecruitmentPipelineRound> b = incoming == null ? List.of() : incoming;
-        if (a.size() != b.size())
-            return false;
-        for (int i = 0; i < a.size(); i++) {
-            RecruitmentPipelineRound x = a.get(i);
-            RecruitmentPipelineRound y = b.get(i);
-            if (!Objects.equals(x.getOrder(), y.getOrder())
-                    || !Objects.equals(x.getRoundType(), y.getRoundType())
-                    || !Objects.equals(StringUtils.blankToNullAndTrim(x.getName()), StringUtils.blankToNullAndTrim(y.getName()))
-                    || !Objects.equals(StringUtils.blankToNullAndTrim(x.getDescription()), StringUtils.blankToNullAndTrim(y.getDescription()))) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    /**
-     * Checks the rounds whose round type has isCustom=false (core stages):
-     * 1. each core stage appears at most once, and
-     * 2. the core stages keep the same relative order as their DB ids (ascending), when rounds are sorted by their order.
-     * Custom stages can be placed anywhere and any number of times.
-     * @param allRoundTypes
-     * @param addedRounds
-     * @param loggedInUserPublicId
-     * @param planPublicId
-     */
-    private void assertRoundTypeOrder(List<RecruitmentPipelineRoundType> allRoundTypes, List<RecruitmentPipelineRound> addedRounds,
-        String loggedInUserPublicId, String planPublicId
-    ){
-        Set<Integer> coreTypeIds = allRoundTypes.stream()
-            .filter(type -> !Boolean.TRUE.equals(type.getIsCustom()))
-            .map(RecruitmentPipelineRoundType::getId)
-            .collect(Collectors.toSet());
-
-        List<Integer> coreIdsInOrder = addedRounds.stream()
-            .sorted(Comparator.comparing(RecruitmentPipelineRound::getOrder, Comparator.nullsLast(Comparator.naturalOrder())))
-            .map(RecruitmentPipelineRound::getRoundType)
-            .filter(coreTypeIds::contains)
-            .toList();
-
-        // strictly ascending ids means both "in id order" and "no duplicates"
-        boolean orderValid = true;
-        for (int i = 1; i < coreIdsInOrder.size() && orderValid; i++) {
-            orderValid = coreIdsInOrder.get(i - 1) < coreIdsInOrder.get(i);
-        }
-        if(!orderValid){
-            throw new InternalServerException("Invalid round type order. Plan: " + planPublicId + ", Request by: " + loggedInUserPublicId);
-        }
     }
 
     private void assertUniqueWithinTenantForCreation(Long tenantId, String name) {

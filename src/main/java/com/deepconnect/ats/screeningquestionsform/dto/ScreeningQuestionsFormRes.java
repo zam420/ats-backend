@@ -1,7 +1,7 @@
 package com.deepconnect.ats.screeningquestionsform.dto;
 
 import lombok.Data;
-
+import org.springframework.util.CollectionUtils;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -30,7 +30,7 @@ public class ScreeningQuestionsFormRes {
         res.setIsSystemTemplate(entity.getIsPublicForAll());
         res.setIsSharedWithinTenant(entity.getIsSharedWithinTenant());
         res.setOwnerId(entity.getOwnerPublicId());
-        if (entity.getQuestions() != null) {
+        if (!CollectionUtils.isEmpty(entity.getQuestions())) {
             res.setQuestionSequence(entity.getQuestions().stream()
                 .sorted(Comparator.comparing(ScreeningQuestion::getOrder, Comparator.nullsLast(Comparator.naturalOrder())))
                 .map(ScreeningQuestion::getLabel)

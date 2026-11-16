@@ -2,15 +2,7 @@ package com.deepconnect.ats.screeningquestionsform.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
-
-import java.util.List;
-
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
 import org.hibernate.validator.constraints.Length;
-
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import lombok.*;
 

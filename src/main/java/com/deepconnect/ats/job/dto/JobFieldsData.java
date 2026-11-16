@@ -5,6 +5,8 @@ import lombok.Data;
 import java.util.List;
 import com.deepconnect.ats.evaluationplan.dto.EvaluationPlanRes;
 import com.deepconnect.ats.evaluationplan.dto.EvaluationPlanResMin;
+import com.deepconnect.ats.screeningquestionsform.dto.ScreeningQuestionsFormRes;
+import com.deepconnect.ats.screeningquestionsform.dto.ScreeningQuestionsFormResMin;
 import com.deepconnect.ats.evaluationplan.model.EvaluationPlanRoundType;
 import com.deepconnect.ats.recruitmentpipeline.dto.RecruitmentPipelineRes;
 import com.deepconnect.ats.recruitmentpipeline.dto.RecruitmentPipelineResMin;
@@ -21,6 +23,7 @@ public class JobFieldsData {
     private List<JobWorkArrangementType> workArrangementTypes;
     private List<EvaluationPlanResMin> evaluationPlans;
     private List<RecruitmentPipelineResMin> recruitmentPipelines;
+    private List<ScreeningQuestionsFormResMin> screeningQuestionsForms;
     private List<UserSummary> recruiters;
     private List<UserSummary> hiringManagers;
     private List<EvaluationPlanRoundType> evaluationPlanRoundTypes;
@@ -32,6 +35,7 @@ public class JobFieldsData {
         List<JobWorkArrangementType> workArrangementTypes, 
         List<EvaluationPlanRes> evaluationPlans, 
         List<RecruitmentPipelineRes> recruitmentPipelines,
+        List<ScreeningQuestionsFormRes> screeningQuestionsForms,
         List<UserSummary> recruiters,
         List<UserSummary> hiringManagers,
         List<EvaluationPlanRoundType> evaluationPlanRoundTypes,
@@ -43,6 +47,7 @@ public class JobFieldsData {
         res.setWorkArrangementTypes(workArrangementTypes);
         res.setEvaluationPlans(EvaluationPlanResMin.fromResList(evaluationPlans));
         res.setRecruitmentPipelines(RecruitmentPipelineResMin.fromResList(recruitmentPipelines));
+        res.setScreeningQuestionsForms(ScreeningQuestionsFormResMin.fromResList(screeningQuestionsForms));
         res.setRecruiters(recruiters);
         res.setHiringManagers(hiringManagers);
         res.setEvaluationPlanRoundTypes(evaluationPlanRoundTypes);

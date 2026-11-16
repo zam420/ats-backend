@@ -7,8 +7,12 @@ import jakarta.persistence.Id;
 import jakarta.persistence.MappedSuperclass;
 import jakarta.persistence.PrePersist;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 @Data 
+@NoArgsConstructor
+@SuperBuilder
 @MappedSuperclass
 public abstract class BaseEntity {
 

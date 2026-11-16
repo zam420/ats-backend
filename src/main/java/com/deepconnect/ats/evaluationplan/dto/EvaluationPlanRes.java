@@ -1,6 +1,7 @@
 package com.deepconnect.ats.evaluationplan.dto;
 
 import lombok.Data;
+import org.springframework.util.CollectionUtils;
 
 import java.util.Comparator;
 import java.util.List;
@@ -30,7 +31,7 @@ public class EvaluationPlanRes {
         res.setIsSystemTemplate(entity.getIsPublicForAll());
         res.setIsSharedWithinTenant(entity.getIsSharedWithinTenant());
         res.setOwnerId(entity.getOwnerPublicId());
-        if (entity.getRounds() != null) {
+        if (!CollectionUtils.isEmpty(entity.getRounds())) {
             res.setRoundSequence(entity.getRounds().stream()
                 .sorted(Comparator.comparing(EvaluationPlanRound::getOrder, Comparator.nullsLast(Comparator.naturalOrder())))
                 .map(EvaluationPlanRound::getName)

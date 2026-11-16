@@ -45,7 +45,11 @@ public class CustomException extends RuntimeException {
         this(getFullMessageKey(exceptionType.getKey()), httpStatus, (Object[])null);
     }
 
-    private static String getFullMessageKey(String messageKey){
+    public static String getFullMessageKey(CustomExceptionType exceptionType){
+        return getFullMessageKey(exceptionType.getKey());
+    }
+
+    public static String getFullMessageKey(String messageKey){
         return customExceptionKeyPrefix + messageKey;
     }
     

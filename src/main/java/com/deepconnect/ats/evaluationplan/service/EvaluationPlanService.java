@@ -37,7 +37,6 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
@@ -156,7 +155,7 @@ public class EvaluationPlanService {
             setAnotherUserAsOwner(plan, evaluationPlanAccessService.getAccessType(loggedInUser, plan), req.getOwnerId());
         }
 
-        boolean roundsChanged = !roundsEqual(plan.getRounds(), req.getRounds());
+        boolean roundsChanged = !EvaluationPlanRoundHelper.roundsEqual(plan.getRounds(), req.getRounds());
         if (roundsChanged) {
             evaluationPlanRoundRepository.deleteByEvaluationPlanId(plan.getId());
         }
@@ -216,7 +215,7 @@ public class EvaluationPlanService {
         LoggedInUserDetails loggedInUser = AuthService.getLoggedInUser();
         this.assertUniqueWithinAllForUpdate(req.getName(), plan.getId());
         evaluationPlanAccessService.assertWriteAccess(loggedInUser, plan);
-        boolean roundsChanged = !roundsEqual(plan.getRounds(), req.getRounds());
+        boolean roundsChanged = !EvaluationPlanRoundHelper.roundsEqual(plan.getRounds(), req.getRounds());
         if (roundsChanged) {
             evaluationPlanRoundRepository.deleteByEvaluationPlanId(plan.getId());
         }
@@ -339,43 +338,6 @@ public class EvaluationPlanService {
                 return false;
         }
         
-        return true;
-    }
-
-    /**
-     * Checks whether two lists of rounds are equal. Null lists are treated as empty.
-     * The lists are equal when they have the same size and, comparing position by position,
-     * every pair of rounds has the same order, round type, name, description and interviewers.
-     * Name and description are compared with null and blank treated as the same value.
-     * Interviewers are compared in sequence (same size, same ids in the same order).
-     *
-     * @param existing the rounds currently stored
-     * @param incoming the rounds from the request
-     * @return true if both lists are equivalent, false otherwise
-     */
-    private boolean roundsEqual(List<EvaluationPlanRound> existing, List<EvaluationPlanRound> incoming) {
-        List<EvaluationPlanRound> a = existing == null ? List.of() : existing;
-        List<EvaluationPlanRound> b = incoming == null ? List.of() : incoming;
-        if (a.size() != b.size())
-            return false;
-        for (int i = 0; i < a.size(); i++) {
-            EvaluationPlanRound x = a.get(i);
-            EvaluationPlanRound y = b.get(i);
-            if (!Objects.equals(x.getOrder(), y.getOrder())
-                    || !Objects.equals(x.getRoundType(), y.getRoundType())
-                    || !Objects.equals(StringUtils.blankToNullAndTrim(x.getName()), StringUtils.blankToNullAndTrim(y.getName()))
-                    || !Objects.equals(StringUtils.blankToNullAndTrim(x.getDescription()), StringUtils.blankToNullAndTrim(y.getDescription()))) {
-                return false;
-            }
-            List<String> xi = x.getInterviewers() == null ? List.of() : x.getInterviewers();
-            List<String> yi = y.getInterviewers() == null ? List.of() : y.getInterviewers();
-            if (xi.size() != yi.size())
-                return false;
-            for (int j = 0; j < xi.size(); j++) {
-                if (!Objects.equals(String.valueOf(xi.get(j)), String.valueOf(yi.get(j))))
-                    return false;
-            }
-        }
         return true;
     }
 

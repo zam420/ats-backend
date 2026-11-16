@@ -69,13 +69,13 @@ public class JobPositionController {
     // }
 
     @PreAuthorize("hasAuthority('jps')")
-    @GetMapping("/job/listAll")
+    @GetMapping("/listAll")
     public ApiResult<AtsPageRsp<JobPosition>> listAll(AtsPageQuery query) {
         return ApiResult.success(jobPositionService.listJobPosition(query));
     }
 
     @PreAuthorize("hasAuthority('jps')")
-    @GetMapping("/jobFieldsData")
+    @GetMapping("/fieldsdata")
     public ApiResult<JobFieldsData> getJobFieldsData() throws Exception {
         return ApiResult.success(jobPositionService.getJobFieldsData());
     }
