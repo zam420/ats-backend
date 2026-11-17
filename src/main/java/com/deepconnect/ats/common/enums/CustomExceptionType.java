@@ -25,6 +25,7 @@ public enum CustomExceptionType {
 
     DUPLICATE_NAME("duplicateName"),
     DUPLICATE_NAME_WITHIN_TENANT("duplicateNameWithinTenant"),
+    JOB_INVALID_STATUS_TRANSITION("jobInvalidStatusTransition"),
 
     VALIDATION_RANGE("validation.range"),
     VALIDATION_MUST_ADD("validation.mustAdd"),

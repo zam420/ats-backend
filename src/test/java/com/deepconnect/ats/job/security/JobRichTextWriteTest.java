@@ -17,6 +17,7 @@ import com.deepconnect.ats.evaluationplan.service.EvaluationPlanService;
 import com.deepconnect.ats.job.dto.JobPositionReq;
 import com.deepconnect.ats.job.model.JobPosition;
 import com.deepconnect.ats.job.repo.JobEmploymentTypeRepository;
+import com.deepconnect.ats.job.repo.JobExperienceLevelTypeRepository;
 import com.deepconnect.ats.job.repo.JobPositionRepository;
 import com.deepconnect.ats.job.repo.JobWorkArrangementTypeRepository;
 import com.deepconnect.ats.job.service.JobPositionService;
@@ -39,7 +40,7 @@ class JobRichTextWriteTest {
     private final JobPositionService service = new JobPositionService(plans, pipelines,
             mock(JobPositionAccessService.class), mock(ScreeningQuestionsFormService.class), 
             mock(UserServiceV2.class), positions, mock(JobEmploymentTypeRepository.class),
-            mock(JobWorkArrangementTypeRepository.class),  
+            mock(JobWorkArrangementTypeRepository.class), mock(JobExperienceLevelTypeRepository.class),
             mock(JobEvaluationPlanRoundRepository.class), mock(JobRecruitmentPipelineRoundRepository.class), 
             mock(JobScreeningQuestionRepository.class));
 
@@ -61,7 +62,7 @@ class JobRichTextWriteTest {
         when(plans.findByDeactivatedFalseAndPublicId("plan")).thenReturn(Optional.of(plan));
         when(pipelines.findByDeactivatedFalseAndPublicId("pipeline")).thenReturn(Optional.of(pipeline));
         when(positions.save(any(JobPosition.class))).thenAnswer(invocation -> invocation.getArgument(0));
-        when(positions.findByDeactivatedFalseAndPublicId(eq("job"))).thenReturn(Optional.of(new JobPosition()));
+        when(positions.findForUpdate(eq("job"), eq(1L))).thenReturn(Optional.of(new JobPosition()));
 
         JobPositionReq req = new JobPositionReq();
         req.setId("job");

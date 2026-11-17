@@ -4,9 +4,6 @@ import lombok.Data;
 
 import java.util.List;
 import jakarta.validation.constraints.NotNull;
-import jakarta.persistence.Column;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import org.hibernate.validator.constraints.Length;
@@ -35,6 +32,9 @@ public class JobPositionReq {
 
     @NotNull(message = "{field.job.workArrangementType}{validation.notBlank}")
     private Integer workArrangementType;
+
+    @NotNull(message = "{field.job.experienceLevelType}{validation.notBlank}")
+    private Integer experienceLevelType;
 
     @NotEmpty(message = "{field.job.workLocation}{validation.notEmpty}")
     private List<Integer> workLocation;

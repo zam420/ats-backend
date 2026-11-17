@@ -4,6 +4,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import com.deepconnect.ats.dto.ApiResult;
 import com.deepconnect.ats.dto.AtsPageQuery;
 import com.deepconnect.ats.dto.AtsPageRsp;
+import com.deepconnect.ats.evaluationplan.dto.EvaluationPlanReq;
 import com.deepconnect.ats.job.service.JobPositionService;
 import com.deepconnect.ats.job.dto.JobPositionReq;
 
@@ -12,7 +13,7 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import com.deepconnect.ats.job.model.JobPosition;
-import com.deepconnect.ats.job.dto.JobFieldsData;
+import com.deepconnect.ats.job.dto.JobFiltersData;
 import com.deepconnect.ats.job.dto.JobPositionRes;
 
 import java.util.Collections;
@@ -33,11 +34,23 @@ public class JobPositionController {
     }
 
     @PreAuthorize("hasAuthority('jpc')")
+    @PostMapping("/saveas")
+    public ApiResult<Map<String, String>> saveAs(@RequestBody @Valid JobPositionReq req) {
+        return ApiResult.success(Collections.singletonMap("id", jobPositionService.create(req)));
+    }
+
+
+    @PreAuthorize("hasAuthority('jpe')")
     @PostMapping("/publish")
-    public ApiResult<Boolean> publish(@RequestBody Map<String, Object> body) {
-        String id = body.get("id").toString();
-        Integer status = Integer.valueOf(body.get("status").toString());
-        jobPositionService.publish(id, status);
+    public ApiResult<Boolean> publish(@RequestBody @Valid JobPositionReq req) {
+        jobPositionService.publish(req);
+        return ApiResult.success(true);
+    }
+
+    @PreAuthorize("hasAuthority('jpe')")
+    @PostMapping("/close")
+    public ApiResult<Boolean> close(@RequestBody @Valid JobPositionReq req) {
+        jobPositionService.close(req);
         return ApiResult.success(true);
     }
 
@@ -75,9 +88,9 @@ public class JobPositionController {
     }
 
     @PreAuthorize("hasAuthority('jps')")
-    @GetMapping("/fieldsdata")
-    public ApiResult<JobFieldsData> getJobFieldsData() throws Exception {
-        return ApiResult.success(jobPositionService.getJobFieldsData());
+    @GetMapping("/filters")
+    public ApiResult<JobFiltersData> getJobFilterssData() throws Exception {
+        return ApiResult.success(jobPositionService.getFiltersData());
     }
 
 }

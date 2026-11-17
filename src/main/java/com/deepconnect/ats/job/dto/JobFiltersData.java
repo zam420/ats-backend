@@ -1,6 +1,7 @@
 package com.deepconnect.ats.job.dto;
 
 import lombok.Data;
+import com.deepconnect.ats.job.model.JobExperienceLevelType;
 
 import java.util.List;
 import com.deepconnect.ats.evaluationplan.dto.EvaluationPlanRes;
@@ -18,9 +19,10 @@ import com.deepconnect.ats.job.model.JobEmploymentType;
 import com.deepconnect.ats.job.model.JobWorkArrangementType;
 
 @Data
-public class JobFieldsData {
+public class JobFiltersData {
     private List<JobEmploymentType> employmentTypes;
     private List<JobWorkArrangementType> workArrangementTypes;
+    private List<JobExperienceLevelType> experienceLevelTypes;
     private List<EvaluationPlanResMin> evaluationPlans;
     private List<RecruitmentPipelineResMin> recruitmentPipelines;
     private List<ScreeningQuestionsFormResMin> screeningQuestionsForms;
@@ -30,9 +32,10 @@ public class JobFieldsData {
     private List<RecruitmentPipelineRoundType> recruitmentPipelineRoundTypes;
     private List<ScreeningQuestionType> screeningQuestionTypes;
     
-    public static JobFieldsData from(
+    public static JobFiltersData from(
         List<JobEmploymentType> employmentTypes, 
         List<JobWorkArrangementType> workArrangementTypes, 
+        List<JobExperienceLevelType> experienceLevelTypes,
         List<EvaluationPlanRes> evaluationPlans, 
         List<RecruitmentPipelineRes> recruitmentPipelines,
         List<ScreeningQuestionsFormRes> screeningQuestionsForms,
@@ -42,9 +45,10 @@ public class JobFieldsData {
         List<RecruitmentPipelineRoundType> recruitmentPipelineRoundTypes,
         List<ScreeningQuestionType> screeningQuestionTypes) 
     {
-        JobFieldsData res = new JobFieldsData();
+        JobFiltersData res = new JobFiltersData();
         res.setEmploymentTypes(employmentTypes);
         res.setWorkArrangementTypes(workArrangementTypes);
+        res.setExperienceLevelTypes(experienceLevelTypes);
         res.setEvaluationPlans(EvaluationPlanResMin.fromResList(evaluationPlans));
         res.setRecruitmentPipelines(RecruitmentPipelineResMin.fromResList(recruitmentPipelines));
         res.setScreeningQuestionsForms(ScreeningQuestionsFormResMin.fromResList(screeningQuestionsForms));

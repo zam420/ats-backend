@@ -22,6 +22,7 @@ public class JobPositionRes {
     private String preferredRequirements;
     private Integer employmentType;
     private Integer workArrangementType;
+    private Integer experienceLevelType;
     private List<Integer> workLocation;
     private String requisitionId;
     private Integer numOfOpenings;
@@ -71,6 +72,7 @@ public class JobPositionRes {
         res.setDescription(JobRichTextSanitizer.sanitize(entity.getDescription()));
         res.setEmploymentType(entity.getEmploymentTypeId());
         res.setWorkArrangementType(entity.getWorkArrangementTypeId());
+        res.setExperienceLevelType(entity.getExperienceLevelTypeId());
         res.setWorkLocation(entity.getWorkLocation());
         res.setRequisitionId(entity.getRequisitionId());
         res.setNumOfOpenings(entity.getNumOfOpenings());

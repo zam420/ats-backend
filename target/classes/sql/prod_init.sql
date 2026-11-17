@@ -384,6 +384,11 @@ INSERT INTO `ats`.`job_work_arrangement_type` (`name`) VALUES ('Onsite');
 INSERT INTO `ats`.`job_work_arrangement_type` (`name`) VALUES ('Remote');
 INSERT INTO `ats`.`job_work_arrangement_type` (`name`) VALUES ('Hybrid');
 
+-- Job Experience Level Types
+INSERT INTO `ats`.`job_experience_level_type` (`name`) VALUES ('Junior');
+INSERT INTO `ats`.`job_experience_level_type` (`name`) VALUES ('Mid-level');
+INSERT INTO `ats`.`job_experience_level_type` (`name`) VALUES ('Senior');
+
 -- Users
 # System Virtual User
 INSERT INTO ats.rbac_user (`id`,`public_id`,`email`,`phone`,`password`,`type`,`status`,`join_date`,`activation_code`,`activation_code_sent_date_time`,`activation_date_time`,`creation_date_time`,`credentials_expired`,`deactivated`,`first_name`,`is_google_login`,`last_name`,`locked`,`locked_by_user_id`,`locked_by_user_name`,`locked_date_time`,`modified_date_time`,`salt`,`password_reset_code`,`password_reset_code_sent_date_time`,`tenant_id`,`company_id`) VALUES (1,'V1StGtR8_vbu','no-reply@fsworkpaper.ai',NULL,'$2a$10$OVNWgRHLRvM6zDn6PDkjv.xzyh1n.zJvhun75xTZ554SgkIFDAxaW',0,0,'2026-10-18 19:22:51.634567',NULL,NULL,'2026-10-18 19:22:51.450781','2026-10-18 19:22:51.450781',0,0,'System',0,NULL,0,NULL,NULL,NULL,NULL,'$2a$10$nuwwU.V9vhBp0LfCxqyeHu',NULL,NULL,1);

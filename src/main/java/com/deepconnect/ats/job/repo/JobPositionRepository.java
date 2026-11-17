@@ -6,8 +6,10 @@ import org.springframework.data.domain.Pageable;
 import com.deepconnect.ats.common.repo.OperatableBaseRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import jakarta.persistence.LockModeType;
 
 import java.util.List;
 import java.util.Optional;
@@ -16,6 +18,9 @@ import java.util.Optional;
 public interface JobPositionRepository extends OperatableBaseRepository<JobPosition, Long>, JpaSpecificationExecutor<JobPosition> {
     //Optional<JobPosition> findByPublicId(String publicId);
     Optional<JobPosition> findByPublicIdAndTenantIdAndDeactivatedFalse(String publicId, Long tenantId);
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT jp FROM JobPosition jp WHERE jp.publicId = :publicId AND jp.tenantId = :tenantId AND jp.deactivated = false")
+    Optional<JobPosition> findForUpdate(@Param("publicId") String publicId, @Param("tenantId") Long tenantId);
     // List<JobPosition> findByStatus(JobStatus status);
     // Optional<JobPosition> findByTitle(String title);
 

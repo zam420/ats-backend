@@ -4,11 +4,12 @@ import com.deepconnect.ats.auth.dto.LoggedInUserDetails;
 import com.deepconnect.ats.auth.service.AuthService;
 import com.deepconnect.ats.common.enums.CustomExceptionType;
 import com.deepconnect.ats.common.exception.InternalServerException;
+import com.deepconnect.ats.common.exception.CustomException;
 import com.deepconnect.ats.common.exception.ValidationException;
 import com.deepconnect.ats.common.utils.HashMapUtils;
 import com.deepconnect.ats.dto.AtsPageQuery;
 import com.deepconnect.ats.dto.AtsPageRsp;
-import com.deepconnect.ats.job.dto.JobFieldsData;
+import com.deepconnect.ats.job.dto.JobFiltersData;
 import com.deepconnect.ats.job.model.JobEvaluationPlanRound;
 import com.deepconnect.ats.job.model.JobPosition;
 import com.deepconnect.ats.job.model.JobRecruitmentPipelineRound;
@@ -16,6 +17,7 @@ import com.deepconnect.ats.job.model.JobScreeningQuestion;
 import com.deepconnect.ats.job.security.JobRichTextSanitizer;
 import com.deepconnect.ats.job.repo.JobPositionRepository;
 import com.deepconnect.ats.job.repo.JobEmploymentTypeRepository;
+import com.deepconnect.ats.job.repo.JobExperienceLevelTypeRepository;
 import com.deepconnect.ats.job.repo.JobEvaluationPlanRoundRepository;
 import com.deepconnect.ats.job.repo.JobWorkArrangementTypeRepository;
 import com.deepconnect.ats.evaluationplan.service.EvaluationPlanRoundHelper;
@@ -46,6 +48,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import java.util.HashMap;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -67,6 +70,7 @@ public class JobPositionService {
     private final JobPositionRepository jobPositionRepository;
     private final JobEmploymentTypeRepository jobEmploymentTypeRepository;
     private final JobWorkArrangementTypeRepository jobWorkArrangementTypeRepository;
+    private final JobExperienceLevelTypeRepository jobExperienceLevelTypeRepository;
     private final JobEvaluationPlanRoundRepository jobEvaluationPlanRoundRepository;
     private final JobRecruitmentPipelineRoundRepository jobRecruitmentPipelineRoundRepository;
     private final JobScreeningQuestionRepository jobScreeningQuestionRepository;
@@ -80,6 +84,7 @@ public class JobPositionService {
         position.setDescription(JobRichTextSanitizer.sanitize(req.getDescription()));
         position.setEmploymentTypeId(req.getEmploymentType());
         position.setWorkArrangementTypeId(req.getWorkArrangementType());
+        position.setExperienceLevelTypeId(req.getExperienceLevelType());
         position.setWorkLocation(req.getWorkLocation());
         position.setRequisitionId(req.getRequisitionId());
         position.setNumOfOpenings(req.getNumOfOpenings());
@@ -176,16 +181,41 @@ public class JobPositionService {
 
     @Transactional 
     public String update(JobPositionReq req) {
+        return update(req, null);
+    }
+
+    private String update(JobPositionReq req, JobStatus targetStatus) {
         if (req.getId() == null) 
             throw new InternalServerException(String.format("Invalid Job Position Id: User: %s, Position: %s", AuthService.getLoggedInUser().getPublicId(), req.getId()));
 
-        JobPosition jobPosition = jobPositionRepository.findByDeactivatedFalseAndPublicId(req.getId())
+        LoggedInUserDetails loggedInUser = AuthService.getLoggedInUser();
+        JobPosition jobPosition = jobPositionRepository.findForUpdate(req.getId(), loggedInUser.getTenantId())
                 .orElseThrow(() -> new InternalServerException(String.format("Job Position not found: User: %s, Position: %s", AuthService.getLoggedInUser().getPublicId(), req.getId())));
 
-        LoggedInUserDetails loggedInUser = AuthService.getLoggedInUser();
         //TODO: think about uniqueness criteria and implement //
         //this.assertUniqueWithinTenantForUpdate(loggedInUser.getTenantId(), req.getName(), plan.getId());
         jobPositionAccessService.assertWriteAccess(loggedInUser, jobPosition);
+        if (targetStatus != null) {
+            JobStatus expected = targetStatus == JobStatus.OPEN ? JobStatus.DRAFT : JobStatus.OPEN;
+            if (jobPosition.getStatus() != expected) {
+                throw new CustomException(CustomExceptionType.JOB_INVALID_STATUS_TRANSITION);
+            }
+            if (CollectionUtils.isEmpty(req.getEvaluationPlanRounds())) {
+                throw new ValidationException(CustomExceptionType.VALIDATION_MUST_ADD, ValidationFieldType.EVALUATION_PLAN_ROUND);
+            }
+            if (CollectionUtils.isEmpty(req.getRecruitmentPipelineRounds())) {
+                throw new ValidationException(CustomExceptionType.VALIDATION_MUST_ADD, ValidationFieldType.RECRUITMENT_PIPELINE_STAGE);
+            }
+            jobPosition.setStatus(targetStatus);
+            if (targetStatus == JobStatus.OPEN) {
+                jobPosition.setPublishedByUserId(loggedInUser.getUserId());
+                jobPosition.setPublishedByUserPublicId(loggedInUser.getPublicId());
+                jobPosition.setPublishedAt(LocalDateTime.now());
+            } else {
+                jobPosition.setClosedByUserId(loggedInUser.getUserId());
+                jobPosition.setClosedByUserPublicId(loggedInUser.getPublicId());
+            }
+        }
         // if(!loggedInUser.getPublicId().equals(req.getOwnerId())){//if the requested owner is not the logged in user, additional checks are needed
         //     setAnotherUserAsOwner(plan, evaluationPlanAccessService.getAccessType(loggedInUser, plan), req.getOwnerId());
         // }
@@ -209,14 +239,13 @@ public class JobPositionService {
     }
 
     @Transactional
-    public void publish(String positionId, Integer status) {
-        LoggedInUserDetails loggedInUser = AuthService.getLoggedInUser();
-        JobPosition position = jobPositionRepository.findByDeactivatedFalseAndPublicId(positionId)
-                .orElseThrow(() -> new InternalServerException("Position not found: " + positionId));
-        position.setStatus(JobStatus.OPEN);
-        position.setPublishedByUserId(loggedInUser.getUserId());
-        position.setPublishedByUserPublicId(loggedInUser.getPublicId());
-        jobPositionRepository.save(position);
+    public void publish(JobPositionReq req) {
+        update(req, JobStatus.OPEN);
+    }
+
+    @Transactional
+    public void close(JobPositionReq req) {
+        update(req, JobStatus.CLOSED);
     }
 
     // public List<JobPosition> listAll() {
@@ -270,10 +299,11 @@ public class JobPositionService {
         return jobPositionRepository.findById(id);
     }
 
-    public JobFieldsData getJobFieldsData() {
-        return JobFieldsData.from(
+    public JobFiltersData getFiltersData() {
+        return JobFiltersData.from(
             jobEmploymentTypeRepository.findAll(),
             jobWorkArrangementTypeRepository.findAll(),
+            jobExperienceLevelTypeRepository.findAll(),
             evaluationPlanService.findAllAsList(),
             recruitmentPipelineService.findAllAsList(),
             screeningQuestionsFormService.findAllAsList(),

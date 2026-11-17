@@ -7,7 +7,6 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.type.SqlTypes;
 import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.Range;
@@ -71,6 +70,14 @@ public class JobPosition extends OperatableBaseWithTenantEntity {
     @Column(name = "workArrangementTypeId", nullable = false)
     @NotNull(message = "{field.job.workArrangementType}{validation.notBlank}")
     private Integer workArrangementTypeId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "experienceLevelTypeId", referencedColumnName = "id", insertable = false, updatable = false)
+    private JobExperienceLevelType experienceLevelType; // By default, the user who created this record. Can be changed.
+
+    @Column(name = "experienceLevelTypeId", nullable = false)
+    @NotNull(message = "{field.job.experienceLevelType}{validation.notBlank}")
+    private Integer experienceLevelTypeId;
 
     //TODO: Later map it to Locations entity in DB (At present, we are using fixed ENUM)
     @JdbcTypeCode(SqlTypes.JSON)
@@ -168,7 +175,16 @@ public class JobPosition extends OperatableBaseWithTenantEntity {
     @Column(name = "publishedByUserPublicId", nullable = true)
     private String publishedByUserPublicId;
 
-    @UpdateTimestamp
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "closedByUserId", referencedColumnName = "id", insertable = false, updatable = false)
+    private User closedByUser; // The user who published this record
+
+    @Column(name = "closedByUserId", nullable = true)
+    private Long closedByUserId;
+
+    @Column(name = "closedByUserPublicId", nullable = true)
+    private String closedByUserPublicId;
+
     @Column(name = "publishedAt", nullable = true)
     private LocalDateTime publishedAt;
 
