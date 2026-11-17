@@ -28,6 +28,7 @@ import com.deepconnect.ats.user.service.UserServiceV2;
 import com.deepconnect.ats.rbac.enums.RoleType;
 import com.deepconnect.ats.job.dto.JobPositionReq;
 import com.deepconnect.ats.job.enums.JobStatus;
+import com.deepconnect.ats.evaluationplan.model.EvaluationPlan;
 import com.deepconnect.ats.evaluationplan.model.EvaluationPlanRoundType;
 import com.deepconnect.ats.recruitmentpipeline.model.RecruitmentPipelineRoundType;
 import com.deepconnect.ats.job.repo.JobRecruitmentPipelineRoundRepository;
@@ -152,10 +153,7 @@ public class JobPositionService {
             jobScreeningQuestionRepository.saveAll(req.getScreeningQuestions());
         }
 
-        // position.setRecruitmentPipelineRounds(req.getRecruitmentPipelineRounds());
-        // position.setEvaluationPlanRounds(req.getEvaluationPlanRounds());
-        // position.setScreeningQuestions(req.getScreeningQuestions());
-        return jobPositionRepository.save(position).getPublicId();
+        return position.getPublicId();
     }
 
     @Transactional
@@ -179,43 +177,18 @@ public class JobPositionService {
         return this.save(jobPosition, req, true, true, true);
     }
 
-    @Transactional 
+    @Transactional
     public String update(JobPositionReq req) {
-        return update(req, null);
-    }
-
-    private String update(JobPositionReq req, JobStatus targetStatus) {
         if (req.getId() == null) 
             throw new InternalServerException(String.format("Invalid Job Position Id: User: %s, Position: %s", AuthService.getLoggedInUser().getPublicId(), req.getId()));
 
         LoggedInUserDetails loggedInUser = AuthService.getLoggedInUser();
-        JobPosition jobPosition = jobPositionRepository.findForUpdate(req.getId(), loggedInUser.getTenantId())
+        JobPosition jobPosition = jobPositionRepository.findByPublicIdAndTenantIdAndDeactivatedFalse(req.getId(), loggedInUser.getTenantId())
                 .orElseThrow(() -> new InternalServerException(String.format("Job Position not found: User: %s, Position: %s", AuthService.getLoggedInUser().getPublicId(), req.getId())));
 
         //TODO: think about uniqueness criteria and implement //
         //this.assertUniqueWithinTenantForUpdate(loggedInUser.getTenantId(), req.getName(), plan.getId());
         jobPositionAccessService.assertWriteAccess(loggedInUser, jobPosition);
-        if (targetStatus != null) {
-            JobStatus expected = targetStatus == JobStatus.OPEN ? JobStatus.DRAFT : JobStatus.OPEN;
-            if (jobPosition.getStatus() != expected) {
-                throw new CustomException(CustomExceptionType.JOB_INVALID_STATUS_TRANSITION);
-            }
-            if (CollectionUtils.isEmpty(req.getEvaluationPlanRounds())) {
-                throw new ValidationException(CustomExceptionType.VALIDATION_MUST_ADD, ValidationFieldType.EVALUATION_PLAN_ROUND);
-            }
-            if (CollectionUtils.isEmpty(req.getRecruitmentPipelineRounds())) {
-                throw new ValidationException(CustomExceptionType.VALIDATION_MUST_ADD, ValidationFieldType.RECRUITMENT_PIPELINE_STAGE);
-            }
-            jobPosition.setStatus(targetStatus);
-            if (targetStatus == JobStatus.OPEN) {
-                jobPosition.setPublishedByUserId(loggedInUser.getUserId());
-                jobPosition.setPublishedByUserPublicId(loggedInUser.getPublicId());
-                jobPosition.setPublishedAt(LocalDateTime.now());
-            } else {
-                jobPosition.setClosedByUserId(loggedInUser.getUserId());
-                jobPosition.setClosedByUserPublicId(loggedInUser.getPublicId());
-            }
-        }
         // if(!loggedInUser.getPublicId().equals(req.getOwnerId())){//if the requested owner is not the logged in user, additional checks are needed
         //     setAnotherUserAsOwner(plan, evaluationPlanAccessService.getAccessType(loggedInUser, plan), req.getOwnerId());
         // }
@@ -239,13 +212,45 @@ public class JobPositionService {
     }
 
     @Transactional
-    public void publish(JobPositionReq req) {
-        update(req, JobStatus.OPEN);
+    public void publish(String publicId) {
+        JobPosition jobPosition = jobPositionRepository.findByPublicIdAndTenantIdAndDeactivatedFalse(publicId, AuthService.getLoggedInTenantId()).orElseThrow(() -> new InternalServerException(String.format("Job position not found: User: %s, Position: %s", AuthService.getLoggedInUser().getPublicId(), publicId)));
+        if (jobPosition.getStatus() != JobStatus.DRAFT) {
+            throw new CustomException(CustomExceptionType.JOB_INVALID_STATUS_TRANSITION);
+        }
+        LoggedInUserDetails loggedInUser = AuthService.getLoggedInUser();
+        jobPosition.setStatus(JobStatus.OPEN);
+        jobPosition.setPublishedByUserId(loggedInUser.getUserId());
+        jobPosition.setPublishedByUserPublicId(loggedInUser.getPublicId());
+        jobPosition.setPublishedAt(LocalDateTime.now());
+        this.saveForStatusUpdate(jobPosition);
     }
 
     @Transactional
-    public void close(JobPositionReq req) {
-        update(req, JobStatus.CLOSED);
+    public void close(String publicId) {
+        JobPosition jobPosition = jobPositionRepository.findByPublicIdAndTenantIdAndDeactivatedFalse(publicId, AuthService.getLoggedInTenantId()).orElseThrow(() -> new InternalServerException(String.format("Job position not found: User: %s, Position: %s", AuthService.getLoggedInUser().getPublicId(), publicId)));
+        if (jobPosition.getStatus() != JobStatus.OPEN) {
+            throw new CustomException(CustomExceptionType.JOB_INVALID_STATUS_TRANSITION);
+        }
+        LoggedInUserDetails loggedInUser = AuthService.getLoggedInUser();
+        jobPosition.setStatus(JobStatus.CLOSED);
+        jobPosition.setClosedByUserId(loggedInUser.getUserId());
+        jobPosition.setClosedByUserPublicId(loggedInUser.getPublicId());
+        this.saveForStatusUpdate(jobPosition);
+    }
+
+    @Transactional
+    public void deactivate(String publicId) {
+        JobPosition jobPosition = jobPositionRepository.findByPublicIdAndTenantIdAndDeactivatedFalse(publicId, AuthService.getLoggedInTenantId()).orElseThrow(() -> new InternalServerException(String.format("Job position not found: User: %s, Position: %s", AuthService.getLoggedInUser().getPublicId(), publicId)));
+        jobPosition.setDeactivated(true);
+        this.saveForStatusUpdate(jobPosition);
+    }
+
+    private void saveForStatusUpdate(JobPosition jobPosition) {
+        LoggedInUserDetails loggedInUser = AuthService.getLoggedInUser();
+        jobPositionAccessService.assertWriteAccess(loggedInUser, jobPosition);
+        jobPosition.setModifiedByUserId(loggedInUser.getUserId());
+        jobPosition.setModifiedByUserPublicId(loggedInUser.getPublicId());
+        jobPositionRepository.save(jobPosition);
     }
 
     // public List<JobPosition> listAll() {

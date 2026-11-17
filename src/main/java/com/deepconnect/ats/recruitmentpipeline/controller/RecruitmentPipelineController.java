@@ -51,7 +51,8 @@ public class RecruitmentPipelineController {
     @PostMapping("/deactivate/{id}")
     public ApiResult<Boolean> deactivate(
         @PathVariable @NotBlank(message = "{field.common.id}{validation.notBlank}") String id) {
-        return ApiResult.success(recruitmentPipelineService.deactivate(id));
+        recruitmentPipelineService.deactivate(id);
+        return ApiResult.success(true);
     }
 
     @PreAuthorize("hasAuthority('rpts')")

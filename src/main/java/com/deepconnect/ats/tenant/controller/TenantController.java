@@ -82,7 +82,8 @@ public class TenantController {
     @PostMapping("/deactivate/{id}")
     public ApiResult<Boolean> deactivate(
         @PathVariable @NotBlank(message = "{field.common.id}{validation.notBlank}") String id) {
-        return ApiResult.success(tenantService.deactivate(id));
+        tenantService.deactivate(id);
+        return ApiResult.success(true);
     }
 
     @PreAuthorize("hasAuthority('clns')")

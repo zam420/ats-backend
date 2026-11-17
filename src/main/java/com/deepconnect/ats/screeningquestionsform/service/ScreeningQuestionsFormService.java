@@ -215,7 +215,7 @@ public class ScreeningQuestionsFormService {
     }
 
     @Transactional
-    public boolean deactivate(String publicId) {
+    public void deactivate(String publicId) {
         ScreeningQuestionsForm plan = screeningQuestionTemplateRepository.findByDeactivatedFalseAndPublicId(publicId).orElseThrow(() -> new InternalServerException(String.format("Screening Question Template not found: User: %s, Plan: %s", AuthService.getLoggedInUser().getPublicId(), publicId)));
         LoggedInUserDetails loggedInUser = AuthService.getLoggedInUser();
         screeningQuestionTemplateAccessService.assertWriteAccess(loggedInUser, plan);
@@ -223,7 +223,6 @@ public class ScreeningQuestionsFormService {
         plan.setModifiedByUserId(loggedInUser.getUserId());
         plan.setModifiedByUserPublicId(loggedInUser.getPublicId());
         screeningQuestionTemplateRepository.save(plan);
-        return true;
     }
 
     @Transactional(readOnly = true)

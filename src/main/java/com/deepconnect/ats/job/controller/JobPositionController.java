@@ -1,6 +1,8 @@
 package com.deepconnect.ats.job.controller;
 
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
+
 import com.deepconnect.ats.dto.ApiResult;
 import com.deepconnect.ats.dto.AtsPageQuery;
 import com.deepconnect.ats.dto.AtsPageRsp;
@@ -22,6 +24,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/job")
 @RequiredArgsConstructor
+@Validated
 public class JobPositionController {
 
     private final JobPositionService jobPositionService;
@@ -39,26 +42,35 @@ public class JobPositionController {
         return ApiResult.success(Collections.singletonMap("id", jobPositionService.create(req)));
     }
 
-
-    @PreAuthorize("hasAuthority('jpe')")
-    @PostMapping("/publish")
-    public ApiResult<Boolean> publish(@RequestBody @Valid JobPositionReq req) {
-        jobPositionService.publish(req);
-        return ApiResult.success(true);
-    }
-
-    @PreAuthorize("hasAuthority('jpe')")
-    @PostMapping("/close")
-    public ApiResult<Boolean> close(@RequestBody @Valid JobPositionReq req) {
-        jobPositionService.close(req);
-        return ApiResult.success(true);
-    }
-
     @PreAuthorize("hasAuthority('jpe')")
     @PostMapping("/update")
-    public ApiResult<Map<String, String>> update(@RequestBody JobPositionReq req) {
+    public ApiResult<Map<String, String>> update(@RequestBody @Valid JobPositionReq req) {
         String id = jobPositionService.update(req);
         return ApiResult.success(Collections.singletonMap("id", id));
+    }
+
+    @PreAuthorize("hasAuthority('jpe')")
+    @PostMapping("/deactivate/{id}")
+    public ApiResult<Boolean> deactivate(
+        @PathVariable @NotBlank(message = "{field.common.id}{validation.notBlank}") String id) {
+        jobPositionService.deactivate(id);
+        return ApiResult.success(true);
+    }
+
+    @PreAuthorize("hasAuthority('jpe')")
+    @PostMapping("/publish/{id}")
+    public ApiResult<Boolean> publish(
+        @PathVariable @NotBlank(message = "{field.common.id}{validation.notBlank}") String id) {
+        jobPositionService.publish(id);
+        return ApiResult.success(true);
+    }
+
+    @PreAuthorize("hasAuthority('jpe')")
+    @PostMapping("/close/{id}")
+    public ApiResult<Boolean> close(
+        @PathVariable @NotBlank(message = "{field.common.id}{validation.notBlank}") String id) {
+        jobPositionService.close(id);
+        return ApiResult.success(true);
     }
 
     @PreAuthorize("hasAuthority('jps')")

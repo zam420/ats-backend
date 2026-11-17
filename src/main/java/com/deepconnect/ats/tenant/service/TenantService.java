@@ -84,7 +84,7 @@ public class TenantService {
     }
 
     @Transactional
-    public boolean deactivate(String publicId) {
+    public void deactivate(String publicId) {
         Tenant tenant = tenantRepository.findByDeactivatedFalseAndPublicId(publicId).orElseThrow(() -> new InternalServerException(String.format("Tenant not found: User: %s, Tenant: %s", AuthService.getLoggedInUser().getPublicId(), publicId)));
         LoggedInUserDetails loggedInUser = AuthService.getLoggedInUser();
         tenantAccessService.assertWriteAccess(loggedInUser, tenant);
@@ -92,7 +92,6 @@ public class TenantService {
         tenant.setModifiedByUserId(loggedInUser.getUserId());
         tenant.setModifiedByUserPublicId(loggedInUser.getPublicId());
         tenantRepository.save(tenant);
-        return true;
     }
 
     @Transactional(readOnly = true)

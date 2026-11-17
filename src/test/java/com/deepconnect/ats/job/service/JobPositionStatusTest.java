@@ -2,6 +2,7 @@ package com.deepconnect.ats.job.service;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 import java.util.List;
@@ -77,14 +78,14 @@ class JobPositionStatusTest {
 
     @Test
     void publishAndCloseSaveEditsAndRecordActor() {
-        service.publish(req);
+        service.publish(req.getId());
         assertEquals(JobStatus.OPEN, position.getStatus());
         assertEquals("Edited title", position.getTitle());
         assertEquals(1L, position.getPublishedByUserId());
         assertNotNull(position.getPublishedAt());
         var publishedAt = position.getPublishedAt();
 
-        service.close(req);
+        service.close(req.getId());
         assertEquals(JobStatus.CLOSED, position.getStatus());
         assertEquals(1L, position.getClosedByUserId());
         assertEquals(publishedAt, position.getPublishedAt());
@@ -94,11 +95,11 @@ class JobPositionStatusTest {
     @Test
     void invalidTransitionAndMissingRoundsDoNotSave() {
         position.setStatus(JobStatus.CLOSED);
-        assertThrows(CustomException.class, () -> service.publish(req));
+        assertThrows(CustomException.class, () -> service.publish(req.getId()));
         position.setStatus(JobStatus.DRAFT);
-        assertThrows(CustomException.class, () -> service.close(req));
+        assertThrows(CustomException.class, () -> service.close(req.getId()));
         req.setEvaluationPlanRounds(List.of());
-        assertThrows(ValidationException.class, () -> service.publish(req));
+        assertThrows(ValidationException.class, () -> service.publish(req.getId()));
         assertEquals(JobStatus.DRAFT, position.getStatus());
         verify(positions, never()).save(any());
     }
@@ -106,7 +107,7 @@ class JobPositionStatusTest {
     @Test
     void deniedWriteAccessCannotChangeStatus() {
         doThrow(new IllegalStateException("denied")).when(access).assertWriteAccess(any(), eq(position));
-        assertThrows(IllegalStateException.class, () -> service.publish(req));
+        assertThrows(IllegalStateException.class, () -> service.publish(req.getId()));
         assertEquals(JobStatus.DRAFT, position.getStatus());
         verify(positions, never()).save(any());
     }
@@ -114,7 +115,7 @@ class JobPositionStatusTest {
     @Test
     void unknownOrDifferentTenantJobCannotBeChanged() {
         when(positions.findForUpdate("job", 2L)).thenReturn(Optional.empty());
-        assertThrows(RuntimeException.class, () -> service.publish(req));
+        assertThrows(RuntimeException.class, () -> service.publish(req.getId()));
         verifyNoInteractions(access);
         verify(positions, never()).save(any());
     }

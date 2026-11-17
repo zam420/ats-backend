@@ -18,25 +18,26 @@ import java.util.Optional;
 public interface JobPositionRepository extends OperatableBaseRepository<JobPosition, Long>, JpaSpecificationExecutor<JobPosition> {
     //Optional<JobPosition> findByPublicId(String publicId);
     Optional<JobPosition> findByPublicIdAndTenantIdAndDeactivatedFalse(String publicId, Long tenantId);
+    
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT jp FROM JobPosition jp WHERE jp.publicId = :publicId AND jp.tenantId = :tenantId AND jp.deactivated = false")
     Optional<JobPosition> findForUpdate(@Param("publicId") String publicId, @Param("tenantId") Long tenantId);
     // List<JobPosition> findByStatus(JobStatus status);
     // Optional<JobPosition> findByTitle(String title);
 
-    @Query("SELECT jp FROM JobPosition jp WHERE jp.tenantId = :tenantId")
+    @Query("SELECT jp FROM JobPosition jp WHERE jp.tenantId = :tenantId AND jp.deactivated = false")
     Page<JobPosition> findAllForTenantAdmin(@Param("tenantId") Long tenantId, Pageable pageable);
 
-    @Query("SELECT jp FROM JobPosition jp WHERE jp.tenantId = :tenantId")
+    @Query("SELECT jp FROM JobPosition jp WHERE jp.tenantId = :tenantId AND jp.deactivated = false")
     List<JobPosition> findAllForTenantAdminAsList(@Param("tenantId") Long tenantId);
 
     @Query(
-        value = "SELECT * FROM job_position jp WHERE jp.tenant_id = :tenantId AND (" +
+        value = "SELECT * FROM job_position jp WHERE jp.tenant_id = :tenantId AND jp.deactivated = false AND (" +
                 "jp.owner_id = :loggedInUserId " +
                 "OR jp.recruiters LIKE CONCAT('%\"', :loggedInUserPublicId, '\"%') " +
                 "OR jp.hiring_managers LIKE CONCAT('%\"', :loggedInUserPublicId, '\"%')" +
                 ")",
-        countQuery = "SELECT count(*) FROM job_position jp WHERE jp.tenant_id = :tenantId AND (" +
+        countQuery = "SELECT count(*) FROM job_position jp WHERE jp.tenant_id = :tenantId AND jp.deactivated = false AND (" +
                     "jp.owner_id = :loggedInUserId " +
                     "OR jp.recruiters LIKE CONCAT('%\"', :loggedInUserPublicId, '\"%') " +
                     "OR jp.hiring_managers LIKE CONCAT('%\"', :loggedInUserPublicId, '\"%')" +
@@ -46,12 +47,12 @@ public interface JobPositionRepository extends OperatableBaseRepository<JobPosit
     Page<JobPosition> findAllForTenantNonAdmin(@Param("tenantId") Long tenantId, @Param("loggedInUserId") Long loggedInUserId, @Param("loggedInUserPublicId") String loggedInUserPublicId, Pageable pageable);
     
     @Query(
-        value = "SELECT * FROM job_position jp WHERE jp.tenant_id = :tenantId AND (" +
+        value = "SELECT * FROM job_position jp WHERE jp.tenant_id = :tenantId AND jp.deactivated = false AND (" +
                 "jp.owner_id = :loggedInUserId " +
                 "OR jp.recruiters LIKE CONCAT('%\"', :loggedInUserPublicId, '\"%') " +
                 "OR jp.hiring_managers LIKE CONCAT('%\"', :loggedInUserPublicId, '\"%')" +
                 ")",
-        countQuery = "SELECT count(*) FROM job_position jp WHERE jp.tenant_id = :tenantId AND (" +
+        countQuery = "SELECT count(*) FROM job_position jp WHERE jp.tenant_id = :tenantId AND jp.deactivated = false AND (" +
                     "jp.owner_id = :loggedInUserId " +
                     "OR jp.recruiters LIKE CONCAT('%\"', :loggedInUserPublicId, '\"%') " +
                     "OR jp.hiring_managers LIKE CONCAT('%\"', :loggedInUserPublicId, '\"%')" +

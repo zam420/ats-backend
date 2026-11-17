@@ -224,7 +224,7 @@ public class EvaluationPlanService {
     }
 
     @Transactional
-    public boolean deactivate(String publicId) {
+    public void deactivate(String publicId) {
         EvaluationPlan plan = evaluationPlanRepository.findByDeactivatedFalseAndPublicId(publicId).orElseThrow(() -> new InternalServerException(String.format("Evaluation Plan not found: User: %s, Plan: %s", AuthService.getLoggedInUser().getPublicId(), publicId)));
         LoggedInUserDetails loggedInUser = AuthService.getLoggedInUser();
         evaluationPlanAccessService.assertWriteAccess(loggedInUser, plan);
@@ -232,7 +232,6 @@ public class EvaluationPlanService {
         plan.setModifiedByUserId(loggedInUser.getUserId());
         plan.setModifiedByUserPublicId(loggedInUser.getPublicId());
         evaluationPlanRepository.save(plan);
-        return true;
     }
 
     @Transactional(readOnly = true)

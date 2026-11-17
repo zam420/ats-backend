@@ -50,7 +50,8 @@ public class ScreeningQuestionsFormController {
     @PostMapping("/deactivate/{id}")
     public ApiResult<Boolean> deactivate(
         @PathVariable @NotBlank(message = "{field.common.id}{validation.notBlank}") String id) {
-        return ApiResult.success(screeningQuestionTemplateService.deactivate(id));
+        screeningQuestionTemplateService.deactivate(id);
+        return ApiResult.success(true);
     }
 
     @PreAuthorize("hasAuthority('sqts')")

@@ -50,7 +50,8 @@ public class EvaluationPlanController {
     @PostMapping("/deactivate/{id}")
     public ApiResult<Boolean> deactivate(
         @PathVariable @NotBlank(message = "{field.common.id}{validation.notBlank}") String id) {
-        return ApiResult.success(evaluationPlanService.deactivate(id));
+        evaluationPlanService.deactivate(id);
+        return ApiResult.success(true);
     }
 
     @PreAuthorize("hasAuthority('ipts')")

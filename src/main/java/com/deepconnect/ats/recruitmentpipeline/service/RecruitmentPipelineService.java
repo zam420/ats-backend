@@ -220,7 +220,7 @@ public class RecruitmentPipelineService {
     }
 
     @Transactional
-    public boolean deactivate(String publicId) {
+    public void deactivate(String publicId) {
         RecruitmentPipeline plan = recruitmentPipelineRepository.findByDeactivatedFalseAndPublicId(publicId).orElseThrow(() -> new InternalServerException("Interview Process not found: " + publicId));
         LoggedInUserDetails loggedInUser = AuthService.getLoggedInUser();
         recruitmentPipelineAccessService.assertWriteAccess(loggedInUser, plan);
@@ -228,7 +228,6 @@ public class RecruitmentPipelineService {
         plan.setModifiedByUserId(loggedInUser.getUserId());
         plan.setModifiedByUserPublicId(loggedInUser.getPublicId());
         recruitmentPipelineRepository.save(plan);
-        return true;
     }
 
     @Transactional(readOnly = true)
