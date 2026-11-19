@@ -14,6 +14,7 @@ public class JobPositionSummaryResForCandidate {
     private String title;
     private String companyName;
     private boolean companyHasLogo;
+    private String companyLogoUrl;
     private LocalDateTime publishedAt;
     private String shortDescription;
     private Integer employmentType;
@@ -46,6 +47,7 @@ public class JobPositionSummaryResForCandidate {
         res.setTitle(entity.getTitle());
         res.setCompanyName(entity.getCompanyName());
         res.setCompanyHasLogo(entity.isCompanyHasLogo());
+        res.setCompanyLogoUrl(entity.getCompanyLogoUrl());
         res.setPublishedAt(entity.getPublishedAt());
         res.setShortDescription(JobRichTextSanitizer.shortDescription(entity.getDescription(), maxWords));
         res.setEmploymentType(entity.getEmploymentType());

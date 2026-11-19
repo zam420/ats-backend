@@ -14,6 +14,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.header.writers.XXssProtectionHeaderWriter;
 import org.springframework.web.client.RestTemplate;
@@ -32,8 +33,15 @@ import java.util.Arrays;
 public class SecurityConfig {
 
     public static final String AUTH_ENDPOINT_BASE = "/api/auth";
+    public static final String PUBLIC_LOGO_PATH = "/api/public/tenant-logos";
     private static final String[] PUBLIC_URLS = {
-        AUTH_ENDPOINT_BASE + "/register", AUTH_ENDPOINT_BASE + "/login", AUTH_ENDPOINT_BASE + "/refresh", AUTH_ENDPOINT_BASE + "/activate", AUTH_ENDPOINT_BASE + "/logingoogle", "/error"};
+        AUTH_ENDPOINT_BASE + "/register", 
+        AUTH_ENDPOINT_BASE + "/login", 
+        AUTH_ENDPOINT_BASE + "/refresh", 
+        AUTH_ENDPOINT_BASE + "/activate", 
+        AUTH_ENDPOINT_BASE + "/logingoogle", 
+        PUBLIC_LOGO_PATH + "/*",
+        "/error"};
 
     private final JwtAuthFilter jwtAuthFilter;
     private final LoggedInUserDetailsService userDetailsService;
@@ -45,6 +53,7 @@ public class SecurityConfig {
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
+                .requestMatchers(HttpMethod.GET, PUBLIC_LOGO_PATH + "/*").permitAll()
                 .anyRequest().permitAll()
             )
             //TODO: for production uncomment the following code block and comment out the above authorizeHttpRequests block

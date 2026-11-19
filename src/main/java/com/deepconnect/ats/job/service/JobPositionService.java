@@ -45,6 +45,7 @@ import com.deepconnect.ats.common.utils.StringUtils;
 import com.deepconnect.ats.common.enums.ValidationFieldType;
 import com.deepconnect.ats.screeningquestionsform.service.ScreeningQuestionsFormService;
 import com.deepconnect.ats.job.dto.JobFiltersResForCandidate;
+import com.deepconnect.ats.tenant.service.TenantLogoStorage;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -74,6 +75,9 @@ public class JobPositionService {
 
     @Value("${jobPosition.shortDescriptionMaxWords}")
     private int shortDescriptionMaxWords;
+
+    @Value("${ats.logo.public-base-url:}")
+    private String publicLogoBaseUrl = "";
 
     private final EvaluationPlanService evaluationPlanService;
     private final RecruitmentPipelineService recruitmentPipelineService;
@@ -343,12 +347,19 @@ public class JobPositionService {
     public AtsPageRsp<JobPositionSummaryResForCandidate> findAllForCandidate(JobPositionSearchQuery query) {
         Page<JobPosition> page = jobPositionRepository.findAll(
             JobPositionSearchSpecification.forCandidate(query), query.toPageable());
-        return AtsPageRsp.of(page.map(JobPositionSummaryResForCandidate::from));
+        return AtsPageRsp.of(page.map(position -> {
+            JobPositionSummaryResForCandidate result = JobPositionSummaryResForCandidate.from(position);
+            result.setCompanyLogoUrl(TenantLogoStorage.publicUrl(position.getTenant().getLogoPath(), publicLogoBaseUrl));
+            return result;
+        }));
     }
 
     @Transactional(readOnly = true)
     public JobPositionResForCandidate findByPublicIdForCandidate(String publicId) {
-        return JobPositionResForCandidate.from(findOpenPositionForCandidate(publicId));
+        JobPosition position = findOpenPositionForCandidate(publicId);
+        JobPositionResForCandidate result = JobPositionResForCandidate.from(position);
+        result.setCompanyLogoUrl(TenantLogoStorage.publicUrl(position.getTenant().getLogoPath(), publicLogoBaseUrl));
+        return result;
     }
 
     @Transactional(readOnly = true)

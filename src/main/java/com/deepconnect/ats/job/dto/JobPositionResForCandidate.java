@@ -19,6 +19,7 @@ public class JobPositionResForCandidate {
     private String title;
     private String companyName;
     private boolean companyHasLogo;
+    private String companyLogoUrl;
     private LocalDateTime publishedAt;
     private String description;
     private Integer employmentType;

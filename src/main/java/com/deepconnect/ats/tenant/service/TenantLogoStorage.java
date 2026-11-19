@@ -1,6 +1,8 @@
 package com.deepconnect.ats.tenant.service;
 
 import com.deepconnect.ats.common.exception.InternalServerException;
+import com.deepconnect.ats.common.security.SecurityConfig;
+
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -21,6 +23,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
@@ -88,6 +91,20 @@ public class TenantLogoStorage {
         Path path = resolve(name);
         if (!Files.isRegularFile(path)) throw new InternalServerException("Tenant logo not found");
         return path;
+    }
+
+    public static String publicUrl(String name, String baseUrl) {
+        if (name == null) return null;
+        if (!FILE_NAME.matcher(name).matches()) throw new InternalServerException("Invalid tenant logo path");
+        if (!baseUrl.isEmpty()) {
+            URI base = URI.create(baseUrl);
+            if (!("http".equalsIgnoreCase(base.getScheme()) || "https".equalsIgnoreCase(base.getScheme()))
+                    || base.getHost() == null || base.getRawUserInfo() != null
+                    || base.getRawQuery() != null || base.getRawFragment() != null) {
+                throw new IllegalArgumentException("Invalid public logo base URL");
+            }
+        }
+        return baseUrl.replaceAll("/+$", "") + SecurityConfig.PUBLIC_LOGO_PATH + "/" + name;
     }
 
     private Path resolve(String name) {

@@ -21,6 +21,17 @@ class TenantLogoStorageTest {
     @TempDir Path root;
     TenantLogoStorage storage;
 
+    @Test
+    void buildsSharedPublicUrlsAndRejectsInvalidPaths() {
+        String name = "12345678-1234-1234-1234-123456789abc.png";
+        assertEquals("/api/public/tenant-logos/" + name, TenantLogoStorage.publicUrl(name, ""));
+        assertEquals("https://cdn.example.com/api/public/tenant-logos/" + name,
+            TenantLogoStorage.publicUrl(name, "https://cdn.example.com/"));
+        assertNull(TenantLogoStorage.publicUrl(null, ""));
+        assertThrows(RuntimeException.class, () -> TenantLogoStorage.publicUrl("../logo.png", ""));
+        assertThrows(IllegalArgumentException.class, () -> TenantLogoStorage.publicUrl(name, "javascript:alert(1)"));
+    }
+
     @BeforeEach
     void setUp() {
         storage = new TenantLogoStorage(root.toString());
