@@ -10,17 +10,41 @@ import org.junit.jupiter.api.Test;
 
 class JobRichTextSanitizerTest {
     @Test
-    void extractsUpToSixtyPlainTextWordsFromSafeHtml() {
-        String words = java.util.stream.IntStream.rangeClosed(1, 61)
+    void separatesHeadingTextFromFollowingContent() {
+        assertEquals("About Remote People: At Remote People, we're the best.",
+            JobRichTextSanitizer.shortDescription("<h2>About Remote People</h2>At Remote People, we're the best.", 70));
+        assertEquals("One: Two: Three: Four: Five: Six: text",
+            JobRichTextSanitizer.shortDescription("<h1>One</h1><h2>Two</h2><h3>Three</h3>"
+                + "<h4>Four</h4><h5>Five</h5><h6><strong>Six</strong> </h6><p>text</p><h2> </h2>", 70));
+        assertEquals("\uE000 Heading: text",
+            JobRichTextSanitizer.shortDescription("<p>\uE000</p><h2>Heading</h2>text", 70));
+    }
+
+    @Test
+    void addsHeadingSeparatorAtTheConfiguredWordBoundary() {
+        String beforeHeading = "word ".repeat(69);
+        assertEquals((beforeHeading + "Title:").trim(),
+            JobRichTextSanitizer.shortDescription("<p>" + beforeHeading + "</p><h1>Title continues</h1>", 70));
+        assertEquals((beforeHeading + "Title:").trim(),
+            JobRichTextSanitizer.shortDescription("<p>" + beforeHeading + "</p><h1>Title</h1><p>More</p>", 70));
+        assertEquals("word ".repeat(70).trim(),
+            JobRichTextSanitizer.shortDescription("<p>" + "word ".repeat(70) + "</p><h1>Title</h1>", 70));
+        assertEquals("One Two Three:", JobRichTextSanitizer.shortDescription("<p>One</p><h2>Two Three Four</h2>", 3));
+        assertThrows(IllegalArgumentException.class, () -> JobRichTextSanitizer.shortDescription("text", 0));
+    }
+
+    @Test
+    void extractsUpToSeventyPlainTextWordsFromSafeHtml() {
+        String words = java.util.stream.IntStream.rangeClosed(1, 71)
                 .mapToObj(i -> "word" + i).collect(java.util.stream.Collectors.joining(" "));
         String result = JobRichTextSanitizer.shortDescription("<p>Intro &amp; welcome</p><p>" + words
-                + "</p><script>hidden</script>");
-        assertEquals(60, result.split(" ").length);
+                + "</p><script>hidden</script>", 70);
+        assertEquals(70, result.split(" ").length);
         assertTrue(result.startsWith("Intro & welcome word1"));
-        assertTrue(result.endsWith("word57"));
+        assertTrue(result.endsWith("word67"));
         assertFalse(result.contains("hidden"));
-        assertEquals("First Second Third", JobRichTextSanitizer.shortDescription("<p>First<br>Second</p><p>Third</p>"));
-        assertEquals("", JobRichTextSanitizer.shortDescription("<p><br></p>"));
+        assertEquals("First Second Third", JobRichTextSanitizer.shortDescription("<p>First<br>Second</p><p>Third</p>", 70));
+        assertEquals("", JobRichTextSanitizer.shortDescription("<p><br></p>", 70));
     }
 
     @Test

@@ -2,7 +2,6 @@ package com.deepconnect.ats.job.service;
 
 import com.deepconnect.ats.auth.dto.LoggedInUserDetails;
 import com.deepconnect.ats.auth.service.AuthService;
-import com.deepconnect.ats.common.dto.EnumsRes;
 import com.deepconnect.ats.common.enums.CustomExceptionType;
 import com.deepconnect.ats.common.exception.InternalServerException;
 import com.deepconnect.ats.common.exception.CustomException;
@@ -73,6 +72,9 @@ public class JobPositionService {
     @Value("${screeningQuestionsForms.maxControls}")
     private int maxQuestions;
 
+    @Value("${jobPosition.shortDescriptionMaxWords}")
+    private int shortDescriptionMaxWords;
+
     private final EvaluationPlanService evaluationPlanService;
     private final RecruitmentPipelineService recruitmentPipelineService;
     private final JobPositionAccessService jobPositionAccessService;
@@ -88,18 +90,6 @@ public class JobPositionService {
     private final JobRecruitmentPipelineRoundRepository jobRecruitmentPipelineRoundRepository;
     private final JobScreeningQuestionRepository jobScreeningQuestionRepository;
 
-    private JobQuestionsDisplayMode resolveDisplayMode(Integer id) {
-        if (id == null) {
-            return null;
-        }
-        for (JobQuestionsDisplayMode mode : JobQuestionsDisplayMode.values()) {
-            if (mode.getId().equals(id)) {
-                return mode;
-            }
-        }
-        throw new IllegalArgumentException("Invalid application questions display mode: " + id);
-    }
-
     private String save(JobPosition position, JobPositionReq req, boolean evaluationPlanRoundsChanged, boolean recruitmentPipelineRoundsChanged, boolean screeningQuestionsChanged){
         LoggedInUserDetails loggedInUser = AuthService.getLoggedInUser();
         position.setModifiedByUserId(loggedInUser.getUserId());
@@ -107,7 +97,7 @@ public class JobPositionService {
         
         position.setTitle(req.getTitle());
         position.setDescription(JobRichTextSanitizer.sanitize(req.getDescription()));
-        position.setShortDescription(JobRichTextSanitizer.shortDescription(position.getDescription()));
+        position.setShortDescription(JobRichTextSanitizer.shortDescription(position.getDescription(), shortDescriptionMaxWords));
         position.setEmploymentTypeId(req.getEmploymentType());
         position.setWorkArrangementTypeId(req.getWorkArrangementType());
         position.setExperienceLevelTypeId(req.getExperienceLevelType());
@@ -118,7 +108,7 @@ public class JobPositionService {
         position.setDepartment(req.getDepartment());
         position.setRecruiters(req.getRecruiters());
         position.setHiringManagers(req.getHiringManagers());
-        position.setApplicationQuestionsDisplayMode(resolveDisplayMode(req.getApplicationQuestionsDisplayMode()));
+        position.setApplicationQuestionsDisplayMode(enumsResUtils.resolve(req.getApplicationQuestionsDisplayMode(), JobQuestionsDisplayMode.values()));
 
         position = jobPositionRepository.save(position);
         if (evaluationPlanRoundsChanged){

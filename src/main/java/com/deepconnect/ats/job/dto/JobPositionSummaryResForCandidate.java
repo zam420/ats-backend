@@ -40,14 +40,14 @@ public class JobPositionSummaryResForCandidate {
         return entities.stream().map(JobPositionSummaryResForCandidate::from).toList();
     }
 
-    public static JobPositionSummaryResForCandidate from(JobPositionResForCandidate entity) {
+    public static JobPositionSummaryResForCandidate from(JobPositionResForCandidate entity, int maxWords) {
         JobPositionSummaryResForCandidate res = new JobPositionSummaryResForCandidate();
         res.setId(entity.getId());
         res.setTitle(entity.getTitle());
         res.setCompanyName(entity.getCompanyName());
         res.setCompanyHasLogo(entity.isCompanyHasLogo());
         res.setPublishedAt(entity.getPublishedAt());
-        res.setShortDescription(JobRichTextSanitizer.shortDescription(entity.getDescription()));
+        res.setShortDescription(JobRichTextSanitizer.shortDescription(entity.getDescription(), maxWords));
         res.setEmploymentType(entity.getEmploymentType());
         res.setWorkArrangementType(entity.getWorkArrangementType());
         res.setExperienceLevelType(entity.getExperienceLevelType());
@@ -55,8 +55,8 @@ public class JobPositionSummaryResForCandidate {
         return res;
     }
 
-    public static List<JobPositionSummaryResForCandidate> fromListForCandidate(List<JobPositionResForCandidate> entities) {
-        return entities.stream().map(JobPositionSummaryResForCandidate::from).toList();
+    public static List<JobPositionSummaryResForCandidate> fromListForCandidate(List<JobPositionResForCandidate> entities, int maxWords) {
+        return entities.stream().map(entity -> from(entity, maxWords)).toList();
     }
 
     

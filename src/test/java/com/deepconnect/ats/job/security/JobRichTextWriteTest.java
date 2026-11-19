@@ -30,6 +30,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.test.util.ReflectionTestUtils;
 import com.deepconnect.ats.job.repo.JobEvaluationPlanRoundRepository;
 import com.deepconnect.ats.job.repo.JobRecruitmentPipelineRoundRepository;
 import com.deepconnect.ats.job.repo.JobScreeningQuestionRepository;
@@ -53,6 +54,7 @@ class JobRichTextWriteTest {
 
     @Test
     void createAndUpdateBothSanitizeAllRichTextFields() {
+        ReflectionTestUtils.setField(service, "shortDescriptionMaxWords", 70);
         LoggedInUserDetails user = new LoggedInUserDetails(1L, 2L, "user", "user@example.com",
                 false, false, List.of());
         SecurityContextHolder.getContext().setAuthentication(

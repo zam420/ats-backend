@@ -10,6 +10,7 @@ import org.apache.poi.ss.formula.functions.T;
 
 import com.deepconnect.ats.common.dto.EnumsRes;
 import com.deepconnect.ats.common.enums.LocalizedBaseEnum;
+import com.deepconnect.ats.job.enums.JobQuestionsDisplayMode;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -33,6 +34,18 @@ public class EnumsResUtils {
         return Arrays.stream(values)
                 .map(this::from)
                 .collect(Collectors.toList());
+    }
+
+    public <T extends LocalizedBaseEnum> T resolve(Integer id, T[] values) {
+        if (id == null) {
+            return null;
+        }
+        for (T mode : values) {
+            if (mode.getId().equals(id)) {
+                return mode;
+            }
+        }
+        throw new IllegalArgumentException("Invalid id: " + id);
     }
 
 }

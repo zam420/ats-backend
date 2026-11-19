@@ -28,16 +28,53 @@ public final class JobRichTextSanitizer {
     private JobRichTextSanitizer() {
     }
 
-    public static String shortDescription(String html) {
+    public static String shortDescription(String html, int maxWords) {
+        if (maxWords <= 0) {
+            throw new IllegalArgumentException("Short description word limit must be positive");
+        }
         if (html == null) {
             return null;
         }
-        String text = Jsoup.parseBodyFragment(sanitize(html)).body().text().trim();
-        if (text.isEmpty()) {
-            return "";
+        Element body = Jsoup.parseBodyFragment(sanitize(html)).body();
+        String originalText = body.text();
+        // Mark heading boundaries so a truncated heading still receives its separator.
+        String headingStart = "\uE000";
+        String headingEnd = "\uE001";
+        while (originalText.contains(headingStart) || originalText.contains(headingEnd)) {
+            headingStart += "\uE000";
+            headingEnd += "\uE001";
         }
-        String[] words = text.split("(?U)\\s+");
-        return String.join(" ", java.util.Arrays.copyOf(words, Math.min(words.length, 60)));
+        for (Element heading : body.select("h1, h2, h3, h4, h5, h6")) {
+            if (!heading.text().isBlank()) {
+                heading.prependText(headingStart + " ");
+                heading.appendText(" " + headingEnd);
+            }
+        }
+        List<String> words = new ArrayList<>();
+        boolean inHeading = false;
+        boolean headingHasWords = false;
+        for (String word : body.text().split("(?U)\\s+")) {
+            if (word.equals(headingStart)) {
+                inHeading = true;
+                headingHasWords = false;
+            } else if (word.equals(headingEnd)) {
+                if (headingHasWords) {
+                    words.set(words.size() - 1, words.get(words.size() - 1) + ":");
+                }
+                inHeading = false;
+                headingHasWords = false;
+            } else if (!word.isEmpty()) {
+                if (words.size() == maxWords) {
+                    break;
+                }
+                words.add(word);
+                headingHasWords |= inHeading;
+            }
+        }
+        if (inHeading && headingHasWords) {
+            words.set(words.size() - 1, words.get(words.size() - 1) + ":");
+        }
+        return String.join(" ", words);
     }
 
     public static String sanitize(String html) {
