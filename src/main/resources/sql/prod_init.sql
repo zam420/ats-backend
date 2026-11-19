@@ -18,15 +18,12 @@ INSERT INTO `rbac_permission`(`public_id`, `code`, `name`) VALUES('uzpRGBH8_Anw'
 INSERT INTO `rbac_permission`(`public_id`, `code`, `name`) VALUES('V9YtXRG8_Z5n','clns','Client Search');
 INSERT INTO `rbac_permission`(`public_id`, `code`, `name`) VALUES('VpTtXRG8_Z5n','clncur','Client Current');#get logged in user's tenant's own logo-available to all roles except Candidate
 -- job position
-INSERT INTO `rbac_permission`(`public_id`, `code`, `name`) VALUES('V1StPos8_Z5r','jpm','job position menu');
-INSERT INTO `rbac_permission`(`public_id`, `code`, `name`) VALUES('V9StGFN8_Z5b','jpc','job position create'); 
-INSERT INTO `rbac_permission`(`public_id`, `code`, `name`) VALUES('V8pRGBH8_Anw','jpe','job position edit'); 
-INSERT INTO `rbac_permission`(`public_id`, `code`, `name`) VALUES('V9YtGXR8_Z5n','jps','job position search');
--- job position
-INSERT INTO `rbac_permission`(`public_id`, `code`, `name`) VALUES('V1StPos8_Z5r','jpm','job position menu');
-INSERT INTO `rbac_permission`(`public_id`, `code`, `name`) VALUES('V9StGFN8_Z5b','jpc','job position create'); 
-INSERT INTO `rbac_permission`(`public_id`, `code`, `name`) VALUES('V8pRGBH8_Anw','jpe','job position edit'); 
-INSERT INTO `rbac_permission`(`public_id`, `code`, `name`) VALUES('V9YtGXR8_Z5n','jps','job position search');
+INSERT INTO `rbac_permission`(`public_id`, `code`, `name`) VALUES('V2xtPos8_Z5r','jpa','Job position Admin');
+INSERT INTO `rbac_permission`(`public_id`, `code`, `name`) VALUES('V1StPos8_Z5r','jpm','Job position menu');
+INSERT INTO `rbac_permission`(`public_id`, `code`, `name`) VALUES('V9StGFN8_Z5b','jpc','Job position create'); 
+INSERT INTO `rbac_permission`(`public_id`, `code`, `name`) VALUES('V8pRGBH8_Anw','jpe','Job position edit'); 
+INSERT INTO `rbac_permission`(`public_id`, `code`, `name`) VALUES('V9YtGXR8_Z5n','jps','Job position search');
+INSERT INTO `rbac_permission`(`public_id`, `code`, `name`) VALUES('V9YvUXR8_Z5n','jpsc','Job position search for Candidate');
 -- talent pool
 INSERT INTO `rbac_permission`(`public_id`, `code`, `name`) VALUES('V1SpnTR8_Zbz','tpm','talent pool menu');
 INSERT INTO `rbac_permission`(`public_id`, `code`, `name`) VALUES(9,'V3lOyXR8_Z60','tpc','talent pool create');
@@ -53,21 +50,21 @@ INSERT INTO `rbac_permission`(`public_id`, `code`, `name`) VALUES('V1StGXR8_Z6h'
 INSERT INTO `rbac_permission`(`public_id`, `code`, `name`) VALUES('V1StGXR8_Z6i','ete','email template edit');
 INSERT INTO `rbac_permission`(`public_id`, `code`, `name`) VALUES('V1StGXR8_Z6j','ets','email template search');
 -- evaluation plan
-INSERT INTO `rbac_permission`(`public_id`, `code`, `name`) VALUES('n3StGXR8_Z6k','iptsa','evaluation plan template super admin');#write access to system templates for evaluation plans (formaly called interview process)
+INSERT INTO `rbac_permission`(`public_id`, `code`, `name`) VALUES('n3StGXR8_Z6k','iptsa','evaluation plan template system admin');#write access to system templates for evaluation plans (formaly called interview process)
 INSERT INTO `rbac_permission`(`public_id`, `code`, `name`) VALUES('n1StGXR8_Z6k','ipta','evaluation plan template admin');
 INSERT INTO `rbac_permission`(`public_id`, `code`, `name`) VALUES('V1StGXR8_Z6k','iptm','evaluation plan template menu');
 INSERT INTO `rbac_permission`(`public_id`, `code`, `name`) VALUES('4RStGXR8_Z6k','iptc','evaluation plan template create');
 INSERT INTO `rbac_permission`(`public_id`, `code`, `name`) VALUES('V1StGXR8_Z6l','ipte','evaluation plan template edit');
 INSERT INTO `rbac_permission`(`public_id`, `code`, `name`) VALUES('V1StGXR8_Z6m','ipts','evaluation plan template search');
 -- recruitment pipeline
-INSERT INTO `rbac_permission`(`public_id`, `code`, `name`) VALUES('t3StGXR8_Z6k','rptsa','recruitment pipeline template super admin');#write access to system templates for recruitment pipeline
+INSERT INTO `rbac_permission`(`public_id`, `code`, `name`) VALUES('t3StGXR8_Z6k','rptsa','recruitment pipeline template system admin');#write access to system templates for recruitment pipeline
 INSERT INTO `rbac_permission`(`public_id`, `code`, `name`) VALUES('6fStGXR8_Z6k','rpta','recruitment pipeline template admin');
 INSERT INTO `rbac_permission`(`public_id`, `code`, `name`) VALUES('ulStGXR8_Z6k','rptm','recruitment pipeline template menu');
 INSERT INTO `rbac_permission`(`public_id`, `code`, `name`) VALUES('aRStGXR8_Z6k','rptc','recruitment pipeline template create');
 INSERT INTO `rbac_permission`(`public_id`, `code`, `name`) VALUES('q1ynGXR8_Z6l','rpte','recruitment pipeline template edit');
 INSERT INTO `rbac_permission`(`public_id`, `code`, `name`) VALUES('b1sgGXR8_Z6m','rpts','recruitment pipeline template search');
 -- screening question template
-INSERT INTO `rbac_permission`(`public_id`, `code`, `name`) VALUES('n3StGaR8_Z6k','sqtsa','screening question forms super admin');#write access to system formss for screening questions
+INSERT INTO `rbac_permission`(`public_id`, `code`, `name`) VALUES('n3StGaR8_Z6k','sqtsa','screening question forms system admin');#write access to system formss for screening questions
 INSERT INTO `rbac_permission`(`public_id`, `code`, `name`) VALUES('n1StGvR8_Z6k','sqta','screening question forms admin');
 INSERT INTO `rbac_permission`(`public_id`, `code`, `name`) VALUES('V1StaXR8_Z6k','sqtm','screening question forms menu');
 INSERT INTO `rbac_permission`(`public_id`, `code`, `name`) VALUES('4RStGeR8_Z6k','sqtc','screening question forms create');
@@ -339,7 +336,8 @@ INSERT INTO `rbac_role_permission` (`role_id`, `permission_code`, `permission_id
 
 ```
 -- Candidates
-
+INSERT INTO `rbac_role_permission` (`role_id`, `permission_code`, `permission_id`) SELECT 200, 'jpsc', `id` FROM `rbac_permission` WHERE `code` = 'jpsc';
+INSERT INTO `rbac_role_permission` (`role_id`, `permission_code`, `permission_id`) SELECT 200, 'ats', `id` FROM `rbac_permission` WHERE `code` = 'ats';
 
 --Tenants
 # NOTE: While creating tenants, there will be a problem that is that the first user creation requires tenant, but tenant creation in turn requires user

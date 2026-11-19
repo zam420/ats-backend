@@ -2,20 +2,25 @@ package com.deepconnect.ats.job.service;
 
 import com.deepconnect.ats.auth.dto.LoggedInUserDetails;
 import com.deepconnect.ats.auth.service.AuthService;
+import com.deepconnect.ats.common.dto.EnumsRes;
 import com.deepconnect.ats.common.enums.CustomExceptionType;
 import com.deepconnect.ats.common.exception.InternalServerException;
 import com.deepconnect.ats.common.exception.CustomException;
 import com.deepconnect.ats.common.exception.ValidationException;
+import com.deepconnect.ats.common.utils.EnumsResUtils;
 import com.deepconnect.ats.common.utils.HashMapUtils;
 import com.deepconnect.ats.dto.AtsPageQuery;
 import com.deepconnect.ats.dto.AtsPageRsp;
-import com.deepconnect.ats.job.dto.JobFiltersData;
+import com.deepconnect.ats.job.dto.JobFiltersRes;
+import com.deepconnect.ats.job.dto.JobPositionSearchQuery;
+import com.deepconnect.ats.job.dto.JobPositionSummaryResForCandidate;
 import com.deepconnect.ats.job.model.JobEvaluationPlanRound;
 import com.deepconnect.ats.job.model.JobPosition;
 import com.deepconnect.ats.job.model.JobRecruitmentPipelineRound;
 import com.deepconnect.ats.job.model.JobScreeningQuestion;
 import com.deepconnect.ats.job.security.JobRichTextSanitizer;
 import com.deepconnect.ats.job.repo.JobPositionRepository;
+import com.deepconnect.ats.job.repo.JobPositionSearchSpecification;
 import com.deepconnect.ats.job.repo.JobEmploymentTypeRepository;
 import com.deepconnect.ats.job.repo.JobExperienceLevelTypeRepository;
 import com.deepconnect.ats.job.repo.JobEvaluationPlanRoundRepository;
@@ -27,17 +32,20 @@ import com.deepconnect.ats.recruitmentpipeline.service.RecruitmentPipelineRoundH
 import com.deepconnect.ats.user.service.UserServiceV2;
 import com.deepconnect.ats.rbac.enums.RoleType;
 import com.deepconnect.ats.job.dto.JobPositionReq;
+import com.deepconnect.ats.job.enums.JobPostedDateType;
+import com.deepconnect.ats.job.enums.JobQuestionsDisplayMode;
 import com.deepconnect.ats.job.enums.JobStatus;
-import com.deepconnect.ats.evaluationplan.model.EvaluationPlan;
 import com.deepconnect.ats.evaluationplan.model.EvaluationPlanRoundType;
 import com.deepconnect.ats.recruitmentpipeline.model.RecruitmentPipelineRoundType;
 import com.deepconnect.ats.job.repo.JobRecruitmentPipelineRoundRepository;
 import com.deepconnect.ats.job.repo.JobScreeningQuestionRepository;
 import com.deepconnect.ats.job.dto.JobPositionRes;
+import com.deepconnect.ats.job.dto.JobPositionResForCandidate;
 import com.deepconnect.ats.screeningquestionsform.service.ScreeningQuestionHelper;
 import com.deepconnect.ats.common.utils.StringUtils;
 import com.deepconnect.ats.common.enums.ValidationFieldType;
 import com.deepconnect.ats.screeningquestionsform.service.ScreeningQuestionsFormService;
+import com.deepconnect.ats.job.dto.JobFiltersResForCandidate;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -62,11 +70,15 @@ public class JobPositionService {
     @Value("${plans.maxRounds}")
     private int maxRounds;
 
+    @Value("${screeningQuestionsForms.maxControls}")
+    private int maxQuestions;
+
     private final EvaluationPlanService evaluationPlanService;
     private final RecruitmentPipelineService recruitmentPipelineService;
     private final JobPositionAccessService jobPositionAccessService;
     private final ScreeningQuestionsFormService screeningQuestionsFormService;
     private final UserServiceV2 userService;
+    private final EnumsResUtils enumsResUtils;
 
     private final JobPositionRepository jobPositionRepository;
     private final JobEmploymentTypeRepository jobEmploymentTypeRepository;
@@ -76,6 +88,18 @@ public class JobPositionService {
     private final JobRecruitmentPipelineRoundRepository jobRecruitmentPipelineRoundRepository;
     private final JobScreeningQuestionRepository jobScreeningQuestionRepository;
 
+    private JobQuestionsDisplayMode resolveDisplayMode(Integer id) {
+        if (id == null) {
+            return null;
+        }
+        for (JobQuestionsDisplayMode mode : JobQuestionsDisplayMode.values()) {
+            if (mode.getId().equals(id)) {
+                return mode;
+            }
+        }
+        throw new IllegalArgumentException("Invalid application questions display mode: " + id);
+    }
+
     private String save(JobPosition position, JobPositionReq req, boolean evaluationPlanRoundsChanged, boolean recruitmentPipelineRoundsChanged, boolean screeningQuestionsChanged){
         LoggedInUserDetails loggedInUser = AuthService.getLoggedInUser();
         position.setModifiedByUserId(loggedInUser.getUserId());
@@ -83,6 +107,7 @@ public class JobPositionService {
         
         position.setTitle(req.getTitle());
         position.setDescription(JobRichTextSanitizer.sanitize(req.getDescription()));
+        position.setShortDescription(JobRichTextSanitizer.shortDescription(position.getDescription()));
         position.setEmploymentTypeId(req.getEmploymentType());
         position.setWorkArrangementTypeId(req.getWorkArrangementType());
         position.setExperienceLevelTypeId(req.getExperienceLevelType());
@@ -93,7 +118,7 @@ public class JobPositionService {
         position.setDepartment(req.getDepartment());
         position.setRecruiters(req.getRecruiters());
         position.setHiringManagers(req.getHiringManagers());
-        position.setApplicationQuestionsDisplayMode(req.getApplicationQuestionsDisplayMode());
+        position.setApplicationQuestionsDisplayMode(resolveDisplayMode(req.getApplicationQuestionsDisplayMode()));
 
         position = jobPositionRepository.save(position);
         if (evaluationPlanRoundsChanged){
@@ -143,7 +168,7 @@ public class JobPositionService {
         }
 
         if (screeningQuestionsChanged && !CollectionUtils.isEmpty(req.getScreeningQuestions())) {
-            if (req.getScreeningQuestions().size() > maxRounds) {
+            if (req.getScreeningQuestions().size() > maxQuestions) {
                 throw new InternalServerException(String.format("Too many questions. User: %s. Position: %s. Questions: %d", loggedInUser.getPublicId(), position.getPublicId(), req.getScreeningQuestions().size()));
             }
             for (JobScreeningQuestion question : req.getScreeningQuestions()) {
@@ -166,8 +191,8 @@ public class JobPositionService {
         jobPosition.setTenantId(loggedInUser.getTenantId());
         //TODO: think about allowing other users as job owner just like evaluation plan
         // if(req.getOwnerId() == null || req.getOwnerId().equals(loggedInUser.getPublicId())) {
-            jobPosition.setOwnerId(loggedInUser.getUserId());
-            jobPosition.setOwnerPublicId(loggedInUser.getPublicId());
+        jobPosition.setOwnerId(loggedInUser.getUserId());
+        jobPosition.setOwnerPublicId(loggedInUser.getPublicId());
         // }
         // else {
         //     setAnotherUserAsOwner(plan, evaluationPlanAccessService.getAccessType(loggedInUser, plan), req.getOwnerId());
@@ -253,14 +278,6 @@ public class JobPositionService {
         jobPositionRepository.save(jobPosition);
     }
 
-    // public List<JobPosition> listAll() {
-    //     return jobPositionRepository.findAll();
-    // }
-
-    // public List<JobPosition> listByProjectId(Long projectId) {
-    //     return jobPositionRepository.findByProjectId(projectId);
-    // }
-
     @Transactional(readOnly = true)
     public JobPositionRes findByPublicIdForTenant(String publicId) {
         JobPosition position = jobPositionRepository.findByPublicIdAndTenantIdAndDeactivatedFalse(publicId, AuthService.getLoggedInTenantId()).orElseThrow(() -> new InternalServerException(String.format("Job position not found: User: %s, Position: %s", AuthService.getLoggedInUser().getPublicId(), publicId)));
@@ -268,15 +285,13 @@ public class JobPositionService {
         return JobPositionRes.from(position);
     }
 
-     @Transactional(readOnly = true)
-    public AtsPageRsp<JobPositionRes> findAll(AtsPageQuery query) {
-        // List<JobPosition> positions = jobPositionRepository.findByStatus(JobStatus.DRAFT);
-        // return JobPositionRes.fromList(positions);
+    @Transactional(readOnly = true)
+    public AtsPageRsp<JobPositionRes> findAll(JobPositionSearchQuery query) {
         LoggedInUserDetails loggedInUser = AuthService.getLoggedInUser();
         boolean isAdmin = jobPositionAccessService.isUserInJobPositionAdminRole(loggedInUser);
-        Page<JobPosition> page = isAdmin 
-            ? jobPositionRepository.findAllForTenantAdmin(AuthService.getLoggedInTenantId(), query.toPageable()) 
-            : jobPositionRepository.findAllForTenantNonAdmin(AuthService.getLoggedInTenantId(), loggedInUser.getUserId(), loggedInUser.getPublicId(), query.toPageable());
+        Page<JobPosition> page = jobPositionRepository.findAll(
+            JobPositionSearchSpecification.forTenantUser(query, loggedInUser.getTenantId(),
+                loggedInUser.getUserId(), loggedInUser.getPublicId(), isAdmin), query.toPageable());
         return AtsPageRsp.of(page.map(JobPositionRes::from));
     }
 
@@ -304,11 +319,14 @@ public class JobPositionService {
         return jobPositionRepository.findById(id);
     }
 
-    public JobFiltersData getFiltersData() {
-        return JobFiltersData.from(
+    public JobFiltersRes getFilters() {
+        return JobFiltersRes.from(
             jobEmploymentTypeRepository.findAll(),
             jobWorkArrangementTypeRepository.findAll(),
             jobExperienceLevelTypeRepository.findAll(),
+            enumsResUtils.from(JobStatus.values()),
+            enumsResUtils.from(JobQuestionsDisplayMode.values()),
+            enumsResUtils.from(JobPostedDateType.values()),
             evaluationPlanService.findAllAsList(),
             recruitmentPipelineService.findAllAsList(),
             screeningQuestionsFormService.findAllAsList(),
@@ -318,6 +336,39 @@ public class JobPositionService {
             recruitmentPipelineService.findAllRoundTypes(),
             screeningQuestionsFormService.findAllScreeningQuestionTypes()
         );
+    }
+
+    public JobFiltersResForCandidate getFiltersForCandidates() {
+        return JobFiltersResForCandidate.from(
+            jobEmploymentTypeRepository.findAll(),
+            jobWorkArrangementTypeRepository.findAll(),
+            jobExperienceLevelTypeRepository.findAll(),
+            enumsResUtils.from(JobStatus.values()),
+            enumsResUtils.from(JobPostedDateType.values()),
+            screeningQuestionsFormService.findAllScreeningQuestionTypes()
+        );
+    }
+
+    @Transactional(readOnly = true)
+    public AtsPageRsp<JobPositionSummaryResForCandidate> findAllForCandidate(JobPositionSearchQuery query) {
+        Page<JobPosition> page = jobPositionRepository.findAll(
+            JobPositionSearchSpecification.forCandidate(query), query.toPageable());
+        return AtsPageRsp.of(page.map(JobPositionSummaryResForCandidate::from));
+    }
+
+    @Transactional(readOnly = true)
+    public JobPositionResForCandidate findByPublicIdForCandidate(String publicId) {
+        return JobPositionResForCandidate.from(findOpenPositionForCandidate(publicId));
+    }
+
+    @Transactional(readOnly = true)
+    public String findLogoForCandidate(String publicId) {
+        return findOpenPositionForCandidate(publicId).getTenant().getLogoPath();
+    }
+
+    private JobPosition findOpenPositionForCandidate(String publicId) {
+        return jobPositionRepository.findByPublicIdAndStatusAndDeactivatedFalse(publicId, JobStatus.OPEN)
+            .orElseThrow(() -> new InternalServerException(String.format("Job position not found: User: %s, Position: %s", AuthService.getLoggedInUser().getPublicId(), publicId)));
     }
 
 }

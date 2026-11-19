@@ -2,6 +2,7 @@ package com.deepconnect.ats.job.service;
 
 import org.springframework.stereotype.Service;
 import java.util.HashSet;
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 
 import com.deepconnect.ats.auth.dto.LoggedInUserDetails;
@@ -23,12 +24,15 @@ public class JobPositionAccessService {
      * @return the access type of the user for the given recruitment pipeline
      */
     public AccessType getAccessType(LoggedInUserDetails user, JobPosition jobPosition) {
-        if(user.getUserId() == jobPosition.getOwnerId())
+        if (user.getTenantId() == null || !Objects.equals(user.getTenantId(), jobPosition.getTenantId()))
+            return AccessType.NONE;
+
+        if(user.getUserId() != null && Objects.equals(user.getUserId(), jobPosition.getOwnerId()))
             return AccessType.WRITE;
 
         //user is not the owner of the plan
-        if(user.getTenantId() == jobPosition.getTenantId()){
-            if(user.hasPermission(PermissionType.RECRUITMENT_PIPELINE_TEMPLATE_ADMIN))
+        if(Objects.equals(user.getTenantId(), jobPosition.getTenantId())){
+            if(user.hasPermission(PermissionType.JOB_POSITION_ADMIN))
                 return AccessType.TENANT_ADMIN;
 
             //user is one of recruiters or hiring managers for this job

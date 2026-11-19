@@ -50,9 +50,9 @@ class TenantLogoStorageTest {
 
     @Test
     void acceptsBoundaryAndDeletesReplacementOnlyAfterCommit() throws Exception {
-        String old = storage.store(raster("logo.png", "png", 140, 140), null);
+        String old = storage.store(raster("logo.png", "png", 200, 200), null);
         complete(TransactionSynchronization.STATUS_COMMITTED);
-        String next = storage.store(raster("logo.jpg", "jpg", 1, 140), old);
+        String next = storage.store(raster("logo.jpg", "jpg", 1, 200), old);
         assertTrue(Files.exists(storage.getPath(old)));
         assertTrue(Files.exists(storage.getPath(next)));
         complete(TransactionSynchronization.STATUS_COMMITTED);
@@ -72,7 +72,7 @@ class TenantLogoStorageTest {
 
     @Test
     void rejectsOversizeWrongTypeAndInvalidContent() throws Exception {
-        assertThrows(IllegalArgumentException.class, () -> storage.store(raster("large.png", "png", 141, 140), null));
+        assertThrows(IllegalArgumentException.class, () -> storage.store(raster("large.png", "png", 141, 200), null));
         assertThrows(IllegalArgumentException.class, () -> storage.store(raster("wrong.jpg", "png", 1, 1), null));
         assertThrows(IllegalArgumentException.class, () -> storage.store(new MockMultipartFile("logo", "x.png", "image/png", new byte[1024 * 1024 + 1]), null));
         assertThrows(IllegalArgumentException.class, () -> storage.store(new MockMultipartFile("logo", "x.gif", "image/gif", new byte[]{1}), null));
@@ -91,9 +91,9 @@ class TenantLogoStorageTest {
     @Test
     void validatesSvgDimensionsAndUnsafeContent() {
         String prefix = "<svg xmlns=\"http://www.w3.org/2000/svg\" ";
-        String valid = storage.store(svg(prefix + "width=\"140\" height=\"140\"><style>.a{fill:red}</style><rect class=\"a\" width=\"10\" height=\"10\"/></svg>"), null);
+        String valid = storage.store(svg(prefix + "width=\"200\" height=\"200\"><style>.a{fill:red}</style><rect class=\"a\" width=\"10\" height=\"10\"/></svg>"), null);
         assertTrue(Files.exists(storage.getPath(valid)));
-        assertDoesNotThrow(() -> storage.store(svg(prefix + "viewBox=\"0 0 140 140\"/>"), null));
+        assertDoesNotThrow(() -> storage.store(svg(prefix + "viewBox=\"0 0 200 200\"/>"), null));
         assertThrows(IllegalArgumentException.class, () -> storage.store(svg(prefix + "width=\"141\" height=\"1\"/>"), null));
         assertThrows(IllegalArgumentException.class, () -> storage.store(svg(prefix + "height=\"500\" viewBox=\"0 0 1 1\"/>"), null));
         assertThrows(IllegalArgumentException.class, () -> storage.store(svg(prefix + "width=\"1\" height=\"1\"><script>alert(1)</script></svg>"), null));

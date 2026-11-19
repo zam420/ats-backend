@@ -9,7 +9,6 @@ import jakarta.validation.constraints.NotEmpty;
 import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.Range;
 
-import com.deepconnect.ats.job.enums.JobQuestionsDisplayMode;
 import com.deepconnect.ats.job.model.JobEvaluationPlanRound;
 import com.deepconnect.ats.job.model.JobRecruitmentPipelineRound;
 import com.deepconnect.ats.job.model.JobScreeningQuestion;
@@ -61,7 +60,7 @@ public class JobPositionReq {
     @NotEmpty(message = "{field.job.hiringManagers}{validation.notEmpty}")
     private List<String> hiringManagers;
 
-    private JobQuestionsDisplayMode applicationQuestionsDisplayMode;
+    private Integer applicationQuestionsDisplayMode;
 
     private List<JobScreeningQuestion> screeningQuestions;
 

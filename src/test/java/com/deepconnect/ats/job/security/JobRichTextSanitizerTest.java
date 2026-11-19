@@ -10,6 +10,20 @@ import org.junit.jupiter.api.Test;
 
 class JobRichTextSanitizerTest {
     @Test
+    void extractsUpToSixtyPlainTextWordsFromSafeHtml() {
+        String words = java.util.stream.IntStream.rangeClosed(1, 61)
+                .mapToObj(i -> "word" + i).collect(java.util.stream.Collectors.joining(" "));
+        String result = JobRichTextSanitizer.shortDescription("<p>Intro &amp; welcome</p><p>" + words
+                + "</p><script>hidden</script>");
+        assertEquals(60, result.split(" ").length);
+        assertTrue(result.startsWith("Intro & welcome word1"));
+        assertTrue(result.endsWith("word57"));
+        assertFalse(result.contains("hidden"));
+        assertEquals("First Second Third", JobRichTextSanitizer.shortDescription("<p>First<br>Second</p><p>Third</p>"));
+        assertEquals("", JobRichTextSanitizer.shortDescription("<p><br></p>"));
+    }
+
+    @Test
     void preservesQuillFormattingAndSafeLinks() {
         String input = "<h2 class=\"ql-align-center\">Title</h2>"
                 + "<p><strong>Bold</strong> <em>Italic</em> <span style=\"color: rgb(230, 0, 0); background-color: #ffff00\">Color</span></p>"
@@ -59,13 +73,9 @@ class JobRichTextSanitizerTest {
 
         JobPositionRes dto = JobPositionRes.from(position);
         assertEquals("<p>Description</p>", dto.getDescription());
-        assertEquals("<p>Required</p>", dto.getMandatoryRequirements());
-        assertEquals("<p>Preferred</p>", dto.getPreferredRequirements());
 
         JsonNode json = new ObjectMapper().valueToTree(position);
         assertEquals(dto.getDescription(), json.get("description").asText());
-        assertEquals(dto.getMandatoryRequirements(), json.get("mandatoryRequirements").asText());
-        assertEquals(dto.getPreferredRequirements(), json.get("preferredRequirements").asText());
         assertNull(JobRichTextSanitizer.sanitize(null));
     }
 }

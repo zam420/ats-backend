@@ -1,13 +1,9 @@
 package com.deepconnect.ats.screeningquestionsform.dto;
 
 import lombok.Data;
-import org.springframework.util.CollectionUtils;
-import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import com.deepconnect.ats.screeningquestionsform.model.ScreeningQuestionsForm;
-import com.deepconnect.ats.screeningquestionsform.model.ScreeningQuestion;
 
 @Data
 public class ScreeningQuestionsFormRes {
@@ -18,8 +14,6 @@ public class ScreeningQuestionsFormRes {
     private Boolean isSystemTemplate;
     private Boolean isSharedWithinTenant;
     private String ownerId;
-    // Round names in order, joined as "name1 -> name2"; generated on the fly, never stored
-    private String questionSequence;
     
     public static ScreeningQuestionsFormRes from(ScreeningQuestionsForm entity) {
         ScreeningQuestionsFormRes res = new ScreeningQuestionsFormRes();
@@ -30,13 +24,6 @@ public class ScreeningQuestionsFormRes {
         res.setIsSystemTemplate(entity.getIsPublicForAll());
         res.setIsSharedWithinTenant(entity.getIsSharedWithinTenant());
         res.setOwnerId(entity.getOwnerPublicId());
-        if (!CollectionUtils.isEmpty(entity.getQuestions())) {
-            res.setQuestionSequence(entity.getQuestions().stream()
-                .sorted(Comparator.comparing(ScreeningQuestion::getOrder, Comparator.nullsLast(Comparator.naturalOrder())))
-                .map(ScreeningQuestion::getLabel)
-                .filter(n -> n != null && !n.isBlank())
-                .collect(Collectors.joining(" -> ")));
-        }
         return res;
     }
 

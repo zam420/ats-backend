@@ -42,8 +42,8 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class ScreeningQuestionsFormService {
 
-    @Value("${plans.maxRounds}")
-    private int maxRounds;
+    @Value("${screeningQuestionsForms.maxControls}")
+    private int maxQuestions;
 
     private final UserServiceV2 userService;
     private final ScreeningQuestionsFormAccessService screeningQuestionTemplateAccessService;
@@ -80,7 +80,7 @@ public class ScreeningQuestionsFormService {
         }
         template = screeningQuestionTemplateRepository.save(template);
         if (questionsChanged && !CollectionUtils.isEmpty(req.getQuestions())) {
-            if (req.getQuestions().size() > maxRounds) {
+            if (req.getQuestions().size() > maxQuestions) {
                 throw new InternalServerException(String.format("Too many questions. User: %s. Plan: %s. Questions: %d", loggedInUser.getPublicId(), template.getPublicId(), req.getQuestions().size()));
             }
             for (ScreeningQuestion question : req.getQuestions()) {
@@ -227,7 +227,8 @@ public class ScreeningQuestionsFormService {
 
     @Transactional(readOnly = true)
     public ScreeningQuestionsFormDetailsRes findByPublicIdForTenant(String publicId) {
-        ScreeningQuestionsForm plan = screeningQuestionTemplateRepository.findByPublicIdAndTenantIdAndDeactivatedFalse(publicId, AuthService.getLoggedInTenantId()).orElseThrow(() -> new InternalServerException("Screening Question Template not found: " + publicId));
+        //ScreeningQuestionsForm plan = screeningQuestionTemplateRepository.findByPublicIdAndTenantIdAndDeactivatedFalse(publicId, AuthService.getLoggedInTenantId()).orElseThrow(() -> new InternalServerException("Screening Question Template not found: " + publicId));
+        ScreeningQuestionsForm plan = screeningQuestionTemplateRepository.findByPublicIdAndDeactivatedFalse(publicId).orElseThrow(() -> new InternalServerException("Screening Question Template not found: " + publicId));
         screeningQuestionTemplateAccessService.assertReadAccess(AuthService.getLoggedInUser(), plan);
         return ScreeningQuestionsFormDetailsRes.from(plan);
     }

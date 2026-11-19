@@ -18,8 +18,6 @@ public class JobPositionRes {
     private String id;
     private String title;
     private String description;
-    private String mandatoryRequirements;
-    private String preferredRequirements;
     private Integer employmentType;
     private Integer workArrangementType;
     private Integer experienceLevelType;

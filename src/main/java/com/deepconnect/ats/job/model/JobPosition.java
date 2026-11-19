@@ -55,6 +55,9 @@ public class JobPosition extends OperatableBaseWithTenantEntity {
     @Length(max = 10000, message = "{field.job.description}{validation.lengthMax}")
     private String description;
 
+    @Column(name = "short_description", columnDefinition = "TEXT")
+    private String shortDescription;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "employmentTypeId", referencedColumnName = "id", insertable = false, updatable = false)
     private JobEmploymentType employmentType; // By default, the user who created this record. Can be changed.

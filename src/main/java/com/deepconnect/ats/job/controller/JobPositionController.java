@@ -6,16 +6,16 @@ import org.springframework.validation.annotation.Validated;
 import com.deepconnect.ats.dto.ApiResult;
 import com.deepconnect.ats.dto.AtsPageQuery;
 import com.deepconnect.ats.dto.AtsPageRsp;
-import com.deepconnect.ats.evaluationplan.dto.EvaluationPlanReq;
 import com.deepconnect.ats.job.service.JobPositionService;
 import com.deepconnect.ats.job.dto.JobPositionReq;
+import com.deepconnect.ats.job.dto.JobPositionSearchQuery;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import com.deepconnect.ats.job.model.JobPosition;
-import com.deepconnect.ats.job.dto.JobFiltersData;
+import com.deepconnect.ats.job.dto.JobFiltersRes;
 import com.deepconnect.ats.job.dto.JobPositionRes;
 
 import java.util.Collections;
@@ -75,7 +75,7 @@ public class JobPositionController {
 
     @PreAuthorize("hasAuthority('jps')")
     @GetMapping("/all")
-    public ApiResult<AtsPageRsp<JobPositionRes>> findAll(AtsPageQuery query) {
+    public ApiResult<AtsPageRsp<JobPositionRes>> findAll(@Valid JobPositionSearchQuery query) {
         return ApiResult.success(jobPositionService.findAll(query));
     }
 
@@ -101,8 +101,8 @@ public class JobPositionController {
 
     @PreAuthorize("hasAuthority('jps')")
     @GetMapping("/filters")
-    public ApiResult<JobFiltersData> getJobFilterssData() throws Exception {
-        return ApiResult.success(jobPositionService.getFiltersData());
+    public ApiResult<JobFiltersRes> getJobFilters() throws Exception {
+        return ApiResult.success(jobPositionService.getFilters());
     }
 
 }

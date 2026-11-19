@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Optional;
 
 import com.deepconnect.ats.auth.dto.LoggedInUserDetails;
+import com.deepconnect.ats.common.utils.EnumsResUtils;
 import com.deepconnect.ats.evaluationplan.model.EvaluationPlan;
 import com.deepconnect.ats.evaluationplan.service.EvaluationPlanService;
 import com.deepconnect.ats.job.dto.JobPositionReq;
@@ -39,7 +40,8 @@ class JobRichTextWriteTest {
     private final JobPositionRepository positions = mock(JobPositionRepository.class);
     private final JobPositionService service = new JobPositionService(plans, pipelines,
             mock(JobPositionAccessService.class), mock(ScreeningQuestionsFormService.class), 
-            mock(UserServiceV2.class), positions, mock(JobEmploymentTypeRepository.class),
+            mock(UserServiceV2.class), mock(EnumsResUtils.class),
+            positions, mock(JobEmploymentTypeRepository.class),
             mock(JobWorkArrangementTypeRepository.class), mock(JobExperienceLevelTypeRepository.class),
             mock(JobEvaluationPlanRoundRepository.class), mock(JobRecruitmentPipelineRoundRepository.class), 
             mock(JobScreeningQuestionRepository.class));
@@ -79,6 +81,7 @@ class JobRichTextWriteTest {
         verify(positions, times(2)).save(saved.capture());
         for (JobPosition position : saved.getAllValues()) {
             assertEquals("<p>Description</p>", position.getDescription());
+            assertEquals("Description", position.getShortDescription());
             // assertEquals("<p>Mandatory</p>", position.getMandatoryRequirements());
             // assertEquals("<p>Preferred</p>", position.getPreferredRequirements());
         }

@@ -236,7 +236,8 @@ public class EvaluationPlanService {
 
     @Transactional(readOnly = true)
     public EvaluationPlanDetailsRes findByPublicIdForTenant(String publicId) {
-        EvaluationPlan plan = evaluationPlanRepository.findByPublicIdAndTenantIdAndDeactivatedFalse(publicId, AuthService.getLoggedInTenantId()).orElseThrow(() -> new InternalServerException("Evaluation plan not found: " + publicId));
+        //EvaluationPlan plan = evaluationPlanRepository.findByPublicIdAndTenantIdAndDeactivatedFalse(publicId, AuthService.getLoggedInTenantId()).orElseThrow(() -> new InternalServerException("Evaluation plan not found: " + publicId));
+        EvaluationPlan plan = evaluationPlanRepository.findByPublicIdAndDeactivatedFalse(publicId).orElseThrow(() -> new InternalServerException("Evaluation plan not found: " + publicId));
         evaluationPlanAccessService.assertReadAccess(AuthService.getLoggedInUser(), plan);
         return EvaluationPlanDetailsRes.from(plan);
     }

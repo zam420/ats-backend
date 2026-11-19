@@ -11,6 +11,7 @@ import java.util.Optional;
 import com.deepconnect.ats.auth.dto.LoggedInUserDetails;
 import com.deepconnect.ats.common.exception.CustomException;
 import com.deepconnect.ats.common.exception.ValidationException;
+import com.deepconnect.ats.common.utils.EnumsResUtils;
 import com.deepconnect.ats.evaluationplan.service.EvaluationPlanService;
 import com.deepconnect.ats.job.dto.JobPositionReq;
 import com.deepconnect.ats.job.enums.JobStatus;
@@ -40,7 +41,8 @@ class JobPositionStatusTest {
     private final JobExperienceLevelTypeRepository experienceLevels = mock(JobExperienceLevelTypeRepository.class);
     private final JobPositionService service = new JobPositionService(
             mock(EvaluationPlanService.class), mock(RecruitmentPipelineService.class), access,
-            mock(ScreeningQuestionsFormService.class), mock(UserServiceV2.class), positions,
+            mock(ScreeningQuestionsFormService.class), mock(UserServiceV2.class), 
+            mock(EnumsResUtils.class), positions,
             mock(JobEmploymentTypeRepository.class), mock(JobWorkArrangementTypeRepository.class),
             experienceLevels,
             mock(JobEvaluationPlanRoundRepository.class), mock(JobRecruitmentPipelineRoundRepository.class),
@@ -73,7 +75,7 @@ class JobPositionStatusTest {
     void filtersIncludeExperienceLevels() {
         var level = new JobExperienceLevelType(3, "Senior", null);
         when(experienceLevels.findAll()).thenReturn(List.of(level));
-        assertEquals(List.of(level), service.getFiltersData().getExperienceLevelTypes());
+        assertEquals(List.of(level), service.getFilters().getExperienceLevelTypes());
     }
 
     @Test

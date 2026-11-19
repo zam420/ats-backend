@@ -16,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -81,6 +82,21 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(ErrorRsp.of(message, HttpStatus.FORBIDDEN.value()), HttpStatus.FORBIDDEN);
     }
 
+    //This Spring built-in exception is thrown when a permission check fails on annotations like @PreAuthorize("hasAuthority('iptsa')")
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<ErrorRsp> handleAAuthenticationException(AuthenticationException ex, HttpServletRequest request) {
+        String message = messageSource.getMessage("exception.authInvalid", null, request.getLocale());
+        log.warn("Access denied | Reason: {} | URI: {} | IP: {} | User: {} | Info: {}", 
+            message,
+            ((HttpServletRequest) request).getRequestURI(), 
+            getClientIpAddress(request), 
+            "anonymous",
+            ex.getMessage()
+        );
+
+        return new ResponseEntity<>(ErrorRsp.of(message, HttpStatus.FORBIDDEN.value()), HttpStatus.FORBIDDEN);
+    }
+
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<ErrorRsp> handleBadCredentialsException(BadCredentialsException ex, HttpServletRequest request) {
     String message = messageSource.getMessage(CustomException.getFullMessageKey(CustomExceptionType.AUTH_INVALID), null, request.getLocale());
@@ -92,7 +108,6 @@ public class GlobalExceptionHandler {
         );
         return new ResponseEntity<>(ErrorRsp.of(message, HttpStatus.UNAUTHORIZED.value()), HttpStatus.UNAUTHORIZED);
     }
-
 
     @ExceptionHandler(CustomException.class)
     public ResponseEntity<ErrorRsp> handleCustomException(CustomException ex, ServletRequest request) {

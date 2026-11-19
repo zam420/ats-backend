@@ -28,6 +28,18 @@ public final class JobRichTextSanitizer {
     private JobRichTextSanitizer() {
     }
 
+    public static String shortDescription(String html) {
+        if (html == null) {
+            return null;
+        }
+        String text = Jsoup.parseBodyFragment(sanitize(html)).body().text().trim();
+        if (text.isEmpty()) {
+            return "";
+        }
+        String[] words = text.split("(?U)\\s+");
+        return String.join(" ", java.util.Arrays.copyOf(words, Math.min(words.length, 60)));
+    }
+
     public static String sanitize(String html) {
         if (html == null) {
             return null;

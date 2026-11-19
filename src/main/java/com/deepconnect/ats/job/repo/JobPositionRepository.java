@@ -1,5 +1,6 @@
 package com.deepconnect.ats.job.repo;
 
+import com.deepconnect.ats.job.enums.JobStatus;
 import com.deepconnect.ats.job.model.JobPosition;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -17,6 +18,9 @@ import java.util.Optional;
 @Repository
 public interface JobPositionRepository extends OperatableBaseRepository<JobPosition, Long>, JpaSpecificationExecutor<JobPosition> {
     //Optional<JobPosition> findByPublicId(String publicId);
+
+    Optional<JobPosition> findByPublicIdAndStatusAndDeactivatedFalse(String publicId, JobStatus status);
+
     Optional<JobPosition> findByPublicIdAndTenantIdAndDeactivatedFalse(String publicId, Long tenantId);
     
     @Lock(LockModeType.PESSIMISTIC_WRITE)

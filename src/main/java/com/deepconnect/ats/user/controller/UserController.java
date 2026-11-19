@@ -16,6 +16,7 @@ import com.deepconnect.ats.user.dto.UserInfoRsp;
 import com.deepconnect.ats.user.dto.UserSummary;
 import com.deepconnect.ats.user.model.User;
 import com.deepconnect.ats.user.service.UserService;
+import com.deepconnect.ats.user.service.UserServiceV2;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -30,6 +31,7 @@ import java.util.Map;
 public class UserController {
 
     private final UserService userService;
+    private final UserServiceV2 userServiceV2;  
 
     @Value("${jwt.authoritiesRolePrefix}")
     private String authoritiesRolePrefix;
@@ -79,9 +81,9 @@ public class UserController {
     }
 
     @PreAuthorize("hasAuthority('aus')")
-    @GetMapping("/getUserFor")
-    public ApiResult<List<UserSummary>> getUserFor(@RequestParam(name = "for", required = false) Integer useFor) {
-        return ApiResult.success(userService.listActiveUsers());
+    @GetMapping("/active")
+    public ApiResult<List<UserSummary>> findActiveUsersForTenant() {
+        return ApiResult.success(userServiceV2.findActiveUsersForTenant());
     }
 
     @PreAuthorize("hasAnyRole('sa','hrd','proa','hrr','hrrc')")

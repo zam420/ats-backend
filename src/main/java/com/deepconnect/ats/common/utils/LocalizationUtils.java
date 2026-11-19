@@ -31,6 +31,11 @@ public class LocalizationUtils {
         Locale locale = getUserLocale();
         return messageSource.getMessage(localizedStringType.getKey(), null, locale);
     }
+
+    public String getLocalizedString(String key){
+        Locale locale = getUserLocale();
+        return messageSource.getMessage(key, null, locale);
+    }
     
 }
 

@@ -232,7 +232,8 @@ public class RecruitmentPipelineService {
 
     @Transactional(readOnly = true)
     public RecruitmentPipelineDetailsRes findByPublicIdForTenant(String publicId) {
-        RecruitmentPipeline plan = recruitmentPipelineRepository.findByPublicIdAndTenantIdAndDeactivatedFalse(publicId, AuthService.getLoggedInTenantId()).orElseThrow(() -> new InternalServerException("Evaluation plan not found: " + publicId));
+        //RecruitmentPipeline plan = recruitmentPipelineRepository.findByPublicIdAndTenantIdAndDeactivatedFalse(publicId, AuthService.getLoggedInTenantId()).orElseThrow(() -> new InternalServerException("Evaluation plan not found: " + publicId));
+        RecruitmentPipeline plan = recruitmentPipelineRepository.findByPublicIdAndDeactivatedFalse(publicId).orElseThrow(() -> new InternalServerException("Evaluation plan not found: " + publicId));
         recruitmentPipelineAccessService.assertReadAccess(AuthService.getLoggedInUser(), plan);
         return RecruitmentPipelineDetailsRes.from(plan);
     }
