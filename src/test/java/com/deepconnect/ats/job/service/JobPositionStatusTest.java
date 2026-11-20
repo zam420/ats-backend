@@ -27,6 +27,7 @@ import com.deepconnect.ats.job.repo.JobRecruitmentPipelineRoundRepository;
 import com.deepconnect.ats.job.repo.JobScreeningQuestionRepository;
 import com.deepconnect.ats.job.repo.JobWorkArrangementTypeRepository;
 import com.deepconnect.ats.recruitmentpipeline.service.RecruitmentPipelineService;
+import com.deepconnect.ats.screeningquestionsform.repo.ScreeningQuestionTypeRepository;
 import com.deepconnect.ats.screeningquestionsform.service.ScreeningQuestionsFormService;
 import com.deepconnect.ats.user.service.UserServiceV2;
 import org.junit.jupiter.api.AfterEach;
@@ -46,7 +47,7 @@ class JobPositionStatusTest {
             mock(JobEmploymentTypeRepository.class), mock(JobWorkArrangementTypeRepository.class),
             experienceLevels,
             mock(JobEvaluationPlanRoundRepository.class), mock(JobRecruitmentPipelineRoundRepository.class),
-            mock(JobScreeningQuestionRepository.class));
+            mock(JobScreeningQuestionRepository.class), mock(ScreeningQuestionTypeRepository.class));
     private final JobPosition position = new JobPosition();
     private final JobPositionReq req = new JobPositionReq();
 

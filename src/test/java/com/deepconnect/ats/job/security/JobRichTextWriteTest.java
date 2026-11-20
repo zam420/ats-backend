@@ -45,7 +45,7 @@ class JobRichTextWriteTest {
             positions, mock(JobEmploymentTypeRepository.class),
             mock(JobWorkArrangementTypeRepository.class), mock(JobExperienceLevelTypeRepository.class),
             mock(JobEvaluationPlanRoundRepository.class), mock(JobRecruitmentPipelineRoundRepository.class), 
-            mock(JobScreeningQuestionRepository.class));
+            mock(JobScreeningQuestionRepository.class), mock(ScreeningQuestionTypeRepository.class));
 
     @AfterEach
     void clearAuthentication() {

@@ -8,6 +8,7 @@ import com.deepconnect.ats.job.model.JobPosition;
 import com.deepconnect.ats.job.dto.JobPositionSearchQuery;
 import com.deepconnect.ats.job.repo.*;
 import com.deepconnect.ats.recruitmentpipeline.service.RecruitmentPipelineService;
+import com.deepconnect.ats.screeningquestionsform.repo.ScreeningQuestionTypeRepository;
 import com.deepconnect.ats.screeningquestionsform.service.ScreeningQuestionsFormService;
 import com.deepconnect.ats.tenant.model.Tenant;
 import com.deepconnect.ats.user.service.UserServiceV2;
@@ -24,6 +25,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 class CandidateJobAccessTest {
@@ -33,7 +35,8 @@ class CandidateJobAccessTest {
         mock(ScreeningQuestionsFormService.class), mock(UserServiceV2.class), mock(EnumsResUtils.class),
         positions, mock(JobEmploymentTypeRepository.class), mock(JobWorkArrangementTypeRepository.class),
         mock(JobExperienceLevelTypeRepository.class), mock(JobEvaluationPlanRoundRepository.class),
-        mock(JobRecruitmentPipelineRoundRepository.class), mock(JobScreeningQuestionRepository.class));
+        mock(JobRecruitmentPipelineRoundRepository.class), mock(JobScreeningQuestionRepository.class),
+        mock(ScreeningQuestionTypeRepository.class));
 
     @AfterEach
     void clearAuthentication() {

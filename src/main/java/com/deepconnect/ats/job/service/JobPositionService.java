@@ -40,6 +40,8 @@ import com.deepconnect.ats.job.repo.JobRecruitmentPipelineRoundRepository;
 import com.deepconnect.ats.job.repo.JobScreeningQuestionRepository;
 import com.deepconnect.ats.job.dto.JobPositionRes;
 import com.deepconnect.ats.job.dto.JobPositionResForCandidate;
+import com.deepconnect.ats.screeningquestionsform.model.ScreeningQuestionType;
+import com.deepconnect.ats.screeningquestionsform.repo.ScreeningQuestionTypeRepository;
 import com.deepconnect.ats.screeningquestionsform.service.ScreeningQuestionHelper;
 import com.deepconnect.ats.common.utils.StringUtils;
 import com.deepconnect.ats.common.enums.ValidationFieldType;
@@ -73,6 +75,12 @@ public class JobPositionService {
     @Value("${screeningQuestionsForms.maxControls}")
     private int maxQuestions;
 
+    @Value("${screeningQuestionsForms.rtLabelMaxLength}")
+    private Integer rtLabelMaxLength;
+
+    @Value("${screeningQuestionsForms.nonRTLabelMaxLength}")
+    private Integer nonRTLabelMaxLength;
+
     @Value("${jobPosition.shortDescriptionMaxWords}")
     private int shortDescriptionMaxWords;
 
@@ -93,6 +101,7 @@ public class JobPositionService {
     private final JobEvaluationPlanRoundRepository jobEvaluationPlanRoundRepository;
     private final JobRecruitmentPipelineRoundRepository jobRecruitmentPipelineRoundRepository;
     private final JobScreeningQuestionRepository jobScreeningQuestionRepository;
+    private final ScreeningQuestionTypeRepository screeningQuestionTypeRepository;
 
     private String save(JobPosition position, JobPositionReq req, boolean evaluationPlanRoundsChanged, boolean recruitmentPipelineRoundsChanged, boolean screeningQuestionsChanged){
         LoggedInUserDetails loggedInUser = AuthService.getLoggedInUser();
@@ -165,6 +174,9 @@ public class JobPositionService {
             if (req.getScreeningQuestions().size() > maxQuestions) {
                 throw new InternalServerException(String.format("Too many questions. User: %s. Position: %s. Questions: %d", loggedInUser.getPublicId(), position.getPublicId(), req.getScreeningQuestions().size()));
             }
+            List<ScreeningQuestionType> allTypes = screeningQuestionTypeRepository.findAll();
+            ScreeningQuestionHelper.assertMaxLength(req.getScreeningQuestions(), allTypes, rtLabelMaxLength, nonRTLabelMaxLength);
+            ScreeningQuestionHelper.sanitizeLabels(req.getScreeningQuestions(), allTypes);
             for (JobScreeningQuestion question : req.getScreeningQuestions()) {
                 question.setJobPosition(position);
                 question.setJobPositionId(position.getId());

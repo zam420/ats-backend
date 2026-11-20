@@ -26,8 +26,8 @@ import lombok.experimental.SuperBuilder;
 @MappedSuperclass
 public abstract class ScreeningQuestionBase extends BaseEntity {
 
-    @Column(nullable = false, length = 500)
-    @Length(max = 500, message = "{field.screeningQuestion.label}{validation.lengthMax}")
+    @Column(nullable = false, length = 1000)
+    @Length(max = 1000, message = "{field.screeningQuestion.label}{validation.lengthMax}")
     @NotBlank(message = "{field.screeningQuestion.label}{validation.notBlank}")
     private String label;//label is for display to candidates e.g. how is this question labaled for candidates
 

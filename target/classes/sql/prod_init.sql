@@ -361,13 +361,12 @@ INSERT INTO ats.recruitment_pipeline_round_type (`id`,`description`,`name`,`is_c
 INSERT INTO ats.recruitment_pipeline_round_type (`id`,`description`,`name`,`is_custom`) VALUES (1,'Custom stage','Custom', 1);
 
 -- Screening Question Types
-INSERT INTO ats.screening_question_type (`description`,`name`,`code`) VALUES (NULL,'Inputbox','INPUT');
-INSERT INTO ats.screening_question_type (`description`,`name`,`code`) VALUES (NULL,'Input Area','INPUTAREA');
-INSERT INTO ats.screening_question_type (`description`,`name`,`code`) VALUES (NULL,'Checkbox','CHK');
+INSERT INTO ats.screening_question_type (`description`,`name`,`code`) VALUES ('Single-line input','Inputbox','INPUT');
+INSERT INTO ats.screening_question_type (`description`,`name`,`code`) VALUES ('Multi-line input','Input Area','INPUTAREA');
+INSERT INTO ats.screening_question_type (`description`,`name`,`code`) VALUES ('Multiple selection','Checkbox','CHK');
 INSERT INTO ats.screening_question_type (`description`,`name`,`code`) VALUES ('Multiple choice','Radio buttons','RDO');
 INSERT INTO ats.screening_question_type (`description`,`name`,`code`) VALUES ('Single or multiple selection','Dropdown','DD');
-INSERT INTO ats.screening_question_type (`description`,`name`,`code`) VALUES (NULL,'Heading','HN');
-INSERT INTO ats.screening_question_type (`description`,`name`,`code`) VALUES (NULL,'Label','LBL');
+INSERT INTO ats.screening_question_type (`description`,`name`,`code`) VALUES ('Headings or paragraphs','Label','LBL');
 
 -- Job Employment Types
 INSERT INTO `ats`.`job_employment_type` (`name`) VALUES ('Full Time');

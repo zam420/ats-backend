@@ -45,6 +45,12 @@ public class ScreeningQuestionsFormService {
     @Value("${screeningQuestionsForms.maxControls}")
     private int maxQuestions;
 
+    @Value("${screeningQuestionsForms.rtLabelMaxLength}")
+    private Integer rtLabelMaxLength;
+
+    @Value("${screeningQuestionsForms.nonRTLabelMaxLength}")
+    private Integer nonRTLabelMaxLength;
+
     private final UserServiceV2 userService;
     private final ScreeningQuestionsFormAccessService screeningQuestionTemplateAccessService;
 
@@ -83,6 +89,9 @@ public class ScreeningQuestionsFormService {
             if (req.getQuestions().size() > maxQuestions) {
                 throw new InternalServerException(String.format("Too many questions. User: %s. Plan: %s. Questions: %d", loggedInUser.getPublicId(), template.getPublicId(), req.getQuestions().size()));
             }
+            List<ScreeningQuestionType> allTypes = screeningQuestionTypeRepository.findAll();
+            ScreeningQuestionHelper.assertMaxLength(req.getQuestions(), allTypes, rtLabelMaxLength, nonRTLabelMaxLength);
+            ScreeningQuestionHelper.sanitizeLabels(req.getQuestions(), allTypes);
             for (ScreeningQuestion question : req.getQuestions()) {
                 question.setScreeningQuestionsForm(template);
                 question.setScreeningQuestionsFormId(template.getId());
