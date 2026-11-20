@@ -134,7 +134,7 @@ public class JobPosition extends OperatableBaseWithTenantEntity {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 30)
     @Builder.Default
-    private JobQuestionsDisplayMode applicationQuestionsDisplayMode = JobQuestionsDisplayMode.WITH_DESCRIPTION;
+    private JobQuestionsDisplayMode applicationQuestionsDisplayMode = JobQuestionsDisplayMode.SEPARATE_TABS;
 
 
     /* SCREENING QUESTION FORMS FIELDS */
