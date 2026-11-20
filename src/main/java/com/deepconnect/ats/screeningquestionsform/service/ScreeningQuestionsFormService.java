@@ -9,16 +9,17 @@ import com.deepconnect.ats.dto.AtsPageQuery;
 import com.deepconnect.ats.dto.AtsPageRsp;
 import com.deepconnect.ats.user.model.User;
 import com.deepconnect.ats.user.service.UserServiceV2;
+import com.deepconnect.ats.common.dto.EnumsExtendedRes;
 import com.deepconnect.ats.common.enums.AccessType;
 import org.springframework.beans.factory.annotation.Value;
 import com.deepconnect.ats.common.enums.ValidationFieldType;
 import com.deepconnect.ats.common.exception.ValidationException;
+import com.deepconnect.ats.common.service.EnumsResService;
 import com.deepconnect.ats.common.enums.CustomExceptionType;
 import com.deepconnect.ats.screeningquestionsform.repo.ScreeningQuestionsFormRepository;
 import com.deepconnect.ats.screeningquestionsform.repo.ScreeningQuestionRepository;
-import com.deepconnect.ats.screeningquestionsform.repo.ScreeningQuestionTypeRepository;
 import com.deepconnect.ats.screeningquestionsform.repo.ScreeningQuestionsFormShareRepository;
-import com.deepconnect.ats.screeningquestionsform.model.ScreeningQuestionType;
+import com.deepconnect.ats.screeningquestionsform.enums.ScreeningQuestionType;
 import com.deepconnect.ats.screeningquestionsform.model.ScreeningQuestionsForm;
 import com.deepconnect.ats.screeningquestionsform.dto.ScreeningQuestionsFormRes;
 import com.deepconnect.ats.screeningquestionsform.dto.ScreeningQuestionsFormReq;
@@ -52,15 +53,15 @@ public class ScreeningQuestionsFormService {
     private Integer nonRTLabelMaxLength;
 
     private final UserServiceV2 userService;
+    private final EnumsResService enumsResService;
     private final ScreeningQuestionsFormAccessService screeningQuestionTemplateAccessService;
 
     private final ScreeningQuestionsFormRepository screeningQuestionTemplateRepository;
     private final ScreeningQuestionRepository screeningQuestionRepository;
-    private final ScreeningQuestionTypeRepository screeningQuestionTypeRepository;
     private final ScreeningQuestionsFormShareRepository screeningQuestionTemplateShareRepository;
 
-    public List<ScreeningQuestionType> findAllScreeningQuestionTypes() {
-        return screeningQuestionTypeRepository.findAll();
+    public List<EnumsExtendedRes> findAllScreeningQuestionTypes() {
+        return enumsResService.from(ScreeningQuestionType.values());
     }
 
     private String save(ScreeningQuestionsForm template, ScreeningQuestionsFormReq req, boolean questionsChanged, boolean sharedWithUsersChanged, boolean isPublicForTenant, boolean isPublicForAll) {
@@ -89,9 +90,8 @@ public class ScreeningQuestionsFormService {
             if (req.getQuestions().size() > maxQuestions) {
                 throw new InternalServerException(String.format("Too many questions. User: %s. Plan: %s. Questions: %d", loggedInUser.getPublicId(), template.getPublicId(), req.getQuestions().size()));
             }
-            List<ScreeningQuestionType> allTypes = screeningQuestionTypeRepository.findAll();
-            ScreeningQuestionHelper.assertMaxLength(req.getQuestions(), allTypes, rtLabelMaxLength, nonRTLabelMaxLength);
-            ScreeningQuestionHelper.sanitizeLabels(req.getQuestions(), allTypes);
+            ScreeningQuestionHelper.assertMaxLength(req.getQuestions(), rtLabelMaxLength, nonRTLabelMaxLength);
+            ScreeningQuestionHelper.sanitizeLabels(req.getQuestions());
             for (ScreeningQuestion question : req.getQuestions()) {
                 question.setScreeningQuestionsForm(template);
                 question.setScreeningQuestionsFormId(template.getId());

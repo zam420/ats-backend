@@ -10,6 +10,7 @@ import com.deepconnect.ats.job.model.JobPosition;
 import com.deepconnect.ats.job.model.JobRecruitmentPipelineRound;
 import com.deepconnect.ats.job.model.JobScreeningQuestion;
 import com.deepconnect.ats.job.security.JobRichTextSanitizer;
+import com.deepconnect.ats.screeningquestionsform.enums.ScreeningQuestionType;
 import com.deepconnect.ats.job.enums.JobQuestionsDisplayMode;
 
 @Data
@@ -42,7 +43,7 @@ public class JobPositionResForCandidate {
             return new ScreeningQuestion(question.getId(), question.getPublicId(), question.getJobPositionId(),
                 question.getLabel(), question.getDescription(), question.getOptions(), question.getDefaultOption(),
                 question.getIsMandatory(), question.getIsDropDownMultiSelect(), question.getMaxChars(),
-                question.getHeadingLevel(), question.getScreeningQuestionTypeId(), question.getOrder());
+                question.getHeadingLevel(), question.getScreeningQuestionType().getId(), question.getOrder());
         }
     }
 

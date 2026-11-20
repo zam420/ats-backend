@@ -11,7 +11,7 @@ import java.util.Optional;
 import com.deepconnect.ats.auth.dto.LoggedInUserDetails;
 import com.deepconnect.ats.common.exception.CustomException;
 import com.deepconnect.ats.common.exception.ValidationException;
-import com.deepconnect.ats.common.utils.EnumsResUtils;
+import com.deepconnect.ats.common.service.EnumsResService;
 import com.deepconnect.ats.evaluationplan.service.EvaluationPlanService;
 import com.deepconnect.ats.job.dto.JobPositionReq;
 import com.deepconnect.ats.job.enums.JobStatus;
@@ -27,7 +27,6 @@ import com.deepconnect.ats.job.repo.JobRecruitmentPipelineRoundRepository;
 import com.deepconnect.ats.job.repo.JobScreeningQuestionRepository;
 import com.deepconnect.ats.job.repo.JobWorkArrangementTypeRepository;
 import com.deepconnect.ats.recruitmentpipeline.service.RecruitmentPipelineService;
-import com.deepconnect.ats.screeningquestionsform.repo.ScreeningQuestionTypeRepository;
 import com.deepconnect.ats.screeningquestionsform.service.ScreeningQuestionsFormService;
 import com.deepconnect.ats.user.service.UserServiceV2;
 import org.junit.jupiter.api.AfterEach;
@@ -43,11 +42,11 @@ class JobPositionStatusTest {
     private final JobPositionService service = new JobPositionService(
             mock(EvaluationPlanService.class), mock(RecruitmentPipelineService.class), access,
             mock(ScreeningQuestionsFormService.class), mock(UserServiceV2.class), 
-            mock(EnumsResUtils.class), positions,
+            mock(EnumsResService.class), positions,
             mock(JobEmploymentTypeRepository.class), mock(JobWorkArrangementTypeRepository.class),
             experienceLevels,
             mock(JobEvaluationPlanRoundRepository.class), mock(JobRecruitmentPipelineRoundRepository.class),
-            mock(JobScreeningQuestionRepository.class), mock(ScreeningQuestionTypeRepository.class));
+            mock(JobScreeningQuestionRepository.class));
     private final JobPosition position = new JobPosition();
     private final JobPositionReq req = new JobPositionReq();
 

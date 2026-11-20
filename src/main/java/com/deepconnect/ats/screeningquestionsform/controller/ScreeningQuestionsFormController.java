@@ -9,12 +9,13 @@ import com.deepconnect.ats.screeningquestionsform.dto.ScreeningQuestionsFormReq;
 import com.deepconnect.ats.screeningquestionsform.service.ScreeningQuestionsFormService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+
+import com.deepconnect.ats.common.dto.EnumsExtendedRes;
 import com.deepconnect.ats.dto.ApiResult;
 import com.deepconnect.ats.dto.AtsPageQuery;
 import com.deepconnect.ats.dto.AtsPageRsp;
 import com.deepconnect.ats.screeningquestionsform.dto.ScreeningQuestionsFormRes;
 import com.deepconnect.ats.screeningquestionsform.dto.ScreeningQuestionsFormDetailsRes;
-import com.deepconnect.ats.screeningquestionsform.model.ScreeningQuestionType;
 
 import java.util.Collections;
 import java.util.List;
@@ -56,7 +57,7 @@ public class ScreeningQuestionsFormController {
 
     @PreAuthorize("hasAuthority('sqts')")
     @GetMapping("/controltypes")
-    public ApiResult<List<ScreeningQuestionType>> findAllScreeningQuestionTypes() throws Exception {
+    public ApiResult<List<EnumsExtendedRes>> findAllScreeningQuestionTypes() throws Exception {
         return ApiResult.success(screeningQuestionTemplateService.findAllScreeningQuestionTypes());
     }
 

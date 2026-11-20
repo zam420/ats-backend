@@ -1,4 +1,4 @@
-package com.deepconnect.ats.common.utils;
+package com.deepconnect.ats.common.service;
 
 import java.util.Locale;
 
@@ -13,7 +13,7 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-public class LocalizationUtils {
+public class LocalizationService {
 
     private final MessageSource messageSource;
 

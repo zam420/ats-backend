@@ -1,7 +1,7 @@
 package com.deepconnect.ats.screeningquestionsform.dto;
 
 import lombok.Data;
-
+import com.deepconnect.ats.screeningquestionsform.enums.ScreeningQuestionType;
 import java.util.List;
 
 import com.deepconnect.ats.screeningquestionsform.model.ScreeningQuestion;
@@ -10,7 +10,7 @@ import com.deepconnect.ats.screeningquestionsform.model.ScreeningQuestion;
 public class ScreeningQuestionRes {
     private String id;
     private String description;
-    private Integer screeningQuestionType;
+    private ScreeningQuestionType screeningQuestionType;
     private Integer order;
 
     private String label;//label is for display to candidates e.g. how is this question labaled for candidates
@@ -27,7 +27,7 @@ public class ScreeningQuestionRes {
         ScreeningQuestionRes res = new ScreeningQuestionRes();
         res.setId(entity.getPublicId());
         res.setDescription(entity.getDescription());
-        res.setScreeningQuestionType(entity.getScreeningQuestionTypeId());
+        res.setScreeningQuestionType(entity.getScreeningQuestionType());
         res.setOrder(entity.getOrder());
 
         res.setLabel(entity.getLabel());

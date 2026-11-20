@@ -11,6 +11,7 @@ import com.deepconnect.ats.job.model.JobScreeningQuestion;
 import com.deepconnect.ats.job.security.JobRichTextSanitizer;
 import com.deepconnect.ats.job.enums.JobQuestionsDisplayMode;
 import com.deepconnect.ats.job.enums.JobStatus;
+import com.deepconnect.ats.screeningquestionsform.enums.ScreeningQuestionType;
 
 @Data
 public class JobPositionRes {
@@ -43,7 +44,7 @@ public class JobPositionRes {
             return new ScreeningQuestion(question.getId(), question.getPublicId(), question.getJobPositionId(),
                 question.getLabel(), question.getDescription(), question.getOptions(), question.getDefaultOption(),
                 question.getIsMandatory(), question.getIsDropDownMultiSelect(), question.getMaxChars(),
-                question.getHeadingLevel(), question.getScreeningQuestionTypeId(), question.getOrder());
+                question.getHeadingLevel(), question.getScreeningQuestionType().getId(), question.getOrder());
         }
     }
 

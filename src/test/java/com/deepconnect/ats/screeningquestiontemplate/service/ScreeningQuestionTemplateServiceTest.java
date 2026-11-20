@@ -14,6 +14,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import com.deepconnect.ats.screeningquestionsform.enums.ScreeningQuestionType;
 import com.deepconnect.ats.screeningquestionsform.model.ScreeningQuestion;
 import com.deepconnect.ats.screeningquestionsform.service.ScreeningQuestionsFormService;
 
@@ -24,7 +25,7 @@ class ScreeningQuestionTemplateServiceTest {
     private ScreeningQuestion question() {
         return ScreeningQuestion.builder()
                 .order(1)
-                .screeningQuestionTypeId(2)
+                .screeningQuestionType(ScreeningQuestionType.INPUT_BOX)
                 .label("Label")
                 .description("Description")
                 .options(new ArrayList<>(List.of("First", "Second")))

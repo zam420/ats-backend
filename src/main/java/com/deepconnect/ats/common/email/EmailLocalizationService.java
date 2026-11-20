@@ -9,7 +9,7 @@ import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
 import com.deepconnect.ats.common.enums.EmailType;
-import com.deepconnect.ats.common.utils.LocalizationUtils;
+import com.deepconnect.ats.common.service.LocalizationService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -23,7 +23,7 @@ public class EmailLocalizationService {
     private static String emailSubjectPrefix = "email.subject.";
 
     public EmailContent getEmailContent(EmailType emailType, Map<String, Object> contextVariables) {
-            Locale locale = LocalizationUtils.getUserLocale();
+            Locale locale = LocalizationService.getUserLocale();
             String subject = messageSource.getMessage(getFullMessageKey(emailType.getSubjectKey()), null, locale);
             String templateName = emailType.getTemplateKey() + "_" + locale.toString();
             String body = templateEngine.process(templateName, new Context(locale, contextVariables));

@@ -6,6 +6,7 @@ import com.deepconnect.ats.job.model.JobExperienceLevelType;
 import java.util.List;
 
 import com.deepconnect.ats.common.dto.EnumsRes;
+import com.deepconnect.ats.common.dto.EnumsExtendedRes;
 import com.deepconnect.ats.evaluationplan.dto.EvaluationPlanRes;
 import com.deepconnect.ats.evaluationplan.dto.EvaluationPlanResMin;
 import com.deepconnect.ats.screeningquestionsform.dto.ScreeningQuestionsFormRes;
@@ -15,10 +16,9 @@ import com.deepconnect.ats.recruitmentpipeline.dto.RecruitmentPipelineRes;
 import com.deepconnect.ats.recruitmentpipeline.dto.RecruitmentPipelineResMin;
 import com.deepconnect.ats.recruitmentpipeline.model.RecruitmentPipelineRoundType;
 import com.deepconnect.ats.user.dto.UserSummary;
-import com.deepconnect.ats.screeningquestionsform.model.ScreeningQuestionType;
-import com.deepconnect.ats.job.enums.JobQuestionsDisplayMode;
 import com.deepconnect.ats.job.model.JobEmploymentType;
 import com.deepconnect.ats.job.model.JobWorkArrangementType;
+
 
 @Data
 public class JobFiltersRes {
@@ -38,7 +38,7 @@ public class JobFiltersRes {
     private List<EnumsRes> jobPostedDateTypes;
     private List<EvaluationPlanRoundType> evaluationPlanRoundTypes;
     private List<RecruitmentPipelineRoundType> recruitmentPipelineRoundTypes;
-    private List<ScreeningQuestionType> screeningQuestionTypes;
+    private List<EnumsExtendedRes> screeningQuestionTypes;
     
     public static JobFiltersRes from(
         List<JobEmploymentType> employmentTypes, 
@@ -54,7 +54,7 @@ public class JobFiltersRes {
         List<UserSummary> hiringManagers,
         List<EvaluationPlanRoundType> evaluationPlanRoundTypes,
         List<RecruitmentPipelineRoundType> recruitmentPipelineRoundTypes,
-        List<ScreeningQuestionType> screeningQuestionTypes) 
+        List<EnumsExtendedRes> screeningQuestionTypes) 
     {
         JobFiltersRes res = new JobFiltersRes();
         res.setEmploymentTypes(employmentTypes);

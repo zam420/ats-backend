@@ -1,6 +1,5 @@
 package com.deepconnect.ats.job.security;
 import com.deepconnect.ats.job.service.JobPositionAccessService;
-import com.deepconnect.ats.screeningquestionsform.repo.ScreeningQuestionTypeRepository;
 import com.deepconnect.ats.screeningquestionsform.service.ScreeningQuestionsFormService;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -12,7 +11,7 @@ import java.util.List;
 import java.util.Optional;
 
 import com.deepconnect.ats.auth.dto.LoggedInUserDetails;
-import com.deepconnect.ats.common.utils.EnumsResUtils;
+import com.deepconnect.ats.common.service.EnumsResService;
 import com.deepconnect.ats.evaluationplan.model.EvaluationPlan;
 import com.deepconnect.ats.evaluationplan.service.EvaluationPlanService;
 import com.deepconnect.ats.job.dto.JobPositionReq;
@@ -41,11 +40,11 @@ class JobRichTextWriteTest {
     private final JobPositionRepository positions = mock(JobPositionRepository.class);
     private final JobPositionService service = new JobPositionService(plans, pipelines,
             mock(JobPositionAccessService.class), mock(ScreeningQuestionsFormService.class), 
-            mock(UserServiceV2.class), mock(EnumsResUtils.class),
+            mock(UserServiceV2.class), mock(EnumsResService.class),
             positions, mock(JobEmploymentTypeRepository.class),
             mock(JobWorkArrangementTypeRepository.class), mock(JobExperienceLevelTypeRepository.class),
             mock(JobEvaluationPlanRoundRepository.class), mock(JobRecruitmentPipelineRoundRepository.class), 
-            mock(JobScreeningQuestionRepository.class), mock(ScreeningQuestionTypeRepository.class));
+            mock(JobScreeningQuestionRepository.class));
 
     @AfterEach
     void clearAuthentication() {

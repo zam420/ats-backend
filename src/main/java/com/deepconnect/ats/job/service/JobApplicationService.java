@@ -33,8 +33,7 @@ import com.deepconnect.ats.job.model.JobScreeningQuestion;
 import com.deepconnect.ats.job.repo.JobApplicationAnswerRepository;
 import com.deepconnect.ats.job.repo.JobApplicationRepository;
 import com.deepconnect.ats.job.repo.JobPositionRepository;
-import com.deepconnect.ats.screeningquestionsform.model.ScreeningQuestionType;
-import com.deepconnect.ats.screeningquestionsform.repo.ScreeningQuestionTypeRepository;
+import com.deepconnect.ats.screeningquestionsform.enums.ScreeningQuestionType;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -47,7 +46,6 @@ public class JobApplicationService {
     private final JobPositionRepository positions;
     private final JobApplicationRepository applications;
     private final JobApplicationAnswerRepository answers;
-    private final ScreeningQuestionTypeRepository questionTypes;
 
     @Value("${ats.storage.root:./uploads}")
     private String storageRoot;
@@ -131,21 +129,24 @@ public class JobApplicationService {
         if (byQuestion.size() != questions.size()) {
             throw new CustomException(CustomExceptionType.JOB_APPLICATION_STALE);
         }
-        Map<Integer, String> codes = new HashMap<>();
-        for (ScreeningQuestionType type : questionTypes.findAll()) codes.put(type.getId(), type.getCode());
+        // Map<Integer, String> codes = new HashMap<>();
+        // for (ScreeningQuestionType type : questionTypes.findAll()) codes.put(type.getId(), type.getCode());
         List<JobApplicationScreeningQuestionAnswer> result = new ArrayList<>();
         for (JobScreeningQuestion question : questions) {
             JobApplicationReq.Answer answer = byQuestion.get(question.getPublicId());
             if (answer == null) throw new CustomException(CustomExceptionType.JOB_APPLICATION_STALE);
             List<String> values = answer.getValues();
-            String code = codes.get(question.getScreeningQuestionTypeId());
-            if ("LBL".equals(code)) {
+            if (question.getScreeningQuestionType() == ScreeningQuestionType.LABEL) {
                 if (!values.isEmpty()) throw new CustomException(CustomExceptionType.JOB_APPLICATION_INVALID);
                 continue;
             }
-            boolean multi = "CHK".equals(code) || ("DD".equals(code) && Boolean.TRUE.equals(question.getIsDropDownMultiSelect()));
-            boolean choice = "CHK".equals(code) || "RDO".equals(code) || "DD".equals(code);
-            if (!choice && !"INPUT".equals(code) && !"INPUTAREA".equals(code)) {
+            boolean multi = question.getScreeningQuestionType() == ScreeningQuestionType.CHECKBOX
+                    || (question.getScreeningQuestionType() == ScreeningQuestionType.DROPDOWN && Boolean.TRUE.equals(question.getIsDropDownMultiSelect()));
+            boolean choice = question.getScreeningQuestionType() == ScreeningQuestionType.CHECKBOX
+                    || question.getScreeningQuestionType() == ScreeningQuestionType.RADIO
+                    || question.getScreeningQuestionType() == ScreeningQuestionType.DROPDOWN;
+            if (!choice && question.getScreeningQuestionType() != ScreeningQuestionType.INPUT_BOX
+                    && question.getScreeningQuestionType() != ScreeningQuestionType.INPUT_AREA) {
                 throw new CustomException(CustomExceptionType.JOB_APPLICATION_STALE);
             }
             if ((Boolean.TRUE.equals(question.getIsMandatory()) && values.isEmpty())

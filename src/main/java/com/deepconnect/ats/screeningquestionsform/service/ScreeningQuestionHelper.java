@@ -2,27 +2,20 @@ package com.deepconnect.ats.screeningquestionsform.service;
 
 import com.deepconnect.ats.common.utils.StringUtils;
 import com.deepconnect.ats.job.security.JobRichTextSanitizer;
+import com.deepconnect.ats.screeningquestionsform.enums.ScreeningQuestionType;
 import com.deepconnect.ats.screeningquestionsform.model.ScreeningQuestionBase;
-import com.deepconnect.ats.screeningquestionsform.model.ScreeningQuestionType;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 public final class ScreeningQuestionHelper {
-    private static final Set<String> RICH_TEXT_LABEL_TYPES = Set.of("LBL", "CHK", "RDO");
+
     private ScreeningQuestionHelper() {
     }
 
-    public static void assertMaxLength(List<? extends ScreeningQuestionBase> questions, List<ScreeningQuestionType> types, int rtLabelMaxLength, int nonRTLabelMaxLength) {
-        Set<Integer> labelTypeIds = types.stream()
-                .filter(type -> RICH_TEXT_LABEL_TYPES.contains(type.getCode()))
-                .map(ScreeningQuestionType::getId)
-                .collect(Collectors.toSet());
-        
+    public static void assertMaxLength(List<? extends ScreeningQuestionBase> questions, int rtLabelMaxLength, int nonRTLabelMaxLength) {
         for (ScreeningQuestionBase question : questions) {
-            if (labelTypeIds.contains(question.getScreeningQuestionTypeId())) {// assert rich-text label max length
+            if (isRichTextLabel(question)) {// assert rich-text label max length
                 if(question.getLabel() != null && question.getLabel().length() > rtLabelMaxLength) {
                     throw new IllegalArgumentException("Label exceeds maximum length of " + rtLabelMaxLength + " characters");
                 }
@@ -33,28 +26,18 @@ public final class ScreeningQuestionHelper {
         }
     }
 
-    public static void assertMaxLength(List<? extends ScreeningQuestionBase> questions, List<ScreeningQuestionType> types) {
-        Set<Integer> labelTypeIds = types.stream()
-                .filter(type -> RICH_TEXT_LABEL_TYPES.contains(type.getCode()))
-                .map(ScreeningQuestionType::getId)
-                .collect(Collectors.toSet());
+    public static void sanitizeLabels(List<? extends ScreeningQuestionBase> questions) {
         for (ScreeningQuestionBase question : questions) {
-            if (labelTypeIds.contains(question.getScreeningQuestionTypeId())) {
+            if (isRichTextLabel(question)) {
                 question.setLabel(JobRichTextSanitizer.sanitize(question.getLabel()));
             }
         }
     }
 
-    public static void sanitizeLabels(List<? extends ScreeningQuestionBase> questions, List<ScreeningQuestionType> types) {
-        Set<Integer> labelTypeIds = types.stream()
-                .filter(type -> RICH_TEXT_LABEL_TYPES.contains(type.getCode()))
-                .map(ScreeningQuestionType::getId)
-                .collect(Collectors.toSet());
-        for (ScreeningQuestionBase question : questions) {
-            if (labelTypeIds.contains(question.getScreeningQuestionTypeId())) {
-                question.setLabel(JobRichTextSanitizer.sanitize(question.getLabel()));
-            }
-        }
+    private static boolean isRichTextLabel(ScreeningQuestionBase question) {
+        return question.getScreeningQuestionType() == ScreeningQuestionType.LABEL
+            || question.getScreeningQuestionType() == ScreeningQuestionType.CHECKBOX
+            || question.getScreeningQuestionType() == ScreeningQuestionType.RADIO;
     }
 
     /**
@@ -77,7 +60,7 @@ public final class ScreeningQuestionHelper {
             ScreeningQuestionBase x = a.get(i);
             ScreeningQuestionBase y = b.get(i);
             if (!Objects.equals(x.getOrder(), y.getOrder())
-                    || !Objects.equals(x.getScreeningQuestionTypeId(), y.getScreeningQuestionTypeId())
+                    || !Objects.equals(x.getScreeningQuestionType(), y.getScreeningQuestionType())
                     || !Objects.equals(StringUtils.blankToNullAndTrim(x.getLabel()), StringUtils.blankToNullAndTrim(y.getLabel()))
                     || !Objects.equals(StringUtils.blankToNullAndTrim(x.getDescription()), StringUtils.blankToNullAndTrim(y.getDescription()))
                     || !Objects.equals(x.getOptions(), y.getOptions())

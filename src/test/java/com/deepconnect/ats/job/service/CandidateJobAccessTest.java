@@ -1,14 +1,13 @@
 package com.deepconnect.ats.job.service;
 
 import com.deepconnect.ats.auth.dto.LoggedInUserDetails;
-import com.deepconnect.ats.common.utils.EnumsResUtils;
+import com.deepconnect.ats.common.service.EnumsResService;
 import com.deepconnect.ats.evaluationplan.service.EvaluationPlanService;
 import com.deepconnect.ats.job.enums.JobStatus;
 import com.deepconnect.ats.job.model.JobPosition;
 import com.deepconnect.ats.job.dto.JobPositionSearchQuery;
 import com.deepconnect.ats.job.repo.*;
 import com.deepconnect.ats.recruitmentpipeline.service.RecruitmentPipelineService;
-import com.deepconnect.ats.screeningquestionsform.repo.ScreeningQuestionTypeRepository;
 import com.deepconnect.ats.screeningquestionsform.service.ScreeningQuestionsFormService;
 import com.deepconnect.ats.tenant.model.Tenant;
 import com.deepconnect.ats.user.service.UserServiceV2;
@@ -32,11 +31,10 @@ class CandidateJobAccessTest {
     private final JobPositionRepository positions = mock(JobPositionRepository.class);
     private final JobPositionService service = new JobPositionService(
         mock(EvaluationPlanService.class), mock(RecruitmentPipelineService.class), mock(JobPositionAccessService.class),
-        mock(ScreeningQuestionsFormService.class), mock(UserServiceV2.class), mock(EnumsResUtils.class),
+        mock(ScreeningQuestionsFormService.class), mock(UserServiceV2.class), mock(EnumsResService.class),
         positions, mock(JobEmploymentTypeRepository.class), mock(JobWorkArrangementTypeRepository.class),
         mock(JobExperienceLevelTypeRepository.class), mock(JobEvaluationPlanRoundRepository.class),
-        mock(JobRecruitmentPipelineRoundRepository.class), mock(JobScreeningQuestionRepository.class),
-        mock(ScreeningQuestionTypeRepository.class));
+        mock(JobRecruitmentPipelineRoundRepository.class), mock(JobScreeningQuestionRepository.class));
 
     @AfterEach
     void clearAuthentication() {

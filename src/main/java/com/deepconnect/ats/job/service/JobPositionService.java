@@ -6,7 +6,7 @@ import com.deepconnect.ats.common.enums.CustomExceptionType;
 import com.deepconnect.ats.common.exception.InternalServerException;
 import com.deepconnect.ats.common.exception.CustomException;
 import com.deepconnect.ats.common.exception.ValidationException;
-import com.deepconnect.ats.common.utils.EnumsResUtils;
+import com.deepconnect.ats.common.service.EnumsResService;
 import com.deepconnect.ats.common.utils.HashMapUtils;
 import com.deepconnect.ats.dto.AtsPageQuery;
 import com.deepconnect.ats.dto.AtsPageRsp;
@@ -40,8 +40,7 @@ import com.deepconnect.ats.job.repo.JobRecruitmentPipelineRoundRepository;
 import com.deepconnect.ats.job.repo.JobScreeningQuestionRepository;
 import com.deepconnect.ats.job.dto.JobPositionRes;
 import com.deepconnect.ats.job.dto.JobPositionResForCandidate;
-import com.deepconnect.ats.screeningquestionsform.model.ScreeningQuestionType;
-import com.deepconnect.ats.screeningquestionsform.repo.ScreeningQuestionTypeRepository;
+import com.deepconnect.ats.screeningquestionsform.enums.ScreeningQuestionType;
 import com.deepconnect.ats.screeningquestionsform.service.ScreeningQuestionHelper;
 import com.deepconnect.ats.common.utils.StringUtils;
 import com.deepconnect.ats.common.enums.ValidationFieldType;
@@ -92,7 +91,7 @@ public class JobPositionService {
     private final JobPositionAccessService jobPositionAccessService;
     private final ScreeningQuestionsFormService screeningQuestionsFormService;
     private final UserServiceV2 userService;
-    private final EnumsResUtils enumsResUtils;
+    private final EnumsResService enumsResService;
 
     private final JobPositionRepository jobPositionRepository;
     private final JobEmploymentTypeRepository jobEmploymentTypeRepository;
@@ -101,7 +100,6 @@ public class JobPositionService {
     private final JobEvaluationPlanRoundRepository jobEvaluationPlanRoundRepository;
     private final JobRecruitmentPipelineRoundRepository jobRecruitmentPipelineRoundRepository;
     private final JobScreeningQuestionRepository jobScreeningQuestionRepository;
-    private final ScreeningQuestionTypeRepository screeningQuestionTypeRepository;
 
     private String save(JobPosition position, JobPositionReq req, boolean evaluationPlanRoundsChanged, boolean recruitmentPipelineRoundsChanged, boolean screeningQuestionsChanged){
         LoggedInUserDetails loggedInUser = AuthService.getLoggedInUser();
@@ -121,7 +119,7 @@ public class JobPositionService {
         position.setDepartment(req.getDepartment());
         position.setRecruiters(req.getRecruiters());
         position.setHiringManagers(req.getHiringManagers());
-        position.setApplicationQuestionsDisplayMode(enumsResUtils.resolve(req.getApplicationQuestionsDisplayMode(), JobQuestionsDisplayMode.values()));
+        position.setApplicationQuestionsDisplayMode(enumsResService.resolve(req.getApplicationQuestionsDisplayMode(), JobQuestionsDisplayMode.values()));
 
         position = jobPositionRepository.save(position);
         if (evaluationPlanRoundsChanged){
@@ -174,9 +172,8 @@ public class JobPositionService {
             if (req.getScreeningQuestions().size() > maxQuestions) {
                 throw new InternalServerException(String.format("Too many questions. User: %s. Position: %s. Questions: %d", loggedInUser.getPublicId(), position.getPublicId(), req.getScreeningQuestions().size()));
             }
-            List<ScreeningQuestionType> allTypes = screeningQuestionTypeRepository.findAll();
-            ScreeningQuestionHelper.assertMaxLength(req.getScreeningQuestions(), allTypes, rtLabelMaxLength, nonRTLabelMaxLength);
-            ScreeningQuestionHelper.sanitizeLabels(req.getScreeningQuestions(), allTypes);
+            ScreeningQuestionHelper.assertMaxLength(req.getScreeningQuestions(), rtLabelMaxLength, nonRTLabelMaxLength);
+            ScreeningQuestionHelper.sanitizeLabels(req.getScreeningQuestions());
             for (JobScreeningQuestion question : req.getScreeningQuestions()) {
                 question.setJobPosition(position);
                 question.setJobPositionId(position.getId());
@@ -330,9 +327,9 @@ public class JobPositionService {
             jobEmploymentTypeRepository.findAll(),
             jobWorkArrangementTypeRepository.findAll(),
             jobExperienceLevelTypeRepository.findAll(),
-            enumsResUtils.from(JobStatus.values()),
-            enumsResUtils.from(JobQuestionsDisplayMode.values()),
-            enumsResUtils.from(JobPostedDateType.values()),
+            enumsResService.from(JobStatus.values()),
+            enumsResService.from(JobQuestionsDisplayMode.values()),
+            enumsResService.from(JobPostedDateType.values()),
             evaluationPlanService.findAllAsList(),
             recruitmentPipelineService.findAllAsList(),
             screeningQuestionsFormService.findAllAsList(),
@@ -349,9 +346,9 @@ public class JobPositionService {
             jobEmploymentTypeRepository.findAll(),
             jobWorkArrangementTypeRepository.findAll(),
             jobExperienceLevelTypeRepository.findAll(),
-            enumsResUtils.from(JobStatus.values()),
-            enumsResUtils.from(JobPostedDateType.values()),
-            screeningQuestionsFormService.findAllScreeningQuestionTypes()
+            enumsResService.from(JobStatus.values()),
+            enumsResService.from(JobPostedDateType.values()),
+            enumsResService.from(ScreeningQuestionType.values())
         );
     }
 

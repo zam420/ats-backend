@@ -19,11 +19,11 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 
 import com.deepconnect.ats.auth.dto.LoggedInUserDetails;
 import com.deepconnect.ats.auth.service.AuthService;
+import com.deepconnect.ats.common.service.EnumsResService;
 import com.deepconnect.ats.dto.AtsPageQuery;
 import com.deepconnect.ats.screeningquestionsform.model.ScreeningQuestionsForm;
 import com.deepconnect.ats.screeningquestionsform.model.ScreeningQuestion;
 import com.deepconnect.ats.screeningquestionsform.repo.ScreeningQuestionRepository;
-import com.deepconnect.ats.screeningquestionsform.repo.ScreeningQuestionTypeRepository;
 import com.deepconnect.ats.screeningquestionsform.repo.ScreeningQuestionsFormRepository;
 import com.deepconnect.ats.screeningquestionsform.repo.ScreeningQuestionsFormShareRepository;
 import com.deepconnect.ats.user.service.UserServiceV2;
@@ -31,8 +31,9 @@ import com.deepconnect.ats.user.service.UserServiceV2;
 class ScreeningQuestionsFormServiceAccessTest {
     private final ScreeningQuestionsFormRepository repository = mock(ScreeningQuestionsFormRepository.class);
     private final ScreeningQuestionsFormService service = new ScreeningQuestionsFormService(
-            mock(UserServiceV2.class), new ScreeningQuestionsFormAccessService(), repository,
-            mock(ScreeningQuestionRepository.class), mock(ScreeningQuestionTypeRepository.class),
+            mock(UserServiceV2.class), mock(EnumsResService.class),
+            new ScreeningQuestionsFormAccessService(), repository,
+            mock(ScreeningQuestionRepository.class), 
             mock(ScreeningQuestionsFormShareRepository.class));
     private final LoggedInUserDetails user = new LoggedInUserDetails(
             1000L, 2000L, "user", "user@example.test", false, false, List.of());
@@ -75,7 +76,7 @@ class ScreeningQuestionsFormServiceAccessTest {
                 "{\"screening_question_type_id\":3,\"label\":\"Name\",\"default_option\":\"A\","
                 + "\"is_mandatory\":true,\"is_drop_down_multi_select\":true,\"max_chars\":40}",
                 ScreeningQuestion.class);
-        assertEquals(3, question.getScreeningQuestionTypeId());
+        assertEquals(3, question.getScreeningQuestionType().getId());
         assertEquals("A", question.getDefaultOption());
         assertEquals(true, question.getIsMandatory());
         assertEquals(true, question.getIsDropDownMultiSelect());

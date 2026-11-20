@@ -14,6 +14,7 @@ import org.hibernate.type.SqlTypes;
 import org.hibernate.validator.constraints.Length;
 
 import com.deepconnect.ats.common.model.BaseEntity;
+import com.deepconnect.ats.screeningquestionsform.enums.ScreeningQuestionType;
 
 import lombok.*;
 import lombok.experimental.SuperBuilder;
@@ -62,13 +63,10 @@ public abstract class ScreeningQuestionBase extends BaseEntity {
     @Max(3)
     private Integer headingLevel;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "screeningQuestionType", referencedColumnName = "id", insertable = false, updatable = false)
-    private ScreeningQuestionType screeningQuestionType; 
-
-    @Column(name = "screeningQuestionType", nullable = false)
+    @Enumerated(EnumType.STRING)
     @NotNull(message = "{field.screeningQuestion.screeningQuestionType}{validation.notBlank}")
-    private Integer screeningQuestionTypeId;
+    @Column(nullable = false)
+    private ScreeningQuestionType screeningQuestionType; 
 
     @Column(name = "`order`", nullable = false)
     @NotNull(message = "{field.screeningQuestion.order}{validation.notBlank}")

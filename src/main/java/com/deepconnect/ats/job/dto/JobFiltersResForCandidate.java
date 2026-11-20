@@ -8,7 +8,7 @@ import java.util.List;
 import com.deepconnect.ats.common.dto.EnumsRes;
 import com.deepconnect.ats.job.model.JobEmploymentType;
 import com.deepconnect.ats.job.model.JobWorkArrangementType;
-import com.deepconnect.ats.screeningquestionsform.model.ScreeningQuestionType;
+import com.deepconnect.ats.common.dto.EnumsExtendedRes;
 
 @Data
 public class JobFiltersResForCandidate {
@@ -17,7 +17,7 @@ public class JobFiltersResForCandidate {
     private List<JobExperienceLevelType> experienceLevelTypes;
     private List<EnumsRes> jobStatus;
     private List<EnumsRes> jobPostedDateTypes;
-    private List<ScreeningQuestionType> screeningQuestionTypes;
+    private List<EnumsExtendedRes> screeningQuestionTypes;
     
     public static JobFiltersResForCandidate from(
         List<JobEmploymentType> employmentTypes, 
@@ -25,7 +25,7 @@ public class JobFiltersResForCandidate {
         List<JobExperienceLevelType> experienceLevelTypes,
         List<EnumsRes> jobStatus,
         List<EnumsRes> jobPostedDateTypes,
-        List<ScreeningQuestionType> screeningQuestionTypes)
+        List<EnumsExtendedRes> screeningQuestionTypes)
     {
         JobFiltersResForCandidate res = new JobFiltersResForCandidate();
         res.setEmploymentTypes(employmentTypes);
