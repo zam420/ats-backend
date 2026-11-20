@@ -34,6 +34,9 @@ public final class JobPositionSearchSpecification {
 
             if(isForCandidate) {
                 predicates.add(cb.equal(root.get("status"), JobStatus.OPEN));
+                if (search.getCompanyId() != null && !search.getCompanyId().isBlank()) {
+                    predicates.add(cb.equal(root.get("tenant").get("publicId"), search.getCompanyId()));
+                }
             }
             else {
                 predicates.add(cb.equal(root.get("tenantId"), tenantId));

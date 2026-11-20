@@ -7,6 +7,7 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.annotations.SQLRestriction;
 import org.hibernate.type.SqlTypes;
 import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.Range;
@@ -142,6 +143,7 @@ public class JobPosition extends OperatableBaseWithTenantEntity {
     @Valid
     @JsonManagedReference("screeningQuestions")
     @OneToMany(mappedBy = "jobPosition", cascade = CascadeType.ALL, orphanRemoval = true)
+    @SQLRestriction("active = true")
     private List<JobScreeningQuestion> screeningQuestions;
 
 

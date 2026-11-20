@@ -27,4 +27,7 @@ public class JobScreeningQuestion extends ScreeningQuestionBase {
     @Column(name = "jobPosition", nullable = false)
     private Long jobPositionId;
 
+    @Column(nullable = false)
+    @Builder.Default
+    private Boolean active = true;
 }

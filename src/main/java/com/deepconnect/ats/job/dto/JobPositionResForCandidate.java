@@ -18,6 +18,7 @@ public class JobPositionResForCandidate {
     private String id;
     private String title;
     private String companyName;
+    private String companyId;
     private boolean companyHasLogo;
     private String companyLogoUrl;
     private LocalDateTime publishedAt;
@@ -66,6 +67,7 @@ public class JobPositionResForCandidate {
         res.setId(entity.getPublicId());
         res.setTitle(entity.getTitle());
         res.setCompanyName(entity.getTenant().getName());
+        res.setCompanyId(entity.getTenant().getPublicId());
         res.setCompanyHasLogo(entity.getTenant().getLogoPath() != null);
         res.setPublishedAt(entity.getPublishedAt());
         res.setDescription(JobRichTextSanitizer.sanitize(entity.getDescription()));

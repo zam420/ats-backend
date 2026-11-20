@@ -20,6 +20,9 @@ import com.deepconnect.ats.job.dto.JobPositionResForCandidate;
 import com.deepconnect.ats.tenant.service.TenantLogoStorage;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.multipart.MultipartFile;
+import com.deepconnect.ats.job.dto.JobApplicationReq;
+import com.deepconnect.ats.job.service.JobApplicationService;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.io.IOException;
@@ -32,6 +35,15 @@ public class JobsController {
 
     private final JobPositionService jobPositionService;
     private final TenantLogoStorage tenantLogoStorage;
+    private final JobApplicationService jobApplicationService;
+
+    @PreAuthorize("hasAuthority('jpsc')")
+    @PostMapping(value = "/{id}/applications", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ApiResult<String> apply(@PathVariable @NotBlank String id,
+            @RequestPart("application") @Valid JobApplicationReq request,
+            @RequestPart("resume") MultipartFile resume) {
+        return ApiResult.success(jobApplicationService.submit(id, request, resume));
+    }
 
     @PreAuthorize("hasAuthority('jpsc')")
     @GetMapping("/all")

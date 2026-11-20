@@ -14,7 +14,7 @@ public interface JobScreeningQuestionRepository extends ScreeningQuestionBaseRep
     List<JobScreeningQuestion> findByJobPositionIdOrderByIdAsc(Long jobPositionId);
 
     @Modifying
-    @Query(value = "delete from job_screening_question where job_position=?1", nativeQuery = true)
-    void deleteByJobPositionId(Long jobPositionId);
+    @Query(value = "update job_screening_question set active = false where job_position=?1 and active = true", nativeQuery = true)
+    void archiveByJobPositionId(Long jobPositionId);
 
 }

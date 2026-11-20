@@ -23,6 +23,8 @@ public class JobPositionSearchQuery extends AtsPageQuery {
     private List<@NotNull Integer> experienceLevelTypes;
     private List<@NotNull Integer> jobStatuses;
     private Integer jobPostedDateType;
+    @Size(max = 12)
+    private String companyId;
 
     @AssertTrue(message = "{validation.invalidJobPostedDateType}")
     public boolean isValidJobPostedDateType() {

@@ -26,6 +26,10 @@ public interface JobPositionRepository extends OperatableBaseRepository<JobPosit
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT jp FROM JobPosition jp WHERE jp.publicId = :publicId AND jp.tenantId = :tenantId AND jp.deactivated = false")
     Optional<JobPosition> findForUpdate(@Param("publicId") String publicId, @Param("tenantId") Long tenantId);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT jp FROM JobPosition jp WHERE jp.publicId = :publicId AND jp.deactivated = false")
+    Optional<JobPosition> findForApplication(@Param("publicId") String publicId);
     // List<JobPosition> findByStatus(JobStatus status);
     // Optional<JobPosition> findByTitle(String title);
 

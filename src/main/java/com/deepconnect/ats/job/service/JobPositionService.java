@@ -214,7 +214,7 @@ public class JobPositionService {
             throw new InternalServerException(String.format("Invalid Job Position Id: User: %s, Position: %s", AuthService.getLoggedInUser().getPublicId(), req.getId()));
 
         LoggedInUserDetails loggedInUser = AuthService.getLoggedInUser();
-        JobPosition jobPosition = jobPositionRepository.findByPublicIdAndTenantIdAndDeactivatedFalse(req.getId(), loggedInUser.getTenantId())
+        JobPosition jobPosition = jobPositionRepository.findForUpdate(req.getId(), loggedInUser.getTenantId())
                 .orElseThrow(() -> new InternalServerException(String.format("Job Position not found: User: %s, Position: %s", AuthService.getLoggedInUser().getPublicId(), req.getId())));
 
         //TODO: think about uniqueness criteria and implement //
@@ -236,7 +236,7 @@ public class JobPositionService {
 
         boolean screeningQuestionsChanged = !ScreeningQuestionHelper.questionsEqual(jobPosition.getScreeningQuestions(), req.getScreeningQuestions());
         if (screeningQuestionsChanged) {
-           jobScreeningQuestionRepository.deleteByJobPositionId(jobPosition.getId());
+           jobScreeningQuestionRepository.archiveByJobPositionId(jobPosition.getId());
         }
 
         return this.save(jobPosition, req, evaluationPlanRoundsChanged, recruitmentPipelineRoundsChanged, screeningQuestionsChanged);
@@ -244,7 +244,7 @@ public class JobPositionService {
 
     @Transactional
     public void publish(String publicId) {
-        JobPosition jobPosition = jobPositionRepository.findByPublicIdAndTenantIdAndDeactivatedFalse(publicId, AuthService.getLoggedInTenantId()).orElseThrow(() -> new InternalServerException(String.format("Job position not found: User: %s, Position: %s", AuthService.getLoggedInUser().getPublicId(), publicId)));
+        JobPosition jobPosition = jobPositionRepository.findForUpdate(publicId, AuthService.getLoggedInTenantId()).orElseThrow(() -> new InternalServerException(String.format("Job position not found: User: %s, Position: %s", AuthService.getLoggedInUser().getPublicId(), publicId)));
         if (jobPosition.getStatus() != JobStatus.DRAFT) {
             throw new CustomException(CustomExceptionType.JOB_INVALID_STATUS_TRANSITION);
         }
@@ -258,7 +258,7 @@ public class JobPositionService {
 
     @Transactional
     public void close(String publicId) {
-        JobPosition jobPosition = jobPositionRepository.findByPublicIdAndTenantIdAndDeactivatedFalse(publicId, AuthService.getLoggedInTenantId()).orElseThrow(() -> new InternalServerException(String.format("Job position not found: User: %s, Position: %s", AuthService.getLoggedInUser().getPublicId(), publicId)));
+        JobPosition jobPosition = jobPositionRepository.findForUpdate(publicId, AuthService.getLoggedInTenantId()).orElseThrow(() -> new InternalServerException(String.format("Job position not found: User: %s, Position: %s", AuthService.getLoggedInUser().getPublicId(), publicId)));
         if (jobPosition.getStatus() != JobStatus.OPEN) {
             throw new CustomException(CustomExceptionType.JOB_INVALID_STATUS_TRANSITION);
         }
@@ -271,7 +271,7 @@ public class JobPositionService {
 
     @Transactional
     public void deactivate(String publicId) {
-        JobPosition jobPosition = jobPositionRepository.findByPublicIdAndTenantIdAndDeactivatedFalse(publicId, AuthService.getLoggedInTenantId()).orElseThrow(() -> new InternalServerException(String.format("Job position not found: User: %s, Position: %s", AuthService.getLoggedInUser().getPublicId(), publicId)));
+        JobPosition jobPosition = jobPositionRepository.findForUpdate(publicId, AuthService.getLoggedInTenantId()).orElseThrow(() -> new InternalServerException(String.format("Job position not found: User: %s, Position: %s", AuthService.getLoggedInUser().getPublicId(), publicId)));
         jobPosition.setDeactivated(true);
         this.saveForStatusUpdate(jobPosition);
     }
