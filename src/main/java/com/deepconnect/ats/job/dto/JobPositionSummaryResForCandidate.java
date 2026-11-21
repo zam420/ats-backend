@@ -3,6 +3,9 @@ package com.deepconnect.ats.job.dto;
 import lombok.Data;
 import java.time.LocalDateTime;
 import java.util.List;
+import com.deepconnect.ats.job.enums.JobEmploymentType;
+import com.deepconnect.ats.job.enums.JobWorkArrangementType;
+import com.deepconnect.ats.job.enums.JobExperienceLevelType;
 
 import com.deepconnect.ats.job.model.JobPosition;
 import com.deepconnect.ats.job.security.JobRichTextSanitizer;
@@ -17,9 +20,9 @@ public class JobPositionSummaryResForCandidate {
     private String companyLogoUrl;
     private LocalDateTime publishedAt;
     private String shortDescription;
-    private Integer employmentType;
-    private Integer workArrangementType;
-    private Integer experienceLevelType;
+    private JobEmploymentType employmentType;
+    private JobWorkArrangementType workArrangementType;
+    private JobExperienceLevelType experienceLevelType;
     private List<Integer> workLocation;
     
     public static JobPositionSummaryResForCandidate from(JobPosition entity) {
@@ -30,9 +33,9 @@ public class JobPositionSummaryResForCandidate {
         res.setCompanyHasLogo(entity.getTenant().getLogoPath() != null);
         res.setPublishedAt(entity.getPublishedAt());
         res.setShortDescription(entity.getShortDescription());
-        res.setEmploymentType(entity.getEmploymentTypeId());
-        res.setWorkArrangementType(entity.getWorkArrangementTypeId());
-        res.setExperienceLevelType(entity.getExperienceLevelTypeId());
+        res.setEmploymentType(entity.getEmploymentType());
+        res.setWorkArrangementType(entity.getWorkArrangementType());
+        res.setExperienceLevelType(entity.getExperienceLevelType());
         res.setWorkLocation(entity.getWorkLocation());
         return res;
     }

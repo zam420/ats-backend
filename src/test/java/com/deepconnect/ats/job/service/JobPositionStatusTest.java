@@ -5,6 +5,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -16,16 +17,13 @@ import com.deepconnect.ats.evaluationplan.service.EvaluationPlanService;
 import com.deepconnect.ats.job.dto.JobPositionReq;
 import com.deepconnect.ats.job.enums.JobStatus;
 import com.deepconnect.ats.job.model.JobEvaluationPlanRound;
-import com.deepconnect.ats.job.model.JobExperienceLevelType;
+import com.deepconnect.ats.job.enums.JobExperienceLevelType;
 import com.deepconnect.ats.job.model.JobPosition;
 import com.deepconnect.ats.job.model.JobRecruitmentPipelineRound;
-import com.deepconnect.ats.job.repo.JobEmploymentTypeRepository;
-import com.deepconnect.ats.job.repo.JobExperienceLevelTypeRepository;
 import com.deepconnect.ats.job.repo.JobEvaluationPlanRoundRepository;
 import com.deepconnect.ats.job.repo.JobPositionRepository;
 import com.deepconnect.ats.job.repo.JobRecruitmentPipelineRoundRepository;
 import com.deepconnect.ats.job.repo.JobScreeningQuestionRepository;
-import com.deepconnect.ats.job.repo.JobWorkArrangementTypeRepository;
 import com.deepconnect.ats.recruitmentpipeline.service.RecruitmentPipelineService;
 import com.deepconnect.ats.screeningquestionsform.service.ScreeningQuestionsFormService;
 import com.deepconnect.ats.user.service.UserServiceV2;
@@ -38,13 +36,11 @@ import org.springframework.security.core.context.SecurityContextHolder;
 class JobPositionStatusTest {
     private final JobPositionRepository positions = mock(JobPositionRepository.class);
     private final JobPositionAccessService access = mock(JobPositionAccessService.class);
-    private final JobExperienceLevelTypeRepository experienceLevels = mock(JobExperienceLevelTypeRepository.class);
+    private final EnumsResService enumResService = mock(EnumsResService.class);
     private final JobPositionService service = new JobPositionService(
             mock(EvaluationPlanService.class), mock(RecruitmentPipelineService.class), access,
             mock(ScreeningQuestionsFormService.class), mock(UserServiceV2.class), 
-            mock(EnumsResService.class), positions,
-            mock(JobEmploymentTypeRepository.class), mock(JobWorkArrangementTypeRepository.class),
-            experienceLevels,
+            enumResService, positions,
             mock(JobEvaluationPlanRoundRepository.class), mock(JobRecruitmentPipelineRoundRepository.class),
             mock(JobScreeningQuestionRepository.class));
     private final JobPosition position = new JobPosition();
@@ -73,9 +69,8 @@ class JobPositionStatusTest {
 
     @Test
     void filtersIncludeExperienceLevels() {
-        var level = new JobExperienceLevelType(3, "Senior", null);
-        when(experienceLevels.findAll()).thenReturn(List.of(level));
-        assertEquals(List.of(level), service.getFilters().getExperienceLevelTypes());
+        when(List.of(JobExperienceLevelType.values())).thenReturn(List.of(JobExperienceLevelType.SENIOR));
+        assertEquals(List.of(JobExperienceLevelType.SENIOR), service.getFilters().getExperienceLevelTypes());
     }
 
     @Test

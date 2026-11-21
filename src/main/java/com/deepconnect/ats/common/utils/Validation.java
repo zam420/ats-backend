@@ -6,6 +6,12 @@ import com.deepconnect.ats.common.exception.ValidationException;
 
 public class Validation {
 
+    public static void validateMaxSize(ValidationFieldType validationFieldType, int maxSize, int valueToValidate) {
+        if (valueToValidate > maxSize) {
+            throw new ValidationException(CustomExceptionType.VALIDATION_MAX_SIZE, validationFieldType, maxSize);
+        }
+    }
+
     public static void validateRange(ValidationFieldType validationFieldType, int rangeFrom, int rangeTo, int valueToValidate) {
         if (!(valueToValidate >= rangeFrom && valueToValidate <= rangeTo)) {
             throw new ValidationException(CustomExceptionType.VALIDATION_RANGE, validationFieldType, rangeFrom, rangeTo);

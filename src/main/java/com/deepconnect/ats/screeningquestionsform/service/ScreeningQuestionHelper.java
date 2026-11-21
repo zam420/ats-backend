@@ -1,6 +1,8 @@
 package com.deepconnect.ats.screeningquestionsform.service;
 
+import com.deepconnect.ats.common.enums.ValidationFieldType;
 import com.deepconnect.ats.common.utils.StringUtils;
+import com.deepconnect.ats.common.utils.Validation;
 import com.deepconnect.ats.job.security.JobRichTextSanitizer;
 import com.deepconnect.ats.screeningquestionsform.enums.ScreeningQuestionType;
 import com.deepconnect.ats.screeningquestionsform.model.ScreeningQuestionBase;
@@ -15,13 +17,24 @@ public final class ScreeningQuestionHelper {
 
     public static void assertMaxLength(List<? extends ScreeningQuestionBase> questions, int rtLabelMaxLength, int nonRTLabelMaxLength) {
         for (ScreeningQuestionBase question : questions) {
-            if (isRichTextLabel(question)) {// assert rich-text label max length
-                if(question.getLabel() != null && question.getLabel().length() > rtLabelMaxLength) {
-                    throw new IllegalArgumentException("Label exceeds maximum length of " + rtLabelMaxLength + " characters");
+            if(question.getLabel() != null) {
+                if (isRichTextLabel(question)) {// assert rich-text label max length
+                    Validation.validateMaxSize(ValidationFieldType.SCREENING_QUESTION_LABEL, rtLabelMaxLength, question.getLabel().length());
+                }
+                else if(question.getLabel() != null) {// assert non-rich-text label max length
+                    Validation.validateMaxSize(ValidationFieldType.SCREENING_QUESTION_LABEL, nonRTLabelMaxLength, question.getLabel().length());
                 }
             }
-            else if(question.getLabel() != null && question.getLabel().length() > nonRTLabelMaxLength) {// assert non-rich-text label max length
-                throw new IllegalArgumentException("Label exceeds maximum length of " + nonRTLabelMaxLength + " characters");
+        }
+    }
+
+    public static void assertMaxLength(ScreeningQuestionBase question, int rtLabelMaxLength, int nonRTLabelMaxLength) {
+        if(question.getLabel() != null) {
+            if (isRichTextLabel(question)) {// assert rich-text label max length
+                Validation.validateMaxSize(ValidationFieldType.SCREENING_QUESTION_LABEL, rtLabelMaxLength, question.getLabel().length());
+            }
+            else if(question.getLabel() != null) {// assert non-rich-text label max length
+                Validation.validateMaxSize(ValidationFieldType.SCREENING_QUESTION_LABEL, nonRTLabelMaxLength, question.getLabel().length());
             }
         }
     }

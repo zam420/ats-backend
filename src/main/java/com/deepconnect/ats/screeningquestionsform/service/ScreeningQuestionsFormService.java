@@ -90,9 +90,9 @@ public class ScreeningQuestionsFormService {
             if (req.getQuestions().size() > maxQuestions) {
                 throw new InternalServerException(String.format("Too many questions. User: %s. Plan: %s. Questions: %d", loggedInUser.getPublicId(), template.getPublicId(), req.getQuestions().size()));
             }
-            ScreeningQuestionHelper.assertMaxLength(req.getQuestions(), rtLabelMaxLength, nonRTLabelMaxLength);
             ScreeningQuestionHelper.sanitizeLabels(req.getQuestions());
             for (ScreeningQuestion question : req.getQuestions()) {
+                ScreeningQuestionHelper.assertMaxLength(question, rtLabelMaxLength, nonRTLabelMaxLength);
                 question.setScreeningQuestionsForm(template);
                 question.setScreeningQuestionsFormId(template.getId());
             }

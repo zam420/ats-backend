@@ -3,6 +3,9 @@ package com.deepconnect.ats.job.dto;
 import lombok.Data;
 import java.util.List;
 import org.springframework.util.CollectionUtils;
+import com.deepconnect.ats.job.enums.JobEmploymentType;
+import com.deepconnect.ats.job.enums.JobWorkArrangementType;
+import com.deepconnect.ats.job.enums.JobExperienceLevelType;
 
 import com.deepconnect.ats.job.model.JobEvaluationPlanRound;
 import com.deepconnect.ats.job.model.JobPosition;
@@ -19,9 +22,9 @@ public class JobPositionRes {
     private String id;
     private String title;
     private String description;
-    private Integer employmentType;
-    private Integer workArrangementType;
-    private Integer experienceLevelType;
+    private JobEmploymentType employmentType;
+    private JobWorkArrangementType workArrangementType;
+    private JobExperienceLevelType experienceLevelType;
     private List<Integer> workLocation;
     private String requisitionId;
     private Integer numOfOpenings;
@@ -69,9 +72,9 @@ public class JobPositionRes {
         res.setId(entity.getPublicId());
         res.setTitle(entity.getTitle());
         res.setDescription(JobRichTextSanitizer.sanitize(entity.getDescription()));
-        res.setEmploymentType(entity.getEmploymentTypeId());
-        res.setWorkArrangementType(entity.getWorkArrangementTypeId());
-        res.setExperienceLevelType(entity.getExperienceLevelTypeId());
+        res.setEmploymentType(entity.getEmploymentType());
+        res.setWorkArrangementType(entity.getWorkArrangementType());
+        res.setExperienceLevelType(entity.getExperienceLevelType());
         res.setWorkLocation(entity.getWorkLocation());
         res.setRequisitionId(entity.getRequisitionId());
         res.setNumOfOpenings(entity.getNumOfOpenings());

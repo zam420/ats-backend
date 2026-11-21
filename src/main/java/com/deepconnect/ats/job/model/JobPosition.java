@@ -17,9 +17,11 @@ import java.util.List;
 
 import com.deepconnect.ats.user.model.User;
 import com.deepconnect.ats.common.model.OperatableBaseWithTenantEntity;
+import com.deepconnect.ats.job.enums.JobEmploymentType;
+import com.deepconnect.ats.job.enums.JobExperienceLevelType;
 import com.deepconnect.ats.job.enums.JobQuestionsDisplayMode;
 import com.deepconnect.ats.job.enums.JobStatus;
-
+import com.deepconnect.ats.job.enums.JobWorkArrangementType;
 import com.deepconnect.ats.job.security.JobRichTextSerializer;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -59,29 +61,21 @@ public class JobPosition extends OperatableBaseWithTenantEntity {
     @Column(name = "short_description", columnDefinition = "TEXT")
     private String shortDescription;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "employmentTypeId", referencedColumnName = "id", insertable = false, updatable = false)
-    private JobEmploymentType employmentType; // By default, the user who created this record. Can be changed.
-
-    @Column(name = "employmentTypeId", nullable = false)
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 30)
     @NotNull(message = "{field.job.employmentType}{validation.notBlank}")
-    private Integer employmentTypeId;
+    private JobEmploymentType employmentType; 
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "workArrangementTypeId", referencedColumnName = "id", insertable = false, updatable = false)
-    private JobWorkArrangementType workArrangementType; // By default, the user who created this record. Can be changed.
-
-    @Column(name = "workArrangementTypeId", nullable = false)
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 30)
     @NotNull(message = "{field.job.workArrangementType}{validation.notBlank}")
-    private Integer workArrangementTypeId;
+    private JobWorkArrangementType workArrangementType; 
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "experienceLevelTypeId", referencedColumnName = "id", insertable = false, updatable = false)
-    private JobExperienceLevelType experienceLevelType; // By default, the user who created this record. Can be changed.
-
-    @Column(name = "experienceLevelTypeId", nullable = false)
+    
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 30)
     @NotNull(message = "{field.job.experienceLevelType}{validation.notBlank}")
-    private Integer experienceLevelTypeId;
+    private JobExperienceLevelType experienceLevelType; 
 
     //TODO: Later map it to Locations entity in DB (At present, we are using fixed ENUM)
     @JdbcTypeCode(SqlTypes.JSON)

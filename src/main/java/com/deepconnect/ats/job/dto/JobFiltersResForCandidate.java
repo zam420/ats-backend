@@ -1,28 +1,25 @@
 package com.deepconnect.ats.job.dto;
 
 import lombok.Data;
-import com.deepconnect.ats.job.model.JobExperienceLevelType;
 
 import java.util.List;
 
 import com.deepconnect.ats.common.dto.EnumsRes;
-import com.deepconnect.ats.job.model.JobEmploymentType;
-import com.deepconnect.ats.job.model.JobWorkArrangementType;
 import com.deepconnect.ats.common.dto.EnumsExtendedRes;
 
 @Data
 public class JobFiltersResForCandidate {
-    private List<JobEmploymentType> employmentTypes;
-    private List<JobWorkArrangementType> workArrangementTypes;
-    private List<JobExperienceLevelType> experienceLevelTypes;
+    private List<EnumsRes> employmentTypes;
+    private List<EnumsRes> workArrangementTypes;
+    private List<EnumsRes> experienceLevelTypes;
     private List<EnumsRes> jobStatus;
     private List<EnumsRes> jobPostedDateTypes;
     private List<EnumsExtendedRes> screeningQuestionTypes;
     
     public static JobFiltersResForCandidate from(
-        List<JobEmploymentType> employmentTypes, 
-        List<JobWorkArrangementType> workArrangementTypes, 
-        List<JobExperienceLevelType> experienceLevelTypes,
+        List<EnumsRes> employmentTypes, 
+        List<EnumsRes> workArrangementTypes, 
+        List<EnumsRes> experienceLevelTypes,
         List<EnumsRes> jobStatus,
         List<EnumsRes> jobPostedDateTypes,
         List<EnumsExtendedRes> screeningQuestionTypes)

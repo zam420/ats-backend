@@ -32,8 +32,7 @@ class CandidateJobAccessTest {
     private final JobPositionService service = new JobPositionService(
         mock(EvaluationPlanService.class), mock(RecruitmentPipelineService.class), mock(JobPositionAccessService.class),
         mock(ScreeningQuestionsFormService.class), mock(UserServiceV2.class), mock(EnumsResService.class),
-        positions, mock(JobEmploymentTypeRepository.class), mock(JobWorkArrangementTypeRepository.class),
-        mock(JobExperienceLevelTypeRepository.class), mock(JobEvaluationPlanRoundRepository.class),
+        positions, mock(JobEvaluationPlanRoundRepository.class),
         mock(JobRecruitmentPipelineRoundRepository.class), mock(JobScreeningQuestionRepository.class));
 
     @AfterEach

@@ -3,6 +3,7 @@ package com.deepconnect.ats.job.dto;
 import lombok.Data;
 
 import java.util.List;
+
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
@@ -60,6 +61,7 @@ public class JobPositionReq {
     @NotEmpty(message = "{field.job.hiringManagers}{validation.notEmpty}")
     private List<String> hiringManagers;
 
+    @NotNull(message = "{field.job.applicationQuestionsDisplayMode}{validation.notBlank}")
     private Integer applicationQuestionsDisplayMode;
 
     private List<JobScreeningQuestion> screeningQuestions;

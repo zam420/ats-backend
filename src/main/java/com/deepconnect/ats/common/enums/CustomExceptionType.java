@@ -33,6 +33,7 @@ public enum CustomExceptionType {
 
     VALIDATION_RANGE("validation.range"),
     VALIDATION_MUST_ADD("validation.mustAdd"),
+    VALIDATION_MAX_SIZE("validation.maxSize"),
     ;
 
     private final String key;

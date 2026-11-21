@@ -70,9 +70,9 @@ public final class JobPositionSearchSpecification {
                     .toList();
                 predicates.add(cb.or(locations.toArray(Predicate[]::new)));
             }
-            addInPredicate(predicates, root.get("employmentTypeId"), search.getEmploymentTypes());
-            addInPredicate(predicates, root.get("workArrangementTypeId"), search.getWorkArrangementTypes());
-            addInPredicate(predicates, root.get("experienceLevelTypeId"), search.getExperienceLevelTypes());
+            addInPredicate(predicates, root.get("employmentType"), search.getEmploymentTypes());
+            addInPredicate(predicates, root.get("workArrangementType"), search.getWorkArrangementTypes());
+            addInPredicate(predicates, root.get("experienceLevelType"), search.getExperienceLevelTypes());
             if (search.getJobPostedDateType() != null) {
                 JobPostedDateType type = Arrays.stream(JobPostedDateType.values())
                     .filter(option -> option.getId().equals(search.getJobPostedDateType()))
