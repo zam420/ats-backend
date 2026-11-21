@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.deepconnect.ats.dto.ApiResult;
 import com.deepconnect.ats.jobapplication.dto.CandidatePipelineRes;
 import com.deepconnect.ats.jobapplication.dto.MoveCandidateReq;
+import com.deepconnect.ats.jobapplication.dto.RejectCandidateReq;
 import com.deepconnect.ats.jobapplication.service.CandidatePipelineService;
 
 import jakarta.validation.Valid;
@@ -42,6 +43,13 @@ public class CandidatePipelineController {
     public ApiResult<Boolean> move(@PathVariable @NotBlank String jobId,
             @PathVariable @NotBlank String candidateId, @RequestBody @Valid MoveCandidateReq request) {
         service.move(jobId, candidateId, request);
+        return ApiResult.success(true);
+    }
+
+    @PostMapping("/{jobId}/candidates/{candidateId}/reject")
+    public ApiResult<Boolean> reject(@PathVariable @NotBlank String jobId,
+            @PathVariable @NotBlank String candidateId, @RequestBody @Valid RejectCandidateReq request) {
+        service.reject(jobId, candidateId, request);
         return ApiResult.success(true);
     }
 }

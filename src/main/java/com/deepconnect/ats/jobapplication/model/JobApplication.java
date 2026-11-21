@@ -24,8 +24,26 @@ public class JobApplication extends BaseEntity {
     @Column(name = "job_position_id", nullable = false)
     private Long jobPositionId;
 
-    @Column(name = "recruitment_pipeline_stage", nullable = false)
+    @Column(name = "recruitment_pipeline_stage")
     private Long recruitmentPipelineStage;
+
+    @Column(nullable = false)
+    private boolean rejected;
+
+    @Column(name = "rejection_reason", length = 2000)
+    private String rejectionReason;
+
+    @Column(name = "consider_for_other_openings")
+    private Boolean considerForOtherOpenings;
+
+    @Column(name = "rejected_at")
+    private LocalDateTime rejectedAt;
+
+    @Column(name = "rejected_stage_name", length = 30)
+    private String rejectedStageName;
+
+    @Column(name = "rejected_stage_type", length = 30)
+    private String rejectedStageType;
 
     @Column(name = "candidate_user_id", nullable = false)
     private Long candidateUserId;

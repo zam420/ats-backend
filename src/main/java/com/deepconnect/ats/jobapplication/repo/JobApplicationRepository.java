@@ -2,6 +2,7 @@ package com.deepconnect.ats.jobapplication.repo;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.repository.query.Param;
 
 import com.deepconnect.ats.jobapplication.model.JobApplication;
@@ -11,9 +12,14 @@ import java.util.Optional;
 
 public interface JobApplicationRepository extends JpaRepository<JobApplication, Long> {
     boolean existsByJobPositionIdAndEmail(Long jobPositionId, String email);
-    boolean existsByRecruitmentPipelineStage(Long stageId);
+    boolean existsByRecruitmentPipelineStageAndRejectedFalse(Long stageId);
     List<JobApplication> findByJobPositionIdOrderByCreatedAtDesc(Long jobPositionId);
     Optional<JobApplication> findByPublicIdAndJobPositionId(String publicId, Long jobPositionId);
+
+    @Modifying
+    @Query("update JobApplication a set a.recruitmentPipelineStage = null "
+            + "where a.rejected = true and a.recruitmentPipelineStage in :stageIds")
+    void clearRejectedStages(@Param("stageIds") Collection<Long> stageIds);
 
     interface PositionCount {
         Long getJobPositionId();

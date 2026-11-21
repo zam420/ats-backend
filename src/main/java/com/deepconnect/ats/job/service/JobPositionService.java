@@ -263,7 +263,7 @@ public class JobPositionService {
             }
         }
         for (JobRecruitmentPipelineRound old : existing) {
-            if (!used.contains(old.getPublicId()) && jobApplicationRepository.existsByRecruitmentPipelineStage(old.getId())) {
+            if (!used.contains(old.getPublicId()) && jobApplicationRepository.existsByRecruitmentPipelineStageAndRejectedFalse(old.getId())) {
                 throw new CustomException(CustomExceptionType.JOB_PIPELINE_OCCUPIED_STAGE);
             }
         }
@@ -271,6 +271,9 @@ public class JobPositionService {
         for (int i = 0; i < existing.size(); i++) existing.get(i).setOrder(-i - 1);
         jobRecruitmentPipelineRoundRepository.saveAllAndFlush(existing);
         List<JobRecruitmentPipelineRound> removed = existing.stream().filter(stage -> !used.contains(stage.getPublicId())).toList();
+        if (!removed.isEmpty()) {
+            jobApplicationRepository.clearRejectedStages(removed.stream().map(JobRecruitmentPipelineRound::getId).toList());
+        }
         position.getRecruitmentPipelineRounds().removeAll(removed);
         jobRecruitmentPipelineRoundRepository.flush();
         List<JobRecruitmentPipelineRound> updated = new ArrayList<>();

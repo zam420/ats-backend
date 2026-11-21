@@ -1,5 +1,6 @@
 package com.deepconnect.ats.jobapplication.service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -19,6 +20,7 @@ import com.deepconnect.ats.job.repo.JobRecruitmentPipelineRoundRepository;
 import com.deepconnect.ats.job.service.JobPositionAccessService;
 import com.deepconnect.ats.jobapplication.dto.CandidatePipelineRes;
 import com.deepconnect.ats.jobapplication.dto.MoveCandidateReq;
+import com.deepconnect.ats.jobapplication.dto.RejectCandidateReq;
 import com.deepconnect.ats.jobapplication.model.JobApplication;
 import com.deepconnect.ats.jobapplication.repo.JobApplicationRepository;
 
@@ -49,17 +51,27 @@ public class CandidatePipelineService {
         List<JobRecruitmentPipelineRound> rounds = stages.findByJobPositionIdOrderByOrderAsc(job.getId());
         List<JobApplication> candidates = applications.findByJobPositionIdOrderByCreatedAtDesc(job.getId());
         Map<Long, List<CandidatePipelineRes.Candidate>> grouped = new HashMap<>();
+        List<CandidatePipelineRes.Candidate> rejected = new ArrayList<>();
         for (JobRecruitmentPipelineRound round : rounds) grouped.put(round.getId(), new ArrayList<>());
         for (JobApplication candidate : candidates) {
+            CandidatePipelineRes.Candidate result = new CandidatePipelineRes.Candidate(candidate.getPublicId(), candidate.getFirstName(),
+                    candidate.getLastName(), candidate.getPreferredName(), candidate.getEmail(), candidate.getCurrentLocation(),
+                    candidate.getCreatedAt(), candidate.getRejectionReason(), candidate.getConsiderForOtherOpenings(),
+                    candidate.getRejectedAt(), candidate.getRejectedStageName(), candidate.getRejectedStageType());
+            if (candidate.isRejected()) {
+                if (candidate.getConsiderForOtherOpenings() == null) {
+                    throw new InternalServerException("Rejected application is missing its consideration preference");
+                }
+                rejected.add(result);
+                continue;
+            }
             List<CandidatePipelineRes.Candidate> group = grouped.get(candidate.getRecruitmentPipelineStage());
             if (group == null) throw new InternalServerException("Application references a missing pipeline stage");
-            group.add(new CandidatePipelineRes.Candidate(candidate.getPublicId(), candidate.getFirstName(),
-                    candidate.getLastName(), candidate.getPreferredName(), candidate.getEmail(), candidate.getCurrentLocation(),
-                    candidate.getCreatedAt()));
+            group.add(result);
         }
-        return new CandidatePipelineRes(job.getPublicId(), job.getTitle(), candidates.size(),
+        return new CandidatePipelineRes(job.getPublicId(), job.getTitle(), candidates.size(), candidates.size() - rejected.size(),
                 rounds.stream().map(round -> new CandidatePipelineRes.Stage(round.getPublicId(), round.getName(),
-                        round.getRoundType().name(), round.getOrder(), grouped.get(round.getId()))).toList());
+                        round.getRoundType().name(), round.getOrder(), grouped.get(round.getId()))).toList(), rejected);
     }
 
     @Transactional
@@ -70,6 +82,7 @@ public class CandidatePipelineService {
         List<JobRecruitmentPipelineRound> rounds = stages.findByJobPositionIdOrderByOrderAsc(job.getId());
         JobApplication application = applications.findByPublicIdAndJobPositionId(candidateId, job.getId())
                 .orElseThrow(() -> new CustomException(CustomExceptionType.JOB_PIPELINE_STALE));
+        if (application.isRejected()) throw new CustomException(CustomExceptionType.JOB_PIPELINE_STALE);
         for (int i = 0; i + 1 < rounds.size(); i++) {
             JobRecruitmentPipelineRound from = rounds.get(i);
             JobRecruitmentPipelineRound to = rounds.get(i + 1);
@@ -81,5 +94,27 @@ public class CandidatePipelineService {
             }
         }
         throw new CustomException(CustomExceptionType.JOB_PIPELINE_STALE);
+    }
+
+    @Transactional
+    public void reject(String jobId, String candidateId, RejectCandidateReq request) {
+        JobPosition job = positions.findForUpdate(jobId, AuthService.getLoggedInTenantId())
+                .orElseThrow(() -> new InternalServerException("Job position not found"));
+        access.assertReadAccess(AuthService.getLoggedInUser(), job);
+        JobApplication application = applications.findByPublicIdAndJobPositionId(candidateId, job.getId())
+                .orElseThrow(() -> new CustomException(CustomExceptionType.JOB_PIPELINE_STALE));
+        if (application.isRejected()) throw new CustomException(CustomExceptionType.JOB_PIPELINE_STALE);
+        JobRecruitmentPipelineRound stage = stages.findByJobPositionIdOrderByOrderAsc(job.getId()).stream()
+                .filter(round -> round.getPublicId().equals(request.stageId())
+                        && round.getId().equals(application.getRecruitmentPipelineStage()))
+                .findFirst().orElseThrow(() -> new CustomException(CustomExceptionType.JOB_PIPELINE_STALE));
+        String reason = request.reason() == null ? null : request.reason().trim();
+        application.setRejected(true);
+        application.setRejectionReason(reason == null || reason.isEmpty() ? null : reason);
+        application.setConsiderForOtherOpenings(request.considerForOtherOpenings());
+        application.setRejectedAt(LocalDateTime.now());
+        application.setRejectedStageName(stage.getName());
+        application.setRejectedStageType(stage.getRoundType().name());
+        applications.save(application);
     }
 }

@@ -22,6 +22,7 @@ import com.deepconnect.ats.job.repo.JobPositionRepository;
 import com.deepconnect.ats.job.repo.JobRecruitmentPipelineRoundRepository;
 import com.deepconnect.ats.job.service.JobPositionAccessService;
 import com.deepconnect.ats.jobapplication.dto.MoveCandidateReq;
+import com.deepconnect.ats.jobapplication.dto.RejectCandidateReq;
 import com.deepconnect.ats.jobapplication.model.JobApplication;
 import com.deepconnect.ats.jobapplication.repo.JobApplicationRepository;
 import com.deepconnect.ats.recruitmentpipeline.enums.RecruitmentPipelineRoundType;
@@ -60,6 +61,7 @@ class CandidatePipelineServiceTest {
         stage.setPublicId(publicId);
         stage.setOrder(id.intValue() - 10);
         stage.setRoundType(RecruitmentPipelineRoundType.APPLIED);
+        stage.setName("Stage " + publicId);
         return stage;
     }
 
@@ -78,6 +80,55 @@ class CandidatePipelineServiceTest {
         assertThrows(CustomException.class, () -> service.move("job", "candidate", new MoveCandidateReq("b", "c")));
         assertEquals(10L, application.getRecruitmentPipelineStage());
         verify(applications, never()).save(any());
+    }
+
+    @Test
+    void recordsRejectionAndPreventsFurtherMoves() {
+        service.reject("job", "candidate", new RejectCandidateReq("a", "  Not a fit  ", true));
+        assertTrue(application.isRejected());
+        assertEquals("Not a fit", application.getRejectionReason());
+        assertEquals(Boolean.TRUE, application.getConsiderForOtherOpenings());
+        assertEquals(10L, application.getRecruitmentPipelineStage());
+        assertEquals("Stage a", application.getRejectedStageName());
+        assertEquals("APPLIED", application.getRejectedStageType());
+        assertNotNull(application.getRejectedAt());
+        assertThrows(CustomException.class, () -> service.move("job", "candidate", new MoveCandidateReq("a", "b")));
+        assertThrows(CustomException.class, () -> service.reject("job", "candidate", new RejectCandidateReq("a", null, false)));
+        verify(applications, times(1)).save(application);
+    }
+
+    @Test
+    void rejectsStaleRejectionWithoutModifyingApplication() {
+        assertThrows(CustomException.class, () -> service.reject("job", "candidate", new RejectCandidateReq("b", null, false)));
+        assertFalse(application.isRejected());
+        verify(applications, never()).save(any());
+    }
+
+    @Test
+    void showsRejectedCandidatesSeparatelyAndCountsOnlyActivePipelineCandidates() {
+        JobPosition job = new JobPosition();
+        job.setId(5L);
+        job.setPublicId("job");
+        when(positions.findByPublicIdAndTenantIdAndDeactivatedFalse("job", 2L)).thenReturn(Optional.of(job));
+        JobApplication rejected = new JobApplication();
+        rejected.setRejected(true);
+        rejected.setConsiderForOtherOpenings(false);
+        rejected.setRejectionReason("Experience");
+        rejected.setRejectedStageName("Original stage");
+        rejected.setRejectedStageType("SCREENING");
+        rejected.setRejectedAt(LocalDateTime.of(2026, 11, 20, 12, 0));
+        rejected.setRecruitmentPipelineStage(null);
+        when(applications.findByJobPositionIdOrderByCreatedAtDesc(5L)).thenReturn(List.of(application, rejected));
+        var result = service.board("job");
+        assertEquals(2, result.totalApplications());
+        assertEquals(1, result.pipelineCount());
+        assertEquals(1, result.stages().get(0).candidates().size());
+        assertEquals(1, result.rejectedCandidates().size());
+        assertEquals("Experience", result.rejectedCandidates().get(0).rejectionReason());
+        assertEquals(Boolean.FALSE, result.rejectedCandidates().get(0).considerForOtherOpenings());
+        assertEquals("Original stage", result.rejectedCandidates().get(0).rejectedStageName());
+        assertEquals("SCREENING", result.rejectedCandidates().get(0).rejectedStageType());
+        assertEquals(rejected.getRejectedAt(), result.rejectedCandidates().get(0).rejectedAt());
     }
 
     @Test

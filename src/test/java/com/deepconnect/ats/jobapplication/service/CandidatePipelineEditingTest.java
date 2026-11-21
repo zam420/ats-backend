@@ -87,7 +87,7 @@ class CandidatePipelineEditingTest {
     @Test
     void preventsRemovingAnOccupiedStage() {
         request.setRecruitmentPipelineRounds(List.of(stage(null, "applied", RecruitmentPipelineRoundType.APPLIED, 0, "Applied")));
-        when(applications.existsByRecruitmentPipelineStage(11L)).thenReturn(true);
+        when(applications.existsByRecruitmentPipelineStageAndRejectedFalse(11L)).thenReturn(true);
         CustomException error = assertThrows(CustomException.class, () -> service.update(request));
         assertEquals(CustomException.getFullMessageKey(CustomExceptionType.JOB_PIPELINE_OCCUPIED_STAGE), error.getMessageKey());
         verify(stages, never()).saveAllAndFlush(any());
@@ -103,5 +103,13 @@ class CandidatePipelineEditingTest {
         assertEquals("Review", screening.getName());
         assertEquals(1, screening.getOrder());
         assertTrue(job.getRecruitmentPipelineRounds().contains(screening));
+    }
+
+    @Test
+    void clearsRejectedReferencesBeforeRemovingAnEmptyStage() {
+        request.setRecruitmentPipelineRounds(List.of(stage(null, "applied", RecruitmentPipelineRoundType.APPLIED, 0, "Applied")));
+        service.update(request);
+        verify(applications).clearRejectedStages(List.of(11L));
+        assertFalse(job.getRecruitmentPipelineRounds().contains(screening));
     }
 }
