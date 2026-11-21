@@ -1,4 +1,4 @@
-package com.deepconnect.ats.job.service;
+package com.deepconnect.ats.jobapplication.service;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -24,15 +24,15 @@ import com.deepconnect.ats.auth.service.AuthService;
 import com.deepconnect.ats.common.enums.CustomExceptionType;
 import com.deepconnect.ats.common.exception.CustomException;
 import com.deepconnect.ats.common.exception.InternalServerException;
-import com.deepconnect.ats.job.dto.JobApplicationReq;
 import com.deepconnect.ats.job.enums.JobStatus;
-import com.deepconnect.ats.job.model.JobApplication;
-import com.deepconnect.ats.job.model.JobApplicationScreeningQuestionAnswer;
 import com.deepconnect.ats.job.model.JobPosition;
 import com.deepconnect.ats.job.model.JobScreeningQuestion;
-import com.deepconnect.ats.job.repo.JobApplicationAnswerRepository;
-import com.deepconnect.ats.job.repo.JobApplicationRepository;
 import com.deepconnect.ats.job.repo.JobPositionRepository;
+import com.deepconnect.ats.jobapplication.dto.JobApplicationReq;
+import com.deepconnect.ats.jobapplication.model.JobApplication;
+import com.deepconnect.ats.jobapplication.model.JobApplicationScreeningQuestionAnswer;
+import com.deepconnect.ats.jobapplication.repo.JobApplicationAnswerRepository;
+import com.deepconnect.ats.jobapplication.repo.JobApplicationRepository;
 import com.deepconnect.ats.screeningquestionsform.enums.ScreeningQuestionType;
 
 import lombok.RequiredArgsConstructor;

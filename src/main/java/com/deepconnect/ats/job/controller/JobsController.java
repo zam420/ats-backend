@@ -7,6 +7,8 @@ import com.deepconnect.ats.dto.ApiResult;
 import com.deepconnect.ats.dto.AtsPageQuery;
 import com.deepconnect.ats.dto.AtsPageRsp;
 import com.deepconnect.ats.job.service.JobPositionService;
+import com.deepconnect.ats.jobapplication.dto.JobApplicationReq;
+import com.deepconnect.ats.jobapplication.service.JobApplicationService;
 import com.deepconnect.ats.job.dto.JobPositionSearchQuery;
 import com.deepconnect.ats.job.dto.JobPositionSummaryResForCandidate;
 
@@ -21,8 +23,7 @@ import com.deepconnect.ats.tenant.service.TenantLogoStorage;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
-import com.deepconnect.ats.job.dto.JobApplicationReq;
-import com.deepconnect.ats.job.service.JobApplicationService;
+
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.io.IOException;

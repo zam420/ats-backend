@@ -1,4 +1,4 @@
-package com.deepconnect.ats.job.dto;
+package com.deepconnect.ats.jobapplication.dto;
 
 import java.util.List;
 

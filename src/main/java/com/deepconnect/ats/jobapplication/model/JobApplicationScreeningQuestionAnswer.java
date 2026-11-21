@@ -1,4 +1,4 @@
-package com.deepconnect.ats.job.model;
+package com.deepconnect.ats.jobapplication.model;
 
 import java.util.List;
 
