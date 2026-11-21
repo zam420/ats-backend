@@ -36,6 +36,7 @@ import com.deepconnect.ats.job.dto.JobPositionResForCandidate;
 import com.deepconnect.ats.screeningquestionsform.enums.ScreeningQuestionType;
 import com.deepconnect.ats.screeningquestionsform.service.ScreeningQuestionHelper;
 import com.deepconnect.ats.common.utils.StringUtils;
+import com.deepconnect.ats.common.utils.Validation;
 import com.deepconnect.ats.common.enums.ValidationFieldType;
 import com.deepconnect.ats.screeningquestionsform.service.ScreeningQuestionsFormService;
 import com.deepconnect.ats.job.dto.JobFiltersResForCandidate;
@@ -114,42 +115,34 @@ public class JobPositionService {
 
         position = jobPositionRepository.save(position);
         if (evaluationPlanRoundsChanged){
-            if(CollectionUtils.isEmpty(req.getEvaluationPlanRounds())) {
-                throw new ValidationException(CustomExceptionType.VALIDATION_MUST_ADD, ValidationFieldType.EVALUATION_PLAN_ROUND);
+            Validation.validateMustAdd(ValidationFieldType.EVALUATION_PLAN_ROUND, req.getEvaluationPlanRounds());
+            if (req.getEvaluationPlanRounds().size() > maxRounds) {
+                throw new InternalServerException(String.format("Too many rounds. User: %s. Plan: %s. Rounds: %d", loggedInUser.getPublicId(), position.getPublicId(), req.getEvaluationPlanRounds().size()));
             }
-            else{
-                if (req.getEvaluationPlanRounds().size() > maxRounds) {
-                    throw new InternalServerException(String.format("Too many rounds. User: %s. Plan: %s. Rounds: %d", loggedInUser.getPublicId(), position.getPublicId(), req.getEvaluationPlanRounds().size()));
+            for (JobEvaluationPlanRound roundTemplate : req.getEvaluationPlanRounds()) {
+                roundTemplate.setJobPosition(position);
+                roundTemplate.setJobPositionId(position.getId());
+                if(!StringUtils.hasText(roundTemplate.getName())) {
+                    roundTemplate.setName(enumsResService.from(roundTemplate.getRoundType()).getName());
                 }
-                for (JobEvaluationPlanRound roundTemplate : req.getEvaluationPlanRounds()) {
-                    roundTemplate.setJobPosition(position);
-                    roundTemplate.setJobPositionId(position.getId());
-                    if(!StringUtils.hasText(roundTemplate.getName())) {
-                        roundTemplate.setName(enumsResService.from(roundTemplate.getRoundType()).getName());
-                    }
-                }
-                jobEvaluationPlanRoundRepository.saveAll(req.getEvaluationPlanRounds());
             }
+            jobEvaluationPlanRoundRepository.saveAll(req.getEvaluationPlanRounds());
         }
 
         if (recruitmentPipelineRoundsChanged) {
-            if(CollectionUtils.isEmpty(req.getRecruitmentPipelineRounds())) {
-                throw new ValidationException(CustomExceptionType.VALIDATION_MUST_ADD, ValidationFieldType.RECRUITMENT_PIPELINE_STAGE);
+            Validation.validateMustAdd(ValidationFieldType.RECRUITMENT_PIPELINE_STAGE, req.getRecruitmentPipelineRounds());
+            if (req.getRecruitmentPipelineRounds().size() > maxRounds) {
+                throw new InternalServerException(String.format("Too many rounds. User: %s. Position: %s. Rounds: %d", loggedInUser.getPublicId(), position.getPublicId(), req.getRecruitmentPipelineRounds().size()));
             }
-            else{
-                if (req.getRecruitmentPipelineRounds().size() > maxRounds) {
-                    throw new InternalServerException(String.format("Too many rounds. User: %s. Position: %s. Rounds: %d", loggedInUser.getPublicId(), position.getPublicId(), req.getRecruitmentPipelineRounds().size()));
+            RecruitmentPipelineRoundHelper.assertRoundTypeOrder(req.getRecruitmentPipelineRounds(), loggedInUser.getPublicId(), position.getPublicId());
+            for (JobRecruitmentPipelineRound roundTemplate : req.getRecruitmentPipelineRounds()) {
+                roundTemplate.setJobPosition(position);
+                roundTemplate.setJobPositionId(position.getId());
+                if(!StringUtils.hasText(roundTemplate.getName())) {
+                    roundTemplate.setName(enumsResService.from(roundTemplate.getRoundType()).getName());
                 }
-                RecruitmentPipelineRoundHelper.assertRoundTypeOrder(req.getRecruitmentPipelineRounds(), loggedInUser.getPublicId(), position.getPublicId());
-                for (JobRecruitmentPipelineRound roundTemplate : req.getRecruitmentPipelineRounds()) {
-                    roundTemplate.setJobPosition(position);
-                    roundTemplate.setJobPositionId(position.getId());
-                    if(!StringUtils.hasText(roundTemplate.getName())) {
-                        roundTemplate.setName(enumsResService.from(roundTemplate.getRoundType()).getName());
-                    }
-                }
-                jobRecruitmentPipelineRoundRepository.saveAll(req.getRecruitmentPipelineRounds());
             }
+            jobRecruitmentPipelineRoundRepository.saveAll(req.getRecruitmentPipelineRounds());
         }
 
         if (screeningQuestionsChanged && !CollectionUtils.isEmpty(req.getScreeningQuestions())) {

@@ -22,6 +22,7 @@ import com.deepconnect.ats.user.service.UserServiceV2;
 import com.deepconnect.ats.common.dto.EnumsExtendedRes;
 import com.deepconnect.ats.common.enums.AccessType;
 import com.deepconnect.ats.common.utils.StringUtils;
+import com.deepconnect.ats.common.utils.Validation;
 import com.deepconnect.ats.common.utils.HashMapUtils;
 import com.deepconnect.ats.recruitmentpipeline.model.RecruitmentPipelineShare;
 import com.deepconnect.ats.common.enums.CustomExceptionType;
@@ -62,9 +63,7 @@ public class RecruitmentPipelineService {
     }
 
     private String save(RecruitmentPipeline plan, RecruitmentPipelineReq req, boolean roundsChanged, boolean sharedWithUsersChanged, boolean isPublicForTenant, boolean isPublicForAll) {
-        if(CollectionUtils.isEmpty(req.getRounds())){
-            throw new ValidationException(CustomExceptionType.VALIDATION_MUST_ADD, ValidationFieldType.RECRUITMENT_PIPELINE_STAGE);
-        }
+        Validation.validateMustAdd(ValidationFieldType.RECRUITMENT_PIPELINE_STAGE, req.getRounds());
         LoggedInUserDetails loggedInUser = AuthService.getLoggedInUser();
         plan.setModifiedByUserId(loggedInUser.getUserId());
         plan.setModifiedByUserPublicId(loggedInUser.getPublicId());

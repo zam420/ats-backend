@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Value;
 import com.deepconnect.ats.common.enums.ValidationFieldType;
 import com.deepconnect.ats.common.exception.ValidationException;
 import com.deepconnect.ats.common.service.EnumsResService;
+import com.deepconnect.ats.common.utils.Validation;
 import com.deepconnect.ats.common.enums.CustomExceptionType;
 import com.deepconnect.ats.screeningquestionsform.repo.ScreeningQuestionsFormRepository;
 import com.deepconnect.ats.screeningquestionsform.repo.ScreeningQuestionRepository;
@@ -73,9 +74,7 @@ public class ScreeningQuestionsFormService {
         if(isPublicForTenant && !CollectionUtils.isEmpty(req.getSharedWithUserIds())) {
             throw new InternalServerException(String.format("Cannot specify both isPublicForTenant and sharedWithUserIds. User: %s, Plan: %s", loggedInUser.getPublicId(), template.getPublicId()));
         }
-        if(CollectionUtils.isEmpty(req.getQuestions())){
-            throw new ValidationException(CustomExceptionType.VALIDATION_MUST_ADD, ValidationFieldType.EVALUATION_PLAN_ROUND);
-        }
+        Validation.validateMustAdd(ValidationFieldType.SCREENING_QUESTION, req.getQuestions());
         template.setModifiedByUserId(loggedInUser.getUserId());
         template.setModifiedByUserPublicId(loggedInUser.getPublicId());
         template.setName(req.getName());

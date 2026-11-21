@@ -23,6 +23,7 @@ import com.deepconnect.ats.user.service.UserServiceV2;
 import com.deepconnect.ats.common.dto.EnumsExtendedRes;
 import com.deepconnect.ats.common.enums.AccessType;
 import com.deepconnect.ats.common.utils.StringUtils;
+import com.deepconnect.ats.common.utils.Validation;
 import com.deepconnect.ats.common.utils.HashMapUtils;
 import org.springframework.beans.factory.annotation.Value;
 import com.deepconnect.ats.common.enums.ValidationFieldType;
@@ -71,9 +72,7 @@ public class EvaluationPlanService {
         if(isPublicForTenant && !CollectionUtils.isEmpty(req.getSharedWithUserIds())) {
             throw new InternalServerException(String.format("Cannot specify both isPublicForTenant and sharedWithUserIds. User: %s, Plan: %s", loggedInUser.getPublicId(), plan.getPublicId()));
         }
-        if(CollectionUtils.isEmpty(req.getRounds())){
-            throw new ValidationException(CustomExceptionType.VALIDATION_MUST_ADD, ValidationFieldType.EVALUATION_PLAN_ROUND);
-        }
+        Validation.validateMustAdd(ValidationFieldType.EVALUATION_PLAN_ROUND, req.getRounds());
         plan.setModifiedByUserId(loggedInUser.getUserId());
         plan.setModifiedByUserPublicId(loggedInUser.getPublicId());
         plan.setName(req.getName());

@@ -1,10 +1,20 @@
 package com.deepconnect.ats.common.utils;
 
 import com.deepconnect.ats.common.enums.ValidationFieldType;
+import java.util.List;
+
+import org.springframework.util.CollectionUtils;
+
 import com.deepconnect.ats.common.enums.CustomExceptionType;
 import com.deepconnect.ats.common.exception.ValidationException;
 
 public class Validation {
+
+    public static <T> void validateMustAdd(ValidationFieldType validationFieldType, List<T> valueToValidate) {
+        if(CollectionUtils.isEmpty(valueToValidate)) {
+            throw new ValidationException(CustomExceptionType.VALIDATION_MUST_ADD, validationFieldType);
+        }
+    }
 
     public static void validateMaxSize(ValidationFieldType validationFieldType, int maxSize, int valueToValidate) {
         if (valueToValidate > maxSize) {
