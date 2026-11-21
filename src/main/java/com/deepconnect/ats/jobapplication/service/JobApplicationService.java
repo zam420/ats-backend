@@ -27,7 +27,10 @@ import com.deepconnect.ats.common.exception.InternalServerException;
 import com.deepconnect.ats.job.enums.JobStatus;
 import com.deepconnect.ats.job.model.JobPosition;
 import com.deepconnect.ats.job.model.JobScreeningQuestion;
+import com.deepconnect.ats.job.model.JobRecruitmentPipelineRound;
 import com.deepconnect.ats.job.repo.JobPositionRepository;
+import com.deepconnect.ats.job.repo.JobRecruitmentPipelineRoundRepository;
+import com.deepconnect.ats.recruitmentpipeline.enums.RecruitmentPipelineRoundType;
 import com.deepconnect.ats.jobapplication.dto.JobApplicationReq;
 import com.deepconnect.ats.jobapplication.model.JobApplication;
 import com.deepconnect.ats.jobapplication.model.JobApplicationScreeningQuestionAnswer;
@@ -46,6 +49,7 @@ public class JobApplicationService {
     private final JobPositionRepository positions;
     private final JobApplicationRepository applications;
     private final JobApplicationAnswerRepository answers;
+    private final JobRecruitmentPipelineRoundRepository stages;
 
     @Value("${ats.storage.root:./uploads}")
     private String storageRoot;
@@ -58,6 +62,10 @@ public class JobApplicationService {
         String email = request.getEmail().trim().toLowerCase(Locale.ROOT);
         if (applications.existsByJobPositionIdAndEmail(job.getId(), email)) {
             throw new CustomException(CustomExceptionType.JOB_APPLICATION_DUPLICATE);
+        }
+        List<JobRecruitmentPipelineRound> rounds = stages.findByJobPositionIdOrderByOrderAsc(job.getId());
+        if (rounds.isEmpty() || rounds.get(0).getRoundType() != RecruitmentPipelineRoundType.APPLIED) {
+            throw new CustomException(CustomExceptionType.JOB_PIPELINE_INVALID);
         }
         List<JobApplicationScreeningQuestionAnswer> validated = validateAnswers(job, request.getAnswers());
         String originalName = resume == null ? "" : resume.getOriginalFilename();
@@ -100,6 +108,7 @@ public class JobApplicationService {
         });
         JobApplication application = new JobApplication();
         application.setJobPositionId(job.getId());
+        application.setRecruitmentPipelineStage(rounds.get(0).getId());
         application.setCandidateUserId(AuthService.getLoggedInUser().getUserId());
         application.setFirstName(request.getFirstName().trim());
         application.setLastName(request.getLastName().trim());

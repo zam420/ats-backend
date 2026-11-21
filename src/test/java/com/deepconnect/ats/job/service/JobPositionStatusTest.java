@@ -24,6 +24,7 @@ import com.deepconnect.ats.job.repo.JobEvaluationPlanRoundRepository;
 import com.deepconnect.ats.job.repo.JobPositionRepository;
 import com.deepconnect.ats.job.repo.JobRecruitmentPipelineRoundRepository;
 import com.deepconnect.ats.job.repo.JobScreeningQuestionRepository;
+import com.deepconnect.ats.jobapplication.repo.JobApplicationRepository;
 import com.deepconnect.ats.recruitmentpipeline.service.RecruitmentPipelineService;
 import com.deepconnect.ats.screeningquestionsform.service.ScreeningQuestionsFormService;
 import com.deepconnect.ats.user.service.UserServiceV2;
@@ -42,7 +43,7 @@ class JobPositionStatusTest {
             mock(ScreeningQuestionsFormService.class), mock(UserServiceV2.class), 
             enumResService, positions,
             mock(JobEvaluationPlanRoundRepository.class), mock(JobRecruitmentPipelineRoundRepository.class),
-            mock(JobScreeningQuestionRepository.class));
+            mock(JobScreeningQuestionRepository.class), mock(JobApplicationRepository.class));
     private final JobPosition position = new JobPosition();
     private final JobPositionReq req = new JobPositionReq();
 

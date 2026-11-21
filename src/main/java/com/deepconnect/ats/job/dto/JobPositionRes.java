@@ -38,6 +38,7 @@ public class JobPositionRes {
     private List<EvaluationRound> evaluationPlanRounds;
     private JobStatus status;
     private String ownerId;
+    private long applicationCount;
 
     public record ScreeningQuestion(Long id, String publicId, Long jobPositionId, String label,
             String description, List<String> options, String defaultOption, Boolean isMandatory,

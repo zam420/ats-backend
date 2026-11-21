@@ -30,6 +30,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import com.deepconnect.ats.job.repo.JobEvaluationPlanRoundRepository;
 import com.deepconnect.ats.job.repo.JobRecruitmentPipelineRoundRepository;
 import com.deepconnect.ats.job.repo.JobScreeningQuestionRepository;
+import com.deepconnect.ats.jobapplication.repo.JobApplicationRepository;
 
 class JobRichTextWriteTest {
     private final EvaluationPlanService plans = mock(EvaluationPlanService.class);
@@ -40,7 +41,7 @@ class JobRichTextWriteTest {
             mock(UserServiceV2.class), mock(EnumsResService.class),
             positions, 
             mock(JobEvaluationPlanRoundRepository.class), mock(JobRecruitmentPipelineRoundRepository.class), 
-            mock(JobScreeningQuestionRepository.class));
+            mock(JobScreeningQuestionRepository.class), mock(JobApplicationRepository.class));
 
     @AfterEach
     void clearAuthentication() {

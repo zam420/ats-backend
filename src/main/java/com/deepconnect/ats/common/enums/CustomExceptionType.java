@@ -30,6 +30,9 @@ public enum CustomExceptionType {
     JOB_APPLICATION_INVALID("jobApplicationInvalid"),
     JOB_APPLICATION_STALE("jobApplicationStale"),
     JOB_APPLICATION_CLOSED("jobApplicationClosed"),
+    JOB_PIPELINE_OCCUPIED_STAGE("jobPipelineOccupiedStage"),
+    JOB_PIPELINE_INVALID("jobPipelineInvalid"),
+    JOB_PIPELINE_STALE("jobPipelineStale"),
 
     VALIDATION_RANGE("validation.range"),
     VALIDATION_MUST_ADD("validation.mustAdd"),

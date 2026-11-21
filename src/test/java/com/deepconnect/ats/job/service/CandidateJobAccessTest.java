@@ -7,6 +7,7 @@ import com.deepconnect.ats.job.enums.JobStatus;
 import com.deepconnect.ats.job.model.JobPosition;
 import com.deepconnect.ats.job.dto.JobPositionSearchQuery;
 import com.deepconnect.ats.job.repo.*;
+import com.deepconnect.ats.jobapplication.repo.JobApplicationRepository;
 import com.deepconnect.ats.recruitmentpipeline.service.RecruitmentPipelineService;
 import com.deepconnect.ats.screeningquestionsform.service.ScreeningQuestionsFormService;
 import com.deepconnect.ats.tenant.model.Tenant;
@@ -33,7 +34,7 @@ class CandidateJobAccessTest {
         mock(EvaluationPlanService.class), mock(RecruitmentPipelineService.class), mock(JobPositionAccessService.class),
         mock(ScreeningQuestionsFormService.class), mock(UserServiceV2.class), mock(EnumsResService.class),
         positions, mock(JobEvaluationPlanRoundRepository.class),
-        mock(JobRecruitmentPipelineRoundRepository.class), mock(JobScreeningQuestionRepository.class));
+        mock(JobRecruitmentPipelineRoundRepository.class), mock(JobScreeningQuestionRepository.class), mock(JobApplicationRepository.class));
 
     @AfterEach
     void clearAuthentication() {

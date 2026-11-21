@@ -24,6 +24,9 @@ public class JobApplication extends BaseEntity {
     @Column(name = "job_position_id", nullable = false)
     private Long jobPositionId;
 
+    @Column(name = "recruitment_pipeline_stage", nullable = false)
+    private Long recruitmentPipelineStage;
+
     @Column(name = "candidate_user_id", nullable = false)
     private Long candidateUserId;
 
