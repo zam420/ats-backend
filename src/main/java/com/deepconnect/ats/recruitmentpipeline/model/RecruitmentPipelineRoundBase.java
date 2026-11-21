@@ -7,6 +7,7 @@ import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 import com.deepconnect.ats.common.model.BaseEntity;
+import com.deepconnect.ats.recruitmentpipeline.enums.RecruitmentPipelineRoundType;
 
 @Getter
 @Setter
@@ -24,13 +25,10 @@ public abstract class RecruitmentPipelineRoundBase extends BaseEntity {
     @Length(max = 100, message = "{field.recruitmentPipelineRound.description}{validation.lengthMax}")
     private String description;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "roundType", referencedColumnName = "id", insertable = false, updatable = false)
-    private RecruitmentPipelineRoundType recruitmentPipelineRoundType; // The type of the round. Can be changed.
-
+    @Enumerated(EnumType.STRING)
     @Column(name = "roundType", nullable = false)
     @NotNull(message = "{field.recruitmentPipelineRound.roundType}{validation.notBlank}")
-    private Integer roundType;
+    private RecruitmentPipelineRoundType roundType;
 
     @Column(name = "`order`", nullable = false)
     @NotNull(message = "{field.recruitmentPipelineRound.order}{validation.notBlank}")

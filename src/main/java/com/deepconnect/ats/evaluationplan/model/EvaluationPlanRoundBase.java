@@ -9,6 +9,7 @@ import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
 import com.deepconnect.ats.common.model.BaseEntity;
+import com.deepconnect.ats.evaluationplan.enums.EvaluationPlanRoundType;
 
 import java.util.List;
 
@@ -28,13 +29,10 @@ public abstract class EvaluationPlanRoundBase extends BaseEntity {
     @Length(max = 100, message = "{field.evaluationPlanRound.description}{validation.lengthMax}")
     private String description;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "roundType", referencedColumnName = "id", insertable = false, updatable = false)
-    private EvaluationPlanRoundType evaluationPlanRoundType; 
-
     @Column(name = "roundType", nullable = false)
     @NotNull(message = "{field.evaluationPlanRound.roundType}{validation.notBlank}")
-    private Integer roundType;
+    @Enumerated(EnumType.STRING)
+    private EvaluationPlanRoundType roundType; 
 
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "json")

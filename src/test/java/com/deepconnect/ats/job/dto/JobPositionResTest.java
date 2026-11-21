@@ -10,8 +10,8 @@ import com.deepconnect.ats.job.model.JobPosition;
 import com.deepconnect.ats.job.model.JobRecruitmentPipelineRound;
 import com.deepconnect.ats.job.model.JobEvaluationPlanRound;
 import com.deepconnect.ats.job.model.JobScreeningQuestion;
-import com.deepconnect.ats.recruitmentpipeline.model.RecruitmentPipelineRoundType;
-import com.deepconnect.ats.evaluationplan.model.EvaluationPlanRoundType;
+import com.deepconnect.ats.recruitmentpipeline.enums.RecruitmentPipelineRoundType;
+import com.deepconnect.ats.evaluationplan.enums.EvaluationPlanRoundType;
 import com.deepconnect.ats.screeningquestionsform.enums.ScreeningQuestionType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
@@ -31,19 +31,15 @@ class JobPositionResTest {
 
     @Test
     void nestedJobDataSerializesWithoutAccessingLazyTypes() {
-        var recruitmentType = mock(RecruitmentPipelineRoundType.class);
-        var evaluationType = mock(EvaluationPlanRoundType.class);
         var recruitment = new JobRecruitmentPipelineRound();
         recruitment.setId(11L);
-        recruitment.setRoundType(1);
+        recruitment.setRoundType(RecruitmentPipelineRoundType.SCREENING);
         recruitment.setName("Screen");
         recruitment.setOrder(0);
-        recruitment.setRecruitmentPipelineRoundType(recruitmentType);
         var evaluation = new JobEvaluationPlanRound();
-        evaluation.setRoundType(2);
+        evaluation.setRoundType(EvaluationPlanRoundType.EXECUTIVE);
         evaluation.setInterviewers(List.of("interviewer"));
         evaluation.setOrder(1);
-        evaluation.setEvaluationPlanRoundType(evaluationType);
         var question = new JobScreeningQuestion();
         question.setLabel("Question");
         question.setScreeningQuestionType(ScreeningQuestionType.CHECKBOX);

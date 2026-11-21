@@ -54,7 +54,7 @@ public class JobPositionResForCandidate {
             String description, Integer roundType, Integer order) {
         static RecruitmentRound from(JobRecruitmentPipelineRound round) {
             return new RecruitmentRound(round.getId(), round.getPublicId(), round.getJobPositionId(),
-                round.getName(), round.getDescription(), round.getRoundType(), round.getOrder());
+                round.getName(), round.getDescription(), round.getRoundType().getId(), round.getOrder());
         }
     }
 
@@ -62,7 +62,7 @@ public class JobPositionResForCandidate {
             String description, Integer roundType, List<String> interviewers, Integer order) {
         static EvaluationRound from(JobEvaluationPlanRound round) {
             return new EvaluationRound(round.getId(), round.getPublicId(), round.getJobPositionId(),
-                round.getName(), round.getDescription(), round.getRoundType(), round.getInterviewers(), round.getOrder());
+                round.getName(), round.getDescription(), round.getRoundType().getId(), round.getInterviewers(), round.getOrder());
         }
     }
     

@@ -4,6 +4,7 @@ import lombok.Data;
 
 import java.util.List;
 
+import com.deepconnect.ats.recruitmentpipeline.enums.RecruitmentPipelineRoundType;
 import com.deepconnect.ats.recruitmentpipeline.model.RecruitmentPipelineRound;
 
 @Data
@@ -11,7 +12,7 @@ public class RecruitmentPipelineRoundRes {
     private String id;
     private String name;
     private String description;
-    private Integer roundType;
+    private RecruitmentPipelineRoundType roundType;
     private List<String> interviewers;
     private Integer order;
 

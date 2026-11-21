@@ -5,13 +5,14 @@ import lombok.Data;
 import java.util.List;
 
 import com.deepconnect.ats.evaluationplan.model.EvaluationPlanRound;
+import com.deepconnect.ats.evaluationplan.enums.EvaluationPlanRoundType;
 
 @Data
 public class EvaluationPlanRoundRes {
     private String id;
     private String name;
     private String description;
-    private Integer roundType;
+    private EvaluationPlanRoundType roundType;
     private List<String> interviewers;
     private Integer order;
 

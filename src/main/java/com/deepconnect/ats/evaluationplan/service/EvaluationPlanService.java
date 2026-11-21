@@ -2,7 +2,6 @@ package com.deepconnect.ats.evaluationplan.service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
-import com.deepconnect.ats.evaluationplan.repo.EvaluationPlanRoundTypeRepository;
 import com.deepconnect.ats.auth.dto.LoggedInUserDetails;
 import com.deepconnect.ats.auth.service.AuthService;
 import com.deepconnect.ats.common.exception.InternalServerException;
@@ -12,20 +11,23 @@ import com.deepconnect.ats.evaluationplan.repo.EvaluationPlanRepository;
 import com.deepconnect.ats.dto.AtsPageQuery;
 import com.deepconnect.ats.dto.AtsPageRsp;
 import com.deepconnect.ats.evaluationplan.dto.EvaluationPlanRes;
+import com.deepconnect.ats.evaluationplan.enums.EvaluationPlanRoundType;
 import com.deepconnect.ats.evaluationplan.dto.EvaluationPlanDetailsRes;
 import com.deepconnect.ats.evaluationplan.model.EvaluationPlanRound;
-import com.deepconnect.ats.evaluationplan.model.EvaluationPlanRoundType;
 import com.deepconnect.ats.evaluationplan.repo.EvaluationPlanRoundRepository;
 import com.deepconnect.ats.evaluationplan.model.EvaluationPlanShare;
 import com.deepconnect.ats.evaluationplan.repo.EvaluationPlanShareRepository;
+import com.deepconnect.ats.job.enums.JobEmploymentType;
 import com.deepconnect.ats.user.model.User;
 import com.deepconnect.ats.user.service.UserServiceV2;
+import com.deepconnect.ats.common.dto.EnumsExtendedRes;
 import com.deepconnect.ats.common.enums.AccessType;
 import com.deepconnect.ats.common.utils.StringUtils;
 import com.deepconnect.ats.common.utils.HashMapUtils;
 import org.springframework.beans.factory.annotation.Value;
 import com.deepconnect.ats.common.enums.ValidationFieldType;
 import com.deepconnect.ats.common.exception.ValidationException;
+import com.deepconnect.ats.common.service.EnumsResService;
 import com.deepconnect.ats.common.enums.CustomExceptionType;
 import com.deepconnect.ats.common.exception.CustomException;
 
@@ -48,16 +50,16 @@ public class EvaluationPlanService {
     @Value("${plans.maxRounds}")
     private int maxRounds;
 
+    private final EnumsResService enumsResService;
     private final UserServiceV2 userService;
     private final EvaluationPlanAccessService evaluationPlanAccessService;
 
     private final EvaluationPlanRepository evaluationPlanRepository;
     private final EvaluationPlanRoundRepository evaluationPlanRoundRepository;
-    private final EvaluationPlanRoundTypeRepository evaluationPlanRoundTypeRepository;
     private final EvaluationPlanShareRepository evaluationPlanShareRepository;
 
-    public List<EvaluationPlanRoundType> findAllRoundTypes() {
-        return evaluationPlanRoundTypeRepository.findAll();
+    public List<EnumsExtendedRes> findAllRoundTypes() {
+        return enumsResService.from(EvaluationPlanRoundType.values());
     }
 
     private String save(EvaluationPlan plan, EvaluationPlanReq req, boolean roundsChanged, boolean sharedWithUsersChanged, boolean isPublicForTenant, boolean isPublicForAll) {
@@ -86,14 +88,11 @@ public class EvaluationPlanService {
             if (req.getRounds().size() > maxRounds) {
                 throw new InternalServerException(String.format("Too many rounds. User: %s. Plan: %s. Rounds: %d", loggedInUser.getPublicId(), plan.getPublicId(), req.getRounds().size()));
             }
-            HashMap<Integer, EvaluationPlanRoundType> roundTypesById = HashMapUtils.getMapFromList(this.findAllRoundTypes(), "Id", Integer.class, EvaluationPlanRoundType.class);
             for (EvaluationPlanRound roundTemplate : req.getRounds()) {
                 roundTemplate.setEvaluationPlan(plan);
                 roundTemplate.setEvaluationPlanId(plan.getId());
                 if(!StringUtils.hasText(roundTemplate.getName())) {
-                    EvaluationPlanRoundType roundType = roundTypesById.get(roundTemplate.getRoundType());
-                    if(roundType != null)
-                        roundTemplate.setName(roundType.getName());
+                    roundTemplate.setName(enumsResService.from(roundTemplate.getRoundType()).getName());
                 }
             }
             evaluationPlanRoundRepository.saveAll(req.getRounds());
@@ -151,7 +150,7 @@ public class EvaluationPlanService {
         LoggedInUserDetails loggedInUser = AuthService.getLoggedInUser();
         this.assertUniqueWithinTenantForUpdate(loggedInUser.getTenantId(), req.getName(), plan.getId());
         evaluationPlanAccessService.assertWriteAccess(loggedInUser, plan);
-        if(!loggedInUser.getPublicId().equals(req.getOwnerId())){//if the requested owner is not the logged in user, additional checks are needed
+        if(req.getOwnerId() != null && !loggedInUser.getPublicId().equals(req.getOwnerId())){//if the requested owner is not the logged in user, additional checks are needed
             setAnotherUserAsOwner(plan, evaluationPlanAccessService.getAccessType(loggedInUser, plan), req.getOwnerId());
         }
 

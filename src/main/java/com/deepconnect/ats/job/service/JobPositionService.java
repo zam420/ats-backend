@@ -28,8 +28,7 @@ import com.deepconnect.ats.recruitmentpipeline.service.RecruitmentPipelineRoundH
 import com.deepconnect.ats.user.service.UserServiceV2;
 import com.deepconnect.ats.rbac.enums.RoleType;
 import com.deepconnect.ats.job.dto.JobPositionReq;
-import com.deepconnect.ats.evaluationplan.model.EvaluationPlanRoundType;
-import com.deepconnect.ats.recruitmentpipeline.model.RecruitmentPipelineRoundType;
+import com.deepconnect.ats.evaluationplan.model.EvaluationPlanRound;
 import com.deepconnect.ats.job.repo.JobRecruitmentPipelineRoundRepository;
 import com.deepconnect.ats.job.repo.JobScreeningQuestionRepository;
 import com.deepconnect.ats.job.dto.JobPositionRes;
@@ -122,14 +121,11 @@ public class JobPositionService {
                 if (req.getEvaluationPlanRounds().size() > maxRounds) {
                     throw new InternalServerException(String.format("Too many rounds. User: %s. Plan: %s. Rounds: %d", loggedInUser.getPublicId(), position.getPublicId(), req.getEvaluationPlanRounds().size()));
                 }
-                HashMap<Integer, EvaluationPlanRoundType> roundTypesById = HashMapUtils.getMapFromList(evaluationPlanService.findAllRoundTypes(), "Id", Integer.class, EvaluationPlanRoundType.class);
                 for (JobEvaluationPlanRound roundTemplate : req.getEvaluationPlanRounds()) {
                     roundTemplate.setJobPosition(position);
                     roundTemplate.setJobPositionId(position.getId());
                     if(!StringUtils.hasText(roundTemplate.getName())) {
-                        EvaluationPlanRoundType roundType = roundTypesById.get(roundTemplate.getRoundType());
-                        if(roundType != null)
-                            roundTemplate.setName(roundType.getName());
+                        roundTemplate.setName(enumsResService.from(roundTemplate.getRoundType()).getName());
                     }
                 }
                 jobEvaluationPlanRoundRepository.saveAll(req.getEvaluationPlanRounds());
@@ -144,16 +140,12 @@ public class JobPositionService {
                 if (req.getRecruitmentPipelineRounds().size() > maxRounds) {
                     throw new InternalServerException(String.format("Too many rounds. User: %s. Position: %s. Rounds: %d", loggedInUser.getPublicId(), position.getPublicId(), req.getRecruitmentPipelineRounds().size()));
                 }
-                List<RecruitmentPipelineRoundType> allRoundTypes = recruitmentPipelineService.findAllRoundTypes();
-                RecruitmentPipelineRoundHelper.assertRoundTypeOrder(allRoundTypes, req.getRecruitmentPipelineRounds(), loggedInUser.getPublicId(), position.getPublicId());
-                HashMap<Integer, RecruitmentPipelineRoundType> roundTypesById = HashMapUtils.getMapFromList(allRoundTypes, "Id", Integer.class, RecruitmentPipelineRoundType.class);
+                RecruitmentPipelineRoundHelper.assertRoundTypeOrder(req.getRecruitmentPipelineRounds(), loggedInUser.getPublicId(), position.getPublicId());
                 for (JobRecruitmentPipelineRound roundTemplate : req.getRecruitmentPipelineRounds()) {
                     roundTemplate.setJobPosition(position);
                     roundTemplate.setJobPositionId(position.getId());
                     if(!StringUtils.hasText(roundTemplate.getName())) {
-                        RecruitmentPipelineRoundType roundType = roundTypesById.get(roundTemplate.getRoundType());
-                        if(roundType != null)
-                            roundTemplate.setName(roundType.getName());
+                        roundTemplate.setName(enumsResService.from(roundTemplate.getRoundType()).getName());
                     }
                 }
                 jobRecruitmentPipelineRoundRepository.saveAll(req.getRecruitmentPipelineRounds());

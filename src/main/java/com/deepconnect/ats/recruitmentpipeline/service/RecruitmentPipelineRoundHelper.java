@@ -3,7 +3,7 @@ package com.deepconnect.ats.recruitmentpipeline.service;
 import com.deepconnect.ats.common.exception.InternalServerException;
 import com.deepconnect.ats.common.utils.StringUtils;
 import com.deepconnect.ats.recruitmentpipeline.model.RecruitmentPipelineRoundBase;
-import com.deepconnect.ats.recruitmentpipeline.model.RecruitmentPipelineRoundType;
+import com.deepconnect.ats.recruitmentpipeline.enums.RecruitmentPipelineRoundType;
 
 import java.util.Comparator;
 import java.util.List;
@@ -15,17 +15,16 @@ public final class RecruitmentPipelineRoundHelper {
     private RecruitmentPipelineRoundHelper() {
     }
 
-    public static void assertRoundTypeOrder(List<RecruitmentPipelineRoundType> allRoundTypes,
-            List<? extends RecruitmentPipelineRoundBase> addedRounds,
+    public static void assertRoundTypeOrder(List<? extends RecruitmentPipelineRoundBase> addedRounds,
             String loggedInUserPublicId, String planPublicId) {
-        Set<Integer> coreTypeIds = allRoundTypes.stream()
+        Set<Integer> coreTypeIds = List.of(RecruitmentPipelineRoundType.values()).stream()
             .filter(type -> !Boolean.TRUE.equals(type.getIsCustom()))
             .map(RecruitmentPipelineRoundType::getId)
             .collect(Collectors.toSet());
 
         List<Integer> coreIdsInOrder = addedRounds.stream()
             .sorted(Comparator.comparing(RecruitmentPipelineRoundBase::getOrder, Comparator.nullsLast(Comparator.naturalOrder())))
-            .map(RecruitmentPipelineRoundBase::getRoundType)
+            .map(r -> r.getRoundType().getId())
             .filter(coreTypeIds::contains)
             .toList();
 

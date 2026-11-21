@@ -3,7 +3,6 @@ package com.deepconnect.ats.recruitmentpipeline.service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.beans.factory.annotation.Value;
-import com.deepconnect.ats.recruitmentpipeline.repo.RecruitmentPipelineRoundTypeRepository;
 import com.deepconnect.ats.auth.dto.LoggedInUserDetails;
 import com.deepconnect.ats.auth.service.AuthService;
 import com.deepconnect.ats.common.exception.InternalServerException;
@@ -16,10 +15,11 @@ import com.deepconnect.ats.dto.AtsPageRsp;
 import com.deepconnect.ats.recruitmentpipeline.dto.RecruitmentPipelineRes;
 import com.deepconnect.ats.recruitmentpipeline.dto.RecruitmentPipelineDetailsRes;
 import com.deepconnect.ats.recruitmentpipeline.model.RecruitmentPipelineRound;
-import com.deepconnect.ats.recruitmentpipeline.model.RecruitmentPipelineRoundType;
+import com.deepconnect.ats.recruitmentpipeline.enums.RecruitmentPipelineRoundType;
 import com.deepconnect.ats.recruitmentpipeline.repo.RecruitmentPipelineRoundRepository;
 import com.deepconnect.ats.user.model.User;
 import com.deepconnect.ats.user.service.UserServiceV2;
+import com.deepconnect.ats.common.dto.EnumsExtendedRes;
 import com.deepconnect.ats.common.enums.AccessType;
 import com.deepconnect.ats.common.utils.StringUtils;
 import com.deepconnect.ats.common.utils.HashMapUtils;
@@ -27,6 +27,7 @@ import com.deepconnect.ats.recruitmentpipeline.model.RecruitmentPipelineShare;
 import com.deepconnect.ats.common.enums.CustomExceptionType;
 import com.deepconnect.ats.common.enums.ValidationFieldType;
 import com.deepconnect.ats.common.exception.ValidationException;
+import com.deepconnect.ats.common.service.EnumsResService;
 import com.deepconnect.ats.common.exception.CustomException;
 
 import lombok.RequiredArgsConstructor;
@@ -48,16 +49,16 @@ public class RecruitmentPipelineService {
     @Value("${plans.maxRounds}")
     private int maxRounds;
 
+    private final EnumsResService enumsResService;
     private final UserServiceV2 userService;
     private final RecruitmentPipelineAccessService recruitmentPipelineAccessService;
 
     private final RecruitmentPipelineRepository recruitmentPipelineRepository;
     private final RecruitmentPipelineRoundRepository recruitmentPipelineRoundRepository;
-    private final RecruitmentPipelineRoundTypeRepository recruitmentPipelineRoundTypeRepository;
     private final RecruitmentPipelineShareRepository recruitmentPipelineShareRepository;
 
-    public List<RecruitmentPipelineRoundType> findAllRoundTypes() {
-        return recruitmentPipelineRoundTypeRepository.findAll();
+    public List<EnumsExtendedRes> findAllRoundTypes() {
+        return enumsResService.from(RecruitmentPipelineRoundType.values());
     }
 
     private String save(RecruitmentPipeline plan, RecruitmentPipelineReq req, boolean roundsChanged, boolean sharedWithUsersChanged, boolean isPublicForTenant, boolean isPublicForAll) {
@@ -79,16 +80,12 @@ public class RecruitmentPipelineService {
             if (req.getRounds().size() > maxRounds) {
                 throw new InternalServerException(String.format("Too many rounds. User: %s. Plan: %s. Rounds: %d", loggedInUser.getPublicId(), plan.getPublicId(), req.getRounds().size()));
             }
-            List<RecruitmentPipelineRoundType> allRoundTypes = this.findAllRoundTypes();
-            RecruitmentPipelineRoundHelper.assertRoundTypeOrder(allRoundTypes, req.getRounds(), loggedInUser.getPublicId(), plan.getPublicId());
-            HashMap<Integer, RecruitmentPipelineRoundType> roundTypesById = HashMapUtils.getMapFromList(allRoundTypes, "Id", Integer.class, RecruitmentPipelineRoundType.class);
+            RecruitmentPipelineRoundHelper.assertRoundTypeOrder(req.getRounds(), loggedInUser.getPublicId(), plan.getPublicId());
             for (RecruitmentPipelineRound roundTemplate : req.getRounds()) {
                 roundTemplate.setRecruitmentPipeline(plan);
                 roundTemplate.setRecruitmentPipelineId(plan.getId());
                 if(!StringUtils.hasText(roundTemplate.getName())) {
-                    RecruitmentPipelineRoundType roundType = roundTypesById.get(roundTemplate.getRoundType());
-                    if(roundType != null)
-                        roundTemplate.setName(roundType.getName());
+                    roundTemplate.setName(enumsResService.from(roundTemplate.getRoundType()).getName());
                 }
                 // recruitmentPipelineRoundRepository.save(roundTemplate);
             }
@@ -147,7 +144,7 @@ public class RecruitmentPipelineService {
         LoggedInUserDetails loggedInUser = AuthService.getLoggedInUser();
         this.assertUniqueWithinTenantForUpdate(loggedInUser.getTenantId(), req.getName(), plan.getId());
         recruitmentPipelineAccessService.assertWriteAccess(loggedInUser, plan);
-        if(!loggedInUser.getPublicId().equals(req.getOwnerId())){//if the requested owner is not the logged in user, additional checks are needed
+        if(req.getOwnerId() != null && !loggedInUser.getPublicId().equals(req.getOwnerId())){//if the requested owner is not the logged in user, additional checks are needed
             setAnotherUserAsOwner(plan, recruitmentPipelineAccessService.getAccessType(loggedInUser, plan), req.getOwnerId());
         }
 

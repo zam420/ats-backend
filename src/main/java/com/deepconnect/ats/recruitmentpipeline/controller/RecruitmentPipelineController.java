@@ -8,6 +8,8 @@ import jakarta.validation.constraints.NotBlank;
 import com.deepconnect.ats.recruitmentpipeline.service.RecruitmentPipelineService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+
+import com.deepconnect.ats.common.dto.EnumsExtendedRes;
 import com.deepconnect.ats.dto.ApiResult;
 import com.deepconnect.ats.dto.AtsPageQuery;
 import com.deepconnect.ats.dto.AtsPageRsp;
@@ -15,7 +17,6 @@ import com.deepconnect.ats.dto.AtsPageRsp;
 import com.deepconnect.ats.recruitmentpipeline.dto.RecruitmentPipelineReq;
 import com.deepconnect.ats.recruitmentpipeline.dto.RecruitmentPipelineRes;
 import com.deepconnect.ats.recruitmentpipeline.dto.RecruitmentPipelineDetailsRes;
-import com.deepconnect.ats.recruitmentpipeline.model.RecruitmentPipelineRoundType;
 
 import java.util.Collections;
 import java.util.List;
@@ -64,7 +65,7 @@ public class RecruitmentPipelineController {
 
     @PreAuthorize("hasAuthority('rpts')")
     @GetMapping("/roundtypes")
-    public ApiResult<List<RecruitmentPipelineRoundType>> findAllRoundTypes() throws Exception {
+    public ApiResult<List<EnumsExtendedRes>> findAllRoundTypes() throws Exception {
         return ApiResult.success(recruitmentPipelineService.findAllRoundTypes());
     }
 
