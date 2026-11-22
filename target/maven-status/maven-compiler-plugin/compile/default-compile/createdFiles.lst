@@ -2,6 +2,7 @@ com\deepconnect\ats\common\constant\enums\InterviewResult$1.class
 com\deepconnect\ats\AtsApplication.class
 com\deepconnect\ats\common\constant\enums\BaseEnum.class
 com\deepconnect\ats\service\resume\CandidateStatusCalculator$1.class
+com\deepconnect\ats\job\enums\JobPostedDateType$1.class
 com\deepconnect\ats\common\constant\enums\CandidateStatusCodes.class
 com\deepconnect\ats\common\constant\enums\CandidateStatus.class
 com\deepconnect\ats\common\constant\enums\AtsEmailType.class

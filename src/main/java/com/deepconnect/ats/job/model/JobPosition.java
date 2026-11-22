@@ -43,10 +43,6 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 @Builder
 public class JobPosition extends OperatableBaseWithTenantEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
     @Column(nullable = false, length = 100)
     @NotBlank(message = "{field.job.title}{validation.notBlank}")
     @Length(max = 100, message = "{field.job.title}{validation.lengthMax}")

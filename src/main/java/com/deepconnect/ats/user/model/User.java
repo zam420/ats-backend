@@ -30,7 +30,7 @@ public class User extends BaseWithTenantEntity {
 
     @Column(nullable = false, unique = true, length = 100)
     @NotBlank(message = "{field.user.email}{validation.notBlank}")
-    @Length(min = 7, max = 50, message = "{field.user.email}{validation.length}")
+    @Length(min = 7, max = 100, message = "{field.user.email}{validation.length}")
     @Email(message = "{field.user.email}{validation.email}")
     private String email;
 

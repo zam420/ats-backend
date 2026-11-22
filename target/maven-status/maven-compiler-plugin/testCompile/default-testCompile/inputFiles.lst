@@ -5,6 +5,7 @@ C:\Work\Espressif\Code\java_backend\src\test\java\com\deepconnect\ats\job\securi
 C:\Work\Espressif\Code\java_backend\src\test\java\com\deepconnect\ats\job\security\JobRichTextWriteTest.java
 C:\Work\Espressif\Code\java_backend\src\test\java\com\deepconnect\ats\job\service\CandidateJobAccessTest.java
 C:\Work\Espressif\Code\java_backend\src\test\java\com\deepconnect\ats\job\service\JobPositionStatusTest.java
+C:\Work\Espressif\Code\java_backend\src\test\java\com\deepconnect\ats\jobapplication\JobApplicationValidationTest.java
 C:\Work\Espressif\Code\java_backend\src\test\java\com\deepconnect\ats\jobapplication\service\CandidatePipelineApplicationTest.java
 C:\Work\Espressif\Code\java_backend\src\test\java\com\deepconnect\ats\jobapplication\service\CandidatePipelineEditingTest.java
 C:\Work\Espressif\Code\java_backend\src\test\java\com\deepconnect\ats\jobapplication\service\CandidatePipelineServiceTest.java
