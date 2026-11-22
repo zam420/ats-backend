@@ -281,7 +281,10 @@ public class JobPositionService {
                 throw new CustomException(CustomExceptionType.JOB_PIPELINE_OCCUPIED_STAGE);
             }
         }
-        // Move old orders out of the way before applying a reorder under a unique order constraint.
+        /*When a candidate was rejected in a custom stage, and if that stage is being deleted, thenclear the stage reference from job applications table. 
+        When a pipeline stage is removed, its foreign key would otherwise prevent deletion.
+        The rejection stage’s name and type are saved separately as snapshots, so they remain visible in the Rejected table. 
+        Stages containing active candidates cannot be removed. */
         for (int i = 0; i < existing.size(); i++) existing.get(i).setOrder(-i - 1);
         jobRecruitmentPipelineRoundRepository.saveAllAndFlush(existing);
         List<JobRecruitmentPipelineRound> removed = existing.stream().filter(stage -> !used.contains(stage.getPublicId())).toList();

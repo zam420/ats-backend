@@ -86,7 +86,7 @@ public class JobApplicationService {
             try (var input = resume.getInputStream()) {
                 Files.copy(input, target);
             }
-        } catch (IOException e) {
+        } catch (IOException e) {// Best-effort cleanup so a partially written or empty file isn't left behind on failure
             try {
                 Files.deleteIfExists(target);
             } catch (IOException cleanupError) {
@@ -94,6 +94,9 @@ public class JobApplicationService {
             }
             throw new InternalServerException("Failed to store application resume");
         }
+
+        // Tie disk file cleanup to the enclosing Spring database transaction lifecycle so orphaned files
+        // are deleted if the database transaction rolls back or fails to commit
         TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
             @Override
             public void afterCompletion(int status) {
@@ -177,6 +180,12 @@ public class JobApplicationService {
         return jobApplicationRepository.existsByRecruitmentPipelineStageAndRejectedFalse(stageId);
     }
 
+    /**When a candidate was rejected in a custom stage, and if that stage is being deleted, thenclear the stage reference from job applications table. 
+     * When a pipeline stage is removed, its foreign key would otherwise prevent deletion.
+     * The rejection stage’s name and type are saved separately as snapshots, so they remain visible in the Rejected table. 
+     * Stages containing active candidates cannot be removed.
+     * @param stageIds
+     */
     public void clearRejectedStages(List<Long> stageIds) {
         jobApplicationRepository.clearRejectedStages(stageIds);
     }

@@ -24,6 +24,10 @@ public class JobApplication extends BaseEntity {
     @Column(name = "job_position_id", nullable = false)
     private Long jobPositionId;
 
+    /*
+     * The ID of the recruitment pipeline stage the application is currently in.
+    It can be null when a candidate was rejected in a custom stage, and later that stage was deleted from the job by job owner or hra.
+     */
     @Column(name = "recruitment_pipeline_stage")
     private Long recruitmentPipelineStage;
 

@@ -1,4 +1,4 @@
-package com.deepconnect.ats.jobapplication.controller;
+package com.deepconnect.ats.candidatepipeline.controller;
 
 import java.util.List;
 
