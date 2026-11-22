@@ -8,7 +8,7 @@ import static org.mockito.Mockito.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-
+import com.deepconnect.ats.jobapplication.service.JobApplicationService;
 import com.deepconnect.ats.auth.dto.LoggedInUserDetails;
 import com.deepconnect.ats.common.exception.CustomException;
 import com.deepconnect.ats.common.exception.ValidationException;
@@ -40,8 +40,8 @@ class JobPositionStatusTest {
     private final EnumsResService enumResService = mock(EnumsResService.class);
     private final JobPositionService service = new JobPositionService(
             mock(EvaluationPlanService.class), mock(RecruitmentPipelineService.class), access,
-            mock(ScreeningQuestionsFormService.class), mock(UserServiceV2.class), 
-            enumResService, positions,
+            mock(ScreeningQuestionsFormService.class), mock(JobApplicationService.class),
+            mock(UserServiceV2.class), enumResService, positions,
             mock(JobEvaluationPlanRoundRepository.class), mock(JobRecruitmentPipelineRoundRepository.class),
             mock(JobScreeningQuestionRepository.class), mock(JobApplicationRepository.class));
     private final JobPosition position = new JobPosition();

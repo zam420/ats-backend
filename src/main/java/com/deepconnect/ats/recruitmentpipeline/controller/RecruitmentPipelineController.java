@@ -88,13 +88,6 @@ public class RecruitmentPipelineController {
     }
 
     @PreAuthorize("hasAuthority('rpts')")
-    @GetMapping("/listByJob")
-    public ApiResult<List<RecruitmentPipelineRes>> listProcessTemplateByJob(@RequestParam(required = false) Long jobId) {
-        throw new UnsupportedOperationException("Listing process templates by job is not implemented yet.");
-        // return ApiResult.success(recruitmentPipelineService.listProcessTemplates()); //TODO: bug in original code, not returning results by jobId param
-    }
-
-    @PreAuthorize("hasAuthority('rpts')")
     @GetMapping("/templates")
     public ApiResult<AtsPageRsp<RecruitmentPipelineRes>> findAllSystemTemplates(AtsPageQuery query) {
         return ApiResult.success(recruitmentPipelineService.findAllSystemTemplates(query));
@@ -112,5 +105,11 @@ public class RecruitmentPipelineController {
         return ApiResult.success(Collections.singletonMap("id", recruitmentPipelineService.updateSystemTemplate(req)));
     }
 
+    // @PreAuthorize("hasAuthority('rpts')")
+    // @GetMapping("/listByJob")
+    // public ApiResult<List<RecruitmentPipelineRes>> listProcessTemplateByJob(@RequestParam(required = false) Long jobId) {
+    //     throw new UnsupportedOperationException("Listing process templates by job is not implemented yet.");
+    //     // return ApiResult.success(recruitmentPipelineService.listProcessTemplates()); //TODO: bug in original code, not returning results by jobId param
+    // }
 
 }

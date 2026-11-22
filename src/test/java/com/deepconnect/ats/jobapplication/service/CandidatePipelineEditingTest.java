@@ -41,7 +41,8 @@ class CandidatePipelineEditingTest {
     private final JobApplicationRepository applications = mock(JobApplicationRepository.class);
     private final JobPositionService service = new JobPositionService(mock(EvaluationPlanService.class),
             mock(RecruitmentPipelineService.class), mock(JobPositionAccessService.class),
-            mock(ScreeningQuestionsFormService.class), mock(UserServiceV2.class), mock(EnumsResService.class),
+            mock(ScreeningQuestionsFormService.class), mock(JobApplicationService.class),
+            mock(UserServiceV2.class), mock(EnumsResService.class),
             positions, mock(JobEvaluationPlanRoundRepository.class), stages,
             mock(JobScreeningQuestionRepository.class), applications);
     private final JobPosition job = new JobPosition();

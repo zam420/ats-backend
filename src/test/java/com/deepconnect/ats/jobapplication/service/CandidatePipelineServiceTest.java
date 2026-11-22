@@ -14,6 +14,9 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import com.deepconnect.ats.auth.dto.LoggedInUserDetails;
+import com.deepconnect.ats.candidatepipeline.dto.MoveCandidateReq;
+import com.deepconnect.ats.candidatepipeline.dto.RejectCandidateReq;
+import com.deepconnect.ats.candidatepipeline.service.CandidatePipelineService;
 import com.deepconnect.ats.common.exception.CustomException;
 import com.deepconnect.ats.common.exception.InternalServerException;
 import com.deepconnect.ats.job.model.JobPosition;
@@ -21,8 +24,6 @@ import com.deepconnect.ats.job.model.JobRecruitmentPipelineRound;
 import com.deepconnect.ats.job.repo.JobPositionRepository;
 import com.deepconnect.ats.job.repo.JobRecruitmentPipelineRoundRepository;
 import com.deepconnect.ats.job.service.JobPositionAccessService;
-import com.deepconnect.ats.jobapplication.dto.MoveCandidateReq;
-import com.deepconnect.ats.jobapplication.dto.RejectCandidateReq;
 import com.deepconnect.ats.jobapplication.model.JobApplication;
 import com.deepconnect.ats.jobapplication.repo.JobApplicationRepository;
 import com.deepconnect.ats.recruitmentpipeline.enums.RecruitmentPipelineRoundType;

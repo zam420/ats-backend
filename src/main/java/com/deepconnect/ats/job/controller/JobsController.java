@@ -69,6 +69,12 @@ public class JobsController {
         return ResponseEntity.ok().contentType(type).body(Files.readAllBytes(path));
     }
 
+    @PreAuthorize("hasAuthority('jpsc')")
+    @GetMapping("/filters")
+    public ApiResult<JobFiltersResForCandidate> getFiltersForCandidates() throws Exception {
+        return ApiResult.success(jobPositionService.getFiltersForCandidates());
+    }
+
 
     // @PreAuthorize("hasAuthority('jps')")
     // @GetMapping("/listJobPostionForCV")
@@ -76,16 +82,10 @@ public class JobsController {
     //     return ApiResult.success(jobPositionService.listActive());
     // }
 
-    @PreAuthorize("hasAuthority('jpsc')")
-    @GetMapping("/listAll")
-    public ApiResult<AtsPageRsp<JobPosition>> listAll(AtsPageQuery query) {
-        return ApiResult.success(jobPositionService.listJobPosition(query));
-    }
-
-    @PreAuthorize("hasAuthority('jpsc')")
-    @GetMapping("/filters")
-    public ApiResult<JobFiltersResForCandidate> getFiltersForCandidates() throws Exception {
-        return ApiResult.success(jobPositionService.getFiltersForCandidates());
-    }
+    // @PreAuthorize("hasAuthority('jpsc')")
+    // @GetMapping("/listAll")
+    // public ApiResult<AtsPageRsp<JobPosition>> listAll(AtsPageQuery query) {
+    //     return ApiResult.success(jobPositionService.listJobPosition(query));
+    // }
 
 }

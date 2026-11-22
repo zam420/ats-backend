@@ -1,4 +1,4 @@
-package com.deepconnect.ats.jobapplication.service;
+package com.deepconnect.ats.candidatepipeline.service;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -10,6 +10,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.deepconnect.ats.auth.service.AuthService;
+import com.deepconnect.ats.candidatepipeline.dto.CandidatePipelineRes;
+import com.deepconnect.ats.candidatepipeline.dto.MoveCandidateReq;
+import com.deepconnect.ats.candidatepipeline.dto.RejectCandidateReq;
 import com.deepconnect.ats.common.enums.CustomExceptionType;
 import com.deepconnect.ats.common.exception.CustomException;
 import com.deepconnect.ats.common.exception.InternalServerException;
@@ -18,9 +21,6 @@ import com.deepconnect.ats.job.model.JobRecruitmentPipelineRound;
 import com.deepconnect.ats.job.repo.JobPositionRepository;
 import com.deepconnect.ats.job.repo.JobRecruitmentPipelineRoundRepository;
 import com.deepconnect.ats.job.service.JobPositionAccessService;
-import com.deepconnect.ats.jobapplication.dto.CandidatePipelineRes;
-import com.deepconnect.ats.jobapplication.dto.MoveCandidateReq;
-import com.deepconnect.ats.jobapplication.dto.RejectCandidateReq;
 import com.deepconnect.ats.jobapplication.model.JobApplication;
 import com.deepconnect.ats.jobapplication.repo.JobApplicationRepository;
 

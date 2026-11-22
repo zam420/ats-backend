@@ -86,6 +86,11 @@ public class JobPositionController {
         return ApiResult.success(jobPositionService.findByPublicIdForTenant(id));
     }
 
+    @PreAuthorize("hasAuthority('jps')")
+    @GetMapping("/filters")
+    public ApiResult<JobFiltersRes> getJobFilters() throws Exception {
+        return ApiResult.success(jobPositionService.getFilters());
+    }
 
     // @PreAuthorize("hasAuthority('jps')")
     // @GetMapping("/listJobPostionForCV")
@@ -93,16 +98,10 @@ public class JobPositionController {
     //     return ApiResult.success(jobPositionService.listActive());
     // }
 
-    @PreAuthorize("hasAuthority('jps')")
-    @GetMapping("/listAll")
-    public ApiResult<AtsPageRsp<JobPosition>> listAll(AtsPageQuery query) {
-        return ApiResult.success(jobPositionService.listJobPosition(query));
-    }
-
-    @PreAuthorize("hasAuthority('jps')")
-    @GetMapping("/filters")
-    public ApiResult<JobFiltersRes> getJobFilters() throws Exception {
-        return ApiResult.success(jobPositionService.getFilters());
-    }
+    // @PreAuthorize("hasAuthority('jps')")
+    // @GetMapping("/listAll")
+    // public ApiResult<AtsPageRsp<JobPosition>> listAll(AtsPageQuery query) {
+    //     return ApiResult.success(jobPositionService.listJobPosition(query));
+    // }
 
 }

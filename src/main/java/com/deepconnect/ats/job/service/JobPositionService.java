@@ -27,6 +27,7 @@ import com.deepconnect.ats.recruitmentpipeline.service.RecruitmentPipelineServic
 import com.deepconnect.ats.recruitmentpipeline.service.RecruitmentPipelineRoundHelper;
 import com.deepconnect.ats.recruitmentpipeline.enums.RecruitmentPipelineRoundType;
 import com.deepconnect.ats.jobapplication.repo.JobApplicationRepository;
+import com.deepconnect.ats.jobapplication.service.JobApplicationService;
 import com.deepconnect.ats.user.service.UserServiceV2;
 import com.deepconnect.ats.rbac.enums.RoleType;
 import com.deepconnect.ats.job.dto.JobPositionReq;
@@ -91,6 +92,7 @@ public class JobPositionService {
     private final RecruitmentPipelineService recruitmentPipelineService;
     private final JobPositionAccessService jobPositionAccessService;
     private final ScreeningQuestionsFormService screeningQuestionsFormService;
+    private final JobApplicationService jobApplicationService;
     private final UserServiceV2 userService;
     private final EnumsResService enumsResService;
 
@@ -141,6 +143,7 @@ public class JobPositionService {
             if (req.getRecruitmentPipelineRounds().size() > maxRounds) {
                 throw new InternalServerException(String.format("Too many rounds. User: %s. Position: %s. Rounds: %d", loggedInUser.getPublicId(), position.getPublicId(), req.getRecruitmentPipelineRounds().size()));
             }
+            RecruitmentPipelineRoundHelper.assertMandatoryRoundsPresent(req.getRecruitmentPipelineRounds(), loggedInUser.getPublicId(), position.getPublicId());
             RecruitmentPipelineRoundHelper.assertRoundTypeOrder(req.getRecruitmentPipelineRounds(), loggedInUser.getPublicId(), position.getPublicId());
             assertAppliedFirst(req.getRecruitmentPipelineRounds());
             for (JobRecruitmentPipelineRound roundTemplate : req.getRecruitmentPipelineRounds()) {
@@ -212,7 +215,7 @@ public class JobPositionService {
         }
 
         boolean recruitmentPipelineRoundsChanged = !RecruitmentPipelineRoundHelper.roundsEqual(jobPosition.getRecruitmentPipelineRounds(), req.getRecruitmentPipelineRounds())
-                || !sameStageIdentities(jobPosition.getRecruitmentPipelineRounds(), req.getRecruitmentPipelineRounds());
+            || !sameStageIdentities(jobPosition.getRecruitmentPipelineRounds(), req.getRecruitmentPipelineRounds());
         if (recruitmentPipelineRoundsChanged) {
             updatePipeline(jobPosition, req.getRecruitmentPipelineRounds(), loggedInUser);
         }
@@ -225,6 +228,7 @@ public class JobPositionService {
         return this.save(jobPosition, req, evaluationPlanRoundsChanged, false, screeningQuestionsChanged);
     }
 
+    /*Asserts that the first recruitment pipeline round is of type APPLIED and that the rounds are valid.*/
     private void assertAppliedFirst(List<JobRecruitmentPipelineRound> rounds) {
         if (rounds == null || rounds.isEmpty() || rounds.stream().anyMatch(round -> round.getOrder() == null)
                 || rounds.stream().anyMatch(round -> round.getOrder() < 0 || round.getRoundType() == null)
@@ -235,6 +239,7 @@ public class JobPositionService {
         }
     }
 
+    /*Checks whether the identities of recruitment pipeline stages (rounds) remain unchanged between an existing list and an incoming list, matching stages by their order.*/
     private boolean sameStageIdentities(List<JobRecruitmentPipelineRound> existing, List<JobRecruitmentPipelineRound> incoming) {
         if (existing == null || incoming == null || incoming.stream().noneMatch(stage -> stage.getPublicId() != null)) return true;
         if (existing.size() != incoming.size()) return false;
@@ -250,20 +255,29 @@ public class JobPositionService {
             throw new InternalServerException("Too many recruitment pipeline stages");
         }
         assertAppliedFirst(incoming);
+        RecruitmentPipelineRoundHelper.assertMandatoryRoundsPresent(incoming, user.getPublicId(), position.getPublicId());
         RecruitmentPipelineRoundHelper.assertRoundTypeOrder(incoming, user.getPublicId(), position.getPublicId());
         List<JobRecruitmentPipelineRound> existing = jobRecruitmentPipelineRoundRepository.findByJobPositionIdOrderByOrderAsc(position.getId());
         Map<String, JobRecruitmentPipelineRound> byPublicId = new HashMap<>();
         existing.forEach(stage -> byPublicId.put(stage.getPublicId(), stage));
+
+        // Track existing stage IDs referenced by the incoming pipeline. This also allows us to identify stages that have been removed.
         Set<String> used = new HashSet<>();
         for (JobRecruitmentPipelineRound stage : incoming) {
             if (stage.getPublicId() == null) continue;
-            JobRecruitmentPipelineRound old = byPublicId.get(stage.getPublicId());
+            JobRecruitmentPipelineRound old = byPublicId.get(stage.getPublicId());// Resolve the incoming public ID against the currently persisted stages.
+            // Reject the update if:
+            // - The supplied ID does not belong to this job position (stale or invalid ID).
+            // - The same existing stage ID appears more than once in the incoming payload.
             if (old == null || !used.add(stage.getPublicId())) {
                 throw new CustomException(CustomExceptionType.JOB_PIPELINE_STALE);
             }
         }
+
+        // Check whether any existing stages omitted from the incoming pipeline are still referenced by non-rejected job applications.
+        // Such stages cannot be removed because active applications depend on them.
         for (JobRecruitmentPipelineRound old : existing) {
-            if (!used.contains(old.getPublicId()) && jobApplicationRepository.existsByRecruitmentPipelineStageAndRejectedFalse(old.getId())) {
+            if (!used.contains(old.getPublicId()) && jobApplicationService.existsByRecruitmentPipelineStageAndRejectedFalse(old.getId())) {
                 throw new CustomException(CustomExceptionType.JOB_PIPELINE_OCCUPIED_STAGE);
             }
         }
@@ -272,7 +286,7 @@ public class JobPositionService {
         jobRecruitmentPipelineRoundRepository.saveAllAndFlush(existing);
         List<JobRecruitmentPipelineRound> removed = existing.stream().filter(stage -> !used.contains(stage.getPublicId())).toList();
         if (!removed.isEmpty()) {
-            jobApplicationRepository.clearRejectedStages(removed.stream().map(JobRecruitmentPipelineRound::getId).toList());
+            jobApplicationService.clearRejectedStages(removed.stream().map(JobRecruitmentPipelineRound::getId).toList());
         }
         position.getRecruitmentPipelineRounds().removeAll(removed);
         jobRecruitmentPipelineRoundRepository.flush();
@@ -364,20 +378,20 @@ public class JobPositionService {
      * Used for selection dropdowns e.g. in job position forms
      * @return
      */
-    @Transactional(readOnly = true)
-    public List<JobPositionRes> findAllAsList() {
-        LoggedInUserDetails loggedInUser = AuthService.getLoggedInUser();
-        boolean isAdmin = jobPositionAccessService.isUserInJobPositionAdminRole(loggedInUser);
-        List<JobPosition> positions = isAdmin 
-            ? jobPositionRepository.findAllForTenantAdminAsList(AuthService.getLoggedInTenantId()) 
-            : jobPositionRepository.findAllForTenantNonAdminAsList(AuthService.getLoggedInTenantId(), loggedInUser.getUserId(), loggedInUser.getPublicId());
-        return positions.stream().map(JobPositionRes::from).toList();
-    }
+    // @Transactional(readOnly = true)
+    // public List<JobPositionRes> findAllAsList() {
+    //     LoggedInUserDetails loggedInUser = AuthService.getLoggedInUser();
+    //     boolean isAdmin = jobPositionAccessService.isUserInJobPositionAdminRole(loggedInUser);
+    //     List<JobPosition> positions = isAdmin 
+    //         ? jobPositionRepository.findAllForTenantAdminAsList(AuthService.getLoggedInTenantId()) 
+    //         : jobPositionRepository.findAllForTenantNonAdminAsList(AuthService.getLoggedInTenantId(), loggedInUser.getUserId(), loggedInUser.getPublicId());
+    //     return positions.stream().map(JobPositionRes::from).toList();
+    // }
 
-    public AtsPageRsp<JobPosition> listJobPosition(AtsPageQuery query) {
-        Page<JobPosition> page = jobPositionRepository.findAll(query.toPageable());
-        return AtsPageRsp.of(page);
-    }
+    // public AtsPageRsp<JobPosition> listJobPosition(AtsPageQuery query) {
+    //     Page<JobPosition> page = jobPositionRepository.findAll(query.toPageable());
+    //     return AtsPageRsp.of(page);
+    // }
 
     public Optional<JobPosition> findById(Long id) {
         return jobPositionRepository.findById(id);

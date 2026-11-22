@@ -74,18 +74,6 @@ public class EvaluationPlanController {
         return ApiResult.success(evaluationPlanService.findByPublicIdForTenant(id));
     }
 
-    /**
-     * Get all interview plans for the current tenant as a list. 
-     * Used for selection dropdowns e.g. in job position forms
-     * @param query
-     * @return
-     */
-    @PreAuthorize("hasAuthority('ipts')")
-    @GetMapping("/list")
-    public ApiResult<List<EvaluationPlanRes>> findAllAsList() {
-        return ApiResult.success(evaluationPlanService.findAllAsList());
-    }
-
     @PreAuthorize("hasAuthority('ipts')")
     @GetMapping("/owned")
     public ApiResult<AtsPageRsp<EvaluationPlanRes>> findAllForPlanOwner(AtsPageQuery query) {
@@ -116,11 +104,23 @@ public class EvaluationPlanController {
         return ApiResult.success(Collections.singletonMap("id", evaluationPlanService.updateSystemTemplate(req)));
     }
 
-    @PreAuthorize("hasAuthority('ipts')")
-    @GetMapping("/listByJob")
-    public ApiResult<List<EvaluationPlanRes>> listProcessTemplateByJob(@RequestParam(required = false) Long jobId) {
-        throw new UnsupportedOperationException("Listing process templates by job is not implemented yet.");
-        // return ApiResult.success(evaluationPlanService.listProcessTemplates()); //TODO: bug in original code, not returning results by jobId param
-    }
+    /**
+     * Get all interview plans for the current tenant as a list. 
+     * Used for selection dropdowns e.g. in job position forms
+     * @param query
+     * @return
+     */
+    // @PreAuthorize("hasAuthority('ipts')")
+    // @GetMapping("/list")
+    // public ApiResult<List<EvaluationPlanRes>> findAllAsList() {
+    //     return ApiResult.success(evaluationPlanService.findAllAsList());
+    // }
+
+    // @PreAuthorize("hasAuthority('ipts')")
+    // @GetMapping("/listByJob")
+    // public ApiResult<List<EvaluationPlanRes>> listProcessTemplateByJob(@RequestParam(required = false) Long jobId) {
+    //     throw new UnsupportedOperationException("Listing process templates by job is not implemented yet.");
+    //     // return ApiResult.success(evaluationPlanService.listProcessTemplates()); //TODO: bug in original code, not returning results by jobId param
+    // }
 
 }

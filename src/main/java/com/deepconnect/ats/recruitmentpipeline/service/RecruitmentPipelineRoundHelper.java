@@ -15,6 +15,23 @@ public final class RecruitmentPipelineRoundHelper {
     private RecruitmentPipelineRoundHelper() {
     }
 
+    public static void assertMandatoryRoundsPresent(List<? extends RecruitmentPipelineRoundBase> addedRounds,
+            String loggedInUserPublicId, String planPublicId) {
+        Set<Integer> coreTypeIds = List.of(RecruitmentPipelineRoundType.values()).stream()
+            .filter(type -> !Boolean.TRUE.equals(type.getIsCustom()))
+            .map(RecruitmentPipelineRoundType::getId)
+            .collect(Collectors.toSet());
+
+        Set<Integer> coreIdsInAddedRounds = addedRounds.stream()
+            .map(r -> r.getRoundType().getId())
+            .filter(coreTypeIds::contains)
+            .collect(Collectors.toSet());
+
+        if (!coreIdsInAddedRounds.containsAll(coreTypeIds)) {
+            throw new InternalServerException("Mandatory rounds missing. Plan: " + planPublicId + ", Request by: " + loggedInUserPublicId);
+        }
+    }
+
     public static void assertRoundTypeOrder(List<? extends RecruitmentPipelineRoundBase> addedRounds,
             String loggedInUserPublicId, String planPublicId) {
         Set<Integer> coreTypeIds = List.of(RecruitmentPipelineRoundType.values()).stream()

@@ -74,18 +74,6 @@ public class ScreeningQuestionsFormController {
         return ApiResult.success(screeningQuestionTemplateService.findByPublicIdForTenant(id));
     }
 
-    /**
-     * Get all screening question templates for the current tenant as a list. 
-     * Used for selection dropdowns e.g. in job position forms
-     * @param query
-     * @return
-     */
-    @PreAuthorize("hasAuthority('sqts')")
-    @GetMapping("/list")
-    public ApiResult<List<ScreeningQuestionsFormRes>> findAllAsList() {
-        return ApiResult.success(screeningQuestionTemplateService.findAllAsList());
-    }
-
     @PreAuthorize("hasAuthority('sqts')")
     @GetMapping("/owned")
     public ApiResult<AtsPageRsp<ScreeningQuestionsFormRes>> findAllForPlanOwner(AtsPageQuery query) {
@@ -116,11 +104,23 @@ public class ScreeningQuestionsFormController {
         return ApiResult.success(Collections.singletonMap("id", screeningQuestionTemplateService.updateSystemTemplate(req)));
     }
 
-    @PreAuthorize("hasAuthority('sqts')")
-    @GetMapping("/listByJob")
-    public ApiResult<List<ScreeningQuestionsFormRes>> listProcessTemplateByJob(@RequestParam(required = false) Long jobId) {
-        throw new UnsupportedOperationException("Listing process templates by job is not implemented yet.");
-        // return ApiResult.success(screeningQuestionTemplateService.listProcessTemplates()); //TODO: bug in original code, not returning results by jobId param
-    }
+    /**
+     * Get all screening question templates for the current tenant as a list. 
+     * Used for selection dropdowns e.g. in job position forms
+     * @param query
+     * @return
+     */
+    // @PreAuthorize("hasAuthority('sqts')")
+    // @GetMapping("/list")
+    // public ApiResult<List<ScreeningQuestionsFormRes>> findAllAsList() {
+    //     return ApiResult.success(screeningQuestionTemplateService.findAllAsList());
+    // }
+
+    // @PreAuthorize("hasAuthority('sqts')")
+    // @GetMapping("/listByJob")
+    // public ApiResult<List<ScreeningQuestionsFormRes>> listProcessTemplateByJob(@RequestParam(required = false) Long jobId) {
+    //     throw new UnsupportedOperationException("Listing process templates by job is not implemented yet.");
+    //     // return ApiResult.success(screeningQuestionTemplateService.listProcessTemplates()); //TODO: bug in original code, not returning results by jobId param
+    // }
 
 }

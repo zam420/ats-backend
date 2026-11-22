@@ -11,18 +11,18 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.deepconnect.ats.candidatepipeline.dto.CandidatePipelineRes;
+import com.deepconnect.ats.candidatepipeline.dto.MoveCandidateReq;
+import com.deepconnect.ats.candidatepipeline.dto.RejectCandidateReq;
+import com.deepconnect.ats.candidatepipeline.service.CandidatePipelineService;
 import com.deepconnect.ats.dto.ApiResult;
-import com.deepconnect.ats.jobapplication.dto.CandidatePipelineRes;
-import com.deepconnect.ats.jobapplication.dto.MoveCandidateReq;
-import com.deepconnect.ats.jobapplication.dto.RejectCandidateReq;
-import com.deepconnect.ats.jobapplication.service.CandidatePipelineService;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/api/candidate-pipeline")
+@RequestMapping("/api/pipeline")
 @RequiredArgsConstructor
 @Validated
 @PreAuthorize("hasAuthority('jps')")

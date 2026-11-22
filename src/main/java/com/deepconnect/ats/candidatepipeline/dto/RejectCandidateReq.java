@@ -1,4 +1,4 @@
-package com.deepconnect.ats.jobapplication.dto;
+package com.deepconnect.ats.candidatepipeline.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;

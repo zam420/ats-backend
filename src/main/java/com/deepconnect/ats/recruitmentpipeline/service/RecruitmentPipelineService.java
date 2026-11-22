@@ -79,6 +79,7 @@ public class RecruitmentPipelineService {
             if (req.getRounds().size() > maxRounds) {
                 throw new InternalServerException(String.format("Too many rounds. User: %s. Plan: %s. Rounds: %d", loggedInUser.getPublicId(), plan.getPublicId(), req.getRounds().size()));
             }
+            RecruitmentPipelineRoundHelper.assertMandatoryRoundsPresent(req.getRounds(), loggedInUser.getPublicId(), plan.getPublicId());
             RecruitmentPipelineRoundHelper.assertRoundTypeOrder(req.getRounds(), loggedInUser.getPublicId(), plan.getPublicId());
             for (RecruitmentPipelineRound roundTemplate : req.getRounds()) {
                 roundTemplate.setRecruitmentPipeline(plan);
@@ -86,7 +87,6 @@ public class RecruitmentPipelineService {
                 if(!StringUtils.hasText(roundTemplate.getName())) {
                     roundTemplate.setName(enumsResService.from(roundTemplate.getRoundType()).getName());
                 }
-                // recruitmentPipelineRoundRepository.save(roundTemplate);
             }
             recruitmentPipelineRoundRepository.saveAll(req.getRounds());
         }

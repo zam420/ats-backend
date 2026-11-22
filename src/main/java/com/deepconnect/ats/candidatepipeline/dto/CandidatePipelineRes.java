@@ -1,4 +1,4 @@
-package com.deepconnect.ats.jobapplication.dto;
+package com.deepconnect.ats.candidatepipeline.dto;
 
 import java.util.List;
 import java.time.LocalDateTime;

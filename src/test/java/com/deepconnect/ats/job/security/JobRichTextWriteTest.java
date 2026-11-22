@@ -31,6 +31,7 @@ import com.deepconnect.ats.job.repo.JobEvaluationPlanRoundRepository;
 import com.deepconnect.ats.job.repo.JobRecruitmentPipelineRoundRepository;
 import com.deepconnect.ats.job.repo.JobScreeningQuestionRepository;
 import com.deepconnect.ats.jobapplication.repo.JobApplicationRepository;
+import com.deepconnect.ats.jobapplication.service.JobApplicationService;
 
 class JobRichTextWriteTest {
     private final EvaluationPlanService plans = mock(EvaluationPlanService.class);
@@ -38,6 +39,7 @@ class JobRichTextWriteTest {
     private final JobPositionRepository positions = mock(JobPositionRepository.class);
     private final JobPositionService service = new JobPositionService(plans, pipelines,
             mock(JobPositionAccessService.class), mock(ScreeningQuestionsFormService.class), 
+            mock(JobApplicationService.class),
             mock(UserServiceV2.class), mock(EnumsResService.class),
             positions, 
             mock(JobEvaluationPlanRoundRepository.class), mock(JobRecruitmentPipelineRoundRepository.class), 

@@ -46,24 +46,24 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class JobApplicationService {
     private static final long MAX_RESUME_SIZE = 5L * 1024 * 1024;
-    private final JobPositionRepository positions;
-    private final JobApplicationRepository applications;
-    private final JobApplicationAnswerRepository answers;
-    private final JobRecruitmentPipelineRoundRepository stages;
+    private final JobPositionRepository jobPositionRepository;
+    private final JobApplicationRepository jobApplicationRepository;
+    private final JobApplicationAnswerRepository jobApplicationAnswerRepository;
+    private final JobRecruitmentPipelineRoundRepository jobRecruitmentPipelineRoundRepository;
 
     @Value("${ats.storage.root:./uploads}")
     private String storageRoot;
 
     @Transactional
     public String submit(String publicId, JobApplicationReq request, MultipartFile resume) {
-        JobPosition job = positions.findForApplication(publicId)
+        JobPosition job = jobPositionRepository.findForApplication(publicId)
                 .filter(position -> position.getStatus() == JobStatus.OPEN)
                 .orElseThrow(() -> new CustomException(CustomExceptionType.JOB_APPLICATION_CLOSED));
         String email = request.getEmail().trim().toLowerCase(Locale.ROOT);
-        if (applications.existsByJobPositionIdAndEmail(job.getId(), email)) {
+        if (jobApplicationRepository.existsByJobPositionIdAndEmail(job.getId(), email)) {
             throw new CustomException(CustomExceptionType.JOB_APPLICATION_DUPLICATE);
         }
-        List<JobRecruitmentPipelineRound> rounds = stages.findByJobPositionIdOrderByOrderAsc(job.getId());
+        List<JobRecruitmentPipelineRound> rounds = jobRecruitmentPipelineRoundRepository.findByJobPositionIdOrderByOrderAsc(job.getId());
         if (rounds.isEmpty() || rounds.get(0).getRoundType() != RecruitmentPipelineRoundType.APPLIED) {
             throw new CustomException(CustomExceptionType.JOB_PIPELINE_INVALID);
         }
@@ -80,7 +80,7 @@ public class JobApplicationService {
         }
         String storedName = UUID.randomUUID() + extension;
         Path root = Paths.get(storageRoot).toAbsolutePath().normalize();
-        Path target = root.resolve("job-applications").resolve(storedName);
+        Path target = root.resolve("job-jobApplicationRepository").resolve(storedName);
         try {
             Files.createDirectories(target.getParent());
             try (var input = resume.getInputStream()) {
@@ -117,13 +117,13 @@ public class JobApplicationService {
         application.setCountryCode(request.getCountryCode().trim());
         application.setPhoneNumber(request.getPhoneNumber().trim());
         application.setCurrentLocation(request.getCurrentLocation().trim());
-        application.setResumePath("job-applications/" + storedName);
+        application.setResumePath("job-jobApplicationRepository/" + storedName);
         application.setResumeName(originalName);
-        applications.saveAndFlush(application);
+        jobApplicationRepository.saveAndFlush(application);
         for (JobApplicationScreeningQuestionAnswer answer : validated) {
             answer.setJobApplicationId(application.getId());
         }
-        answers.saveAll(validated);
+        jobApplicationAnswerRepository.saveAll(validated);
         return application.getPublicId();
     }
 
@@ -171,5 +171,13 @@ public class JobApplicationService {
             result.add(record);
         }
         return result;
+    }
+
+    public boolean existsByRecruitmentPipelineStageAndRejectedFalse(Long stageId) {
+        return jobApplicationRepository.existsByRecruitmentPipelineStageAndRejectedFalse(stageId);
+    }
+
+    public void clearRejectedStages(List<Long> stageIds) {
+        jobApplicationRepository.clearRejectedStages(stageIds);
     }
 }
