@@ -4,7 +4,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 
 import com.deepconnect.ats.dto.ApiResult;
-import com.deepconnect.ats.dto.AtsPageQuery;
 import com.deepconnect.ats.dto.AtsPageRsp;
 import com.deepconnect.ats.job.service.JobPositionService;
 import com.deepconnect.ats.jobapplication.dto.JobApplicationReq;
@@ -16,7 +15,6 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
-import com.deepconnect.ats.job.model.JobPosition;
 import com.deepconnect.ats.job.dto.JobFiltersResForCandidate;
 import com.deepconnect.ats.job.dto.JobPositionResForCandidate;
 import com.deepconnect.ats.tenant.service.TenantLogoStorage;
@@ -35,11 +33,10 @@ import java.io.IOException;
 public class JobsController {
 
     private final JobPositionService jobPositionService;
-    private final TenantLogoStorage tenantLogoStorage;
     private final JobApplicationService jobApplicationService;
 
     @PreAuthorize("hasAuthority('jpsc')")
-    @PostMapping(value = "/{id}/applications", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/{id}/apply", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ApiResult<String> apply(@PathVariable @NotBlank String id,
             @RequestPart("application") @Valid JobApplicationReq request,
             @RequestPart("resume") MultipartFile resume) {
@@ -60,21 +57,10 @@ public class JobsController {
     }
 
     @PreAuthorize("hasAuthority('jpsc')")
-    @GetMapping("/{id}/logo")
-    public ResponseEntity<byte[]> logo(@PathVariable @NotBlank String id) throws IOException {
-        Path path = tenantLogoStorage.getPath(jobPositionService.findLogoForCandidate(id));
-        String name = path.getFileName().toString();
-        MediaType type = name.endsWith(".svg") ? MediaType.parseMediaType("image/svg+xml")
-            : name.endsWith(".png") ? MediaType.IMAGE_PNG : MediaType.IMAGE_JPEG;
-        return ResponseEntity.ok().contentType(type).body(Files.readAllBytes(path));
-    }
-
-    @PreAuthorize("hasAuthority('jpsc')")
     @GetMapping("/filters")
     public ApiResult<JobFiltersResForCandidate> getFiltersForCandidates() throws Exception {
         return ApiResult.success(jobPositionService.getFiltersForCandidates());
     }
-
 
     // @PreAuthorize("hasAuthority('jps')")
     // @GetMapping("/listJobPostionForCV")

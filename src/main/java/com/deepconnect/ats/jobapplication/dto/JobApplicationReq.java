@@ -11,14 +11,29 @@ import lombok.Data;
 
 @Data
 public class JobApplicationReq {
-    @NotBlank @Size(max = 100) private String firstName;
-    @NotBlank @Size(max = 100) private String lastName;
-    @Size(max = 100) private String preferredName;
-    @NotBlank @Email @Size(max = 254) private String email;
-    @NotBlank @Size(max = 10) private String countryCode;
-    @NotBlank @Size(max = 40) private String phoneNumber;
-    @NotBlank @Size(max = 200) private String currentLocation;
-    @NotNull @Size(max = 40) @Valid private List<Answer> answers;
+    @NotBlank @Size(max = 100) 
+    private String firstName;
+
+    @NotBlank @Size(max = 100) 
+    private String lastName;
+
+    @Size(max = 100) 
+    private String preferredName;
+
+    @NotBlank @Email @Size(max = 254) 
+    private String email;
+
+    @NotBlank @Size(max = 10) 
+    private String countryCode;
+
+    @NotBlank @Size(max = 40) 
+    private String phoneNumber;
+
+    @NotBlank @Size(max = 200) 
+    private String currentLocation;
+    
+    @NotNull @Size(max = 40) @Valid 
+    private List<Answer> answers;
 
     @Data
     public static class Answer {
