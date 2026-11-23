@@ -4,19 +4,18 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 
 import com.deepconnect.ats.dto.ApiResult;
-import com.deepconnect.ats.dto.AtsPageQuery;
 import com.deepconnect.ats.dto.AtsPageRsp;
 import com.deepconnect.ats.job.service.JobPositionService;
 import com.deepconnect.ats.job.dto.JobPositionReq;
 import com.deepconnect.ats.job.dto.JobPositionSearchQuery;
+import com.deepconnect.ats.job.dto.JobPositionRes;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
-import com.deepconnect.ats.job.model.JobPosition;
 import com.deepconnect.ats.job.dto.JobFiltersRes;
-import com.deepconnect.ats.job.dto.JobPositionRes;
+import com.deepconnect.ats.job.dto.JobPositionDetailsRes;
 
 import java.util.Collections;
 import java.util.Map;
@@ -81,7 +80,7 @@ public class JobPositionController {
 
     @PreAuthorize("hasAuthority('jps')")
     @GetMapping("/{id}")
-    public ApiResult<JobPositionRes> findById(
+    public ApiResult<JobPositionDetailsRes> findById(
         @PathVariable @NotBlank(message = "{field.common.id}{validation.notBlank}")String id) {
         return ApiResult.success(jobPositionService.findByPublicIdForTenant(id));
     }

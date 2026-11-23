@@ -23,7 +23,7 @@ class JobPositionResTest {
         JobPosition position = new JobPosition();
         position.setHiringManagers(List.of("manager1", "manager2"));
 
-        JobPositionRes response = JobPositionRes.from(position);
+        JobPositionDetailsRes response = JobPositionDetailsRes.from(position);
         assertEquals(List.of("manager1", "manager2"), response.getHiringManagers());
         ObjectMapper mapper = new ObjectMapper().setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE);
         assertEquals("manager1", mapper.valueToTree(response).get("hiring_managers").get(0).asText());
@@ -52,7 +52,7 @@ class JobPositionResTest {
         position.setScreeningQuestions(List.of(question));
 
         var mapper = new ObjectMapper().setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE);
-        var result = mapper.valueToTree(JobPositionRes.from(position));
+        var result = mapper.valueToTree(JobPositionDetailsRes.from(position));
         var recruitmentJson = result.get("recruitment_pipeline_rounds").get(0);
         var evaluationJson = result.get("evaluation_plan_rounds").get(0);
         var questionJson = result.get("screening_questions").get(0);

@@ -4,7 +4,7 @@ import lombok.Data;
 import com.deepconnect.ats.screeningquestionsform.enums.ScreeningQuestionType;
 import java.util.List;
 
-import com.deepconnect.ats.screeningquestionsform.model.ScreeningQuestion;
+import com.deepconnect.ats.screeningquestionsform.model.ScreeningQuestionBase;
 
 @Data
 public class ScreeningQuestionRes {
@@ -19,9 +19,8 @@ public class ScreeningQuestionRes {
     private Boolean isMandatory;
     private Boolean isDropDownMultiSelect;
     private Integer maxChars;
-    private Integer headingLevel;
 
-    public static ScreeningQuestionRes from(ScreeningQuestion entity) {
+    public static ScreeningQuestionRes from(ScreeningQuestionBase entity) {
         if(entity == null)
             return null;
         ScreeningQuestionRes res = new ScreeningQuestionRes();
@@ -29,18 +28,16 @@ public class ScreeningQuestionRes {
         res.setDescription(entity.getDescription());
         res.setScreeningQuestionType(entity.getScreeningQuestionType());
         res.setOrder(entity.getOrder());
-
         res.setLabel(entity.getLabel());
         res.setOptions(entity.getOptions());
         res.setDefaultOption(entity.getDefaultOption());
         res.setIsMandatory(entity.getIsMandatory());
         res.setIsDropDownMultiSelect(entity.getIsDropDownMultiSelect());
         res.setMaxChars(entity.getMaxChars());
-        res.setHeadingLevel(entity.getHeadingLevel());
         return res;
     }
 
-    public static List<ScreeningQuestionRes> fromList(List<ScreeningQuestion> entities) {
+    public static List<ScreeningQuestionRes> fromList(List<ScreeningQuestionBase> entities) {
         return entities.stream().map(ScreeningQuestionRes::from).toList();
     }
 }

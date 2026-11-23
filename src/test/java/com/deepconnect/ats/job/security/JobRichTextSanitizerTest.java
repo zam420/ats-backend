@@ -2,7 +2,7 @@ package com.deepconnect.ats.job.security;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import com.deepconnect.ats.job.dto.JobPositionRes;
+import com.deepconnect.ats.job.dto.JobPositionDetailsRes;
 import com.deepconnect.ats.job.model.JobPosition;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -95,7 +95,7 @@ class JobRichTextSanitizerTest {
         // position.setMandatoryRequirements("<img src=x onerror=alert(1)><p>Required</p>");
         // position.setPreferredRequirements("<script>alert(1)</script><p>Preferred</p>");
 
-        JobPositionRes dto = JobPositionRes.from(position);
+        JobPositionDetailsRes dto = JobPositionDetailsRes.from(position);
         assertEquals("<p>Description</p>", dto.getDescription());
 
         JsonNode json = new ObjectMapper().valueToTree(position);

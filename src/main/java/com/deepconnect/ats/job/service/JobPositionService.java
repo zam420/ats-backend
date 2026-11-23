@@ -5,13 +5,11 @@ import com.deepconnect.ats.auth.service.AuthService;
 import com.deepconnect.ats.common.enums.CustomExceptionType;
 import com.deepconnect.ats.common.exception.InternalServerException;
 import com.deepconnect.ats.common.exception.CustomException;
-import com.deepconnect.ats.common.exception.ValidationException;
 import com.deepconnect.ats.common.service.EnumsResService;
-import com.deepconnect.ats.common.utils.HashMapUtils;
-import com.deepconnect.ats.dto.AtsPageQuery;
 import com.deepconnect.ats.dto.AtsPageRsp;
 import com.deepconnect.ats.job.dto.JobFiltersRes;
 import com.deepconnect.ats.job.dto.JobPositionSearchQuery;
+import com.deepconnect.ats.job.dto.JobPositionRes;
 import com.deepconnect.ats.job.dto.JobPositionSummaryResForCandidate;
 import com.deepconnect.ats.job.model.JobEvaluationPlanRound;
 import com.deepconnect.ats.job.model.JobPosition;
@@ -31,11 +29,10 @@ import com.deepconnect.ats.jobapplication.service.JobApplicationService;
 import com.deepconnect.ats.user.service.UserServiceV2;
 import com.deepconnect.ats.rbac.enums.RoleType;
 import com.deepconnect.ats.job.dto.JobPositionReq;
-import com.deepconnect.ats.evaluationplan.model.EvaluationPlanRound;
 import com.deepconnect.ats.job.repo.JobRecruitmentPipelineRoundRepository;
 import com.deepconnect.ats.job.repo.JobScreeningQuestionRepository;
-import com.deepconnect.ats.job.dto.JobPositionRes;
-import com.deepconnect.ats.job.dto.JobPositionResForCandidate;
+import com.deepconnect.ats.job.dto.JobPositionDetailsRes;
+import com.deepconnect.ats.job.dto.JobPositionCandidateRes;
 import com.deepconnect.ats.screeningquestionsform.enums.ScreeningQuestionType;
 import com.deepconnect.ats.screeningquestionsform.service.ScreeningQuestionHelper;
 import com.deepconnect.ats.common.utils.StringUtils;
@@ -217,7 +214,7 @@ public class JobPositionService {
         boolean recruitmentPipelineRoundsChanged = !RecruitmentPipelineRoundHelper.roundsEqual(jobPosition.getRecruitmentPipelineRounds(), req.getRecruitmentPipelineRounds())
             || !sameStageIdentities(jobPosition.getRecruitmentPipelineRounds(), req.getRecruitmentPipelineRounds());
         if (recruitmentPipelineRoundsChanged) {
-            updatePipeline(jobPosition, req.getRecruitmentPipelineRounds(), loggedInUser);
+            updateRecruitmentPipeline(jobPosition, req.getRecruitmentPipelineRounds(), loggedInUser);
         }
 
         boolean screeningQuestionsChanged = !ScreeningQuestionHelper.questionsEqual(jobPosition.getScreeningQuestions(), req.getScreeningQuestions());
@@ -249,7 +246,7 @@ public class JobPositionService {
                 && stage.getPublicId().equals(idsByOrder.get(stage.getOrder())));
     }
 
-    private void updatePipeline(JobPosition position, List<JobRecruitmentPipelineRound> incoming, LoggedInUserDetails user) {
+    private void updateRecruitmentPipeline(JobPosition position, List<JobRecruitmentPipelineRound> incoming, LoggedInUserDetails user) {
         Validation.validateMustAdd(ValidationFieldType.RECRUITMENT_PIPELINE_STAGE, incoming);
         if (incoming.size() > maxRounds) {
             throw new InternalServerException("Too many recruitment pipeline stages");
@@ -351,10 +348,10 @@ public class JobPositionService {
     }
 
     @Transactional(readOnly = true)
-    public JobPositionRes findByPublicIdForTenant(String publicId) {
+    public JobPositionDetailsRes findByPublicIdForTenant(String publicId) {
         JobPosition position = jobPositionRepository.findByPublicIdAndTenantIdAndDeactivatedFalse(publicId, AuthService.getLoggedInTenantId()).orElseThrow(() -> new InternalServerException(String.format("Job position not found: User: %s, Position: %s", AuthService.getLoggedInUser().getPublicId(), publicId)));
         jobPositionAccessService.assertReadAccess(AuthService.getLoggedInUser(), position);
-        return JobPositionRes.from(position);
+        return JobPositionDetailsRes.from(position);
     }
 
     @Transactional(readOnly = true)
@@ -369,9 +366,16 @@ public class JobPositionService {
             jobApplicationRepository.countForPositions(page.getContent().stream().map(JobPosition::getId).toList())
                 .forEach(count -> counts.put(count.getJobPositionId(), count.getApplicationCount()));
         }
+        
+        HashSet<Long> ownerIds = new HashSet<>();
+        for(JobPosition position : page.getContent()) {
+            ownerIds.add(position.getOwnerId());
+        }
+        HashMap<Long, String> ownerIdToUser = userService.findNameByUserIds(ownerIds);
         return AtsPageRsp.of(page.map(position -> {
             JobPositionRes res = JobPositionRes.from(position);
             res.setApplicationCount(counts.getOrDefault(position.getId(), 0L));
+            res.setOwnerName(ownerIdToUser.getOrDefault(position.getOwnerId(), ""));
             return res;
         }));
     }
@@ -415,7 +419,7 @@ public class JobPositionService {
             userService.findActiveByRolesForTenant(Set.of(RoleType.HIRING_MANAGER, RoleType.HR_ADMIN, RoleType.RECRUITER)),
             evaluationPlanService.findAllRoundTypes(),
             recruitmentPipelineService.findAllRoundTypes(),
-            screeningQuestionsFormService.findAllScreeningQuestionTypes()
+            enumsResService.from(ScreeningQuestionType.values())
         );
     }
 
@@ -442,9 +446,9 @@ public class JobPositionService {
     }
 
     @Transactional(readOnly = true)
-    public JobPositionResForCandidate findByPublicIdForCandidate(String publicId) {
+    public JobPositionCandidateRes findByPublicIdForCandidate(String publicId) {
         JobPosition position = findOpenPositionForCandidate(publicId);
-        JobPositionResForCandidate result = JobPositionResForCandidate.from(position);
+        JobPositionCandidateRes result = JobPositionCandidateRes.from(position);
         result.setCompanyLogoUrl(TenantLogoStorage.publicUrl(position.getTenant().getLogoPath(), publicLogoBaseUrl));
         return result;
     }

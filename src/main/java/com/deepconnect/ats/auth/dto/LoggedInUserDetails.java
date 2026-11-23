@@ -35,7 +35,7 @@ public class LoggedInUserDetails implements UserDetails {
         this.tenantId = user.getTenantId();
         this.userId = user.getId();
         this.publicId = user.getPublicId();
-        this.username = user.getFullName();
+        this.username = user.getName();
         this.email = user.getEmail();
         this.password = user.getPassword();
         this.authorities = authorities;//this includes roles only

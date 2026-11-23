@@ -5,7 +5,7 @@ import lombok.Data;
 import java.util.List;
 
 import com.deepconnect.ats.recruitmentpipeline.enums.RecruitmentPipelineRoundType;
-import com.deepconnect.ats.recruitmentpipeline.model.RecruitmentPipelineRound;
+import com.deepconnect.ats.recruitmentpipeline.model.RecruitmentPipelineRoundBase;
 
 @Data
 public class RecruitmentPipelineRoundRes {
@@ -13,10 +13,9 @@ public class RecruitmentPipelineRoundRes {
     private String name;
     private String description;
     private RecruitmentPipelineRoundType roundType;
-    private List<String> interviewers;
     private Integer order;
 
-    public static RecruitmentPipelineRoundRes from(RecruitmentPipelineRound entity) {
+    public static RecruitmentPipelineRoundRes from(RecruitmentPipelineRoundBase entity) {
         if(entity == null)
             return null;
         RecruitmentPipelineRoundRes res = new RecruitmentPipelineRoundRes();
@@ -28,7 +27,7 @@ public class RecruitmentPipelineRoundRes {
         return res;
     }
 
-    public static List<RecruitmentPipelineRoundRes> fromList(List<RecruitmentPipelineRound> entities) {
+    public static List<RecruitmentPipelineRoundRes> fromList(List<RecruitmentPipelineRoundBase> entities) {
         return entities.stream().map(RecruitmentPipelineRoundRes::from).toList();
     }
 }

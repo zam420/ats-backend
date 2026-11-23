@@ -7,6 +7,14 @@ import com.deepconnect.ats.auth.service.AuthService;
 import com.deepconnect.ats.common.exception.InternalServerException;
 import com.deepconnect.ats.dto.AtsPageQuery;
 import com.deepconnect.ats.dto.AtsPageRsp;
+import com.deepconnect.ats.job.dto.JobFiltersRes;
+import com.deepconnect.ats.job.enums.JobEmploymentType;
+import com.deepconnect.ats.job.enums.JobExperienceLevelType;
+import com.deepconnect.ats.job.enums.JobPostedDateType;
+import com.deepconnect.ats.job.enums.JobQuestionsDisplayMode;
+import com.deepconnect.ats.job.enums.JobWorkArrangementType;
+import com.deepconnect.ats.job.model.JobPosition;
+import com.deepconnect.ats.rbac.enums.RoleType;
 import com.deepconnect.ats.user.model.User;
 import com.deepconnect.ats.user.service.UserServiceV2;
 import com.deepconnect.ats.common.dto.EnumsExtendedRes;
@@ -27,6 +35,7 @@ import com.deepconnect.ats.screeningquestionsform.dto.ScreeningQuestionsFormReq;
 import com.deepconnect.ats.screeningquestionsform.model.ScreeningQuestion;
 import com.deepconnect.ats.screeningquestionsform.model.ScreeningQuestionsFormShare;
 import com.deepconnect.ats.screeningquestionsform.dto.ScreeningQuestionsFormDetailsRes;
+import com.deepconnect.ats.screeningquestionsform.dto.ScreeningQuestionsFormFiltersRes;
 import com.deepconnect.ats.common.exception.CustomException;
 
 import lombok.RequiredArgsConstructor;
@@ -35,6 +44,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -61,8 +72,11 @@ public class ScreeningQuestionsFormService {
     private final ScreeningQuestionRepository screeningQuestionRepository;
     private final ScreeningQuestionsFormShareRepository screeningQuestionTemplateShareRepository;
 
-    public List<EnumsExtendedRes> findAllScreeningQuestionTypes() {
-        return enumsResService.from(ScreeningQuestionType.values());
+    public ScreeningQuestionsFormFiltersRes getFilters() {
+        return ScreeningQuestionsFormFiltersRes.from(
+            enumsResService.from(ScreeningQuestionType.values()),
+            userService.findActiveUsersForTenant()
+        );
     }
 
     private String save(ScreeningQuestionsForm template, ScreeningQuestionsFormReq req, boolean questionsChanged, boolean sharedWithUsersChanged, boolean isPublicForTenant, boolean isPublicForAll) {
@@ -238,7 +252,7 @@ public class ScreeningQuestionsFormService {
         //ScreeningQuestionsForm plan = screeningQuestionTemplateRepository.findByPublicIdAndTenantIdAndDeactivatedFalse(publicId, AuthService.getLoggedInTenantId()).orElseThrow(() -> new InternalServerException("Screening Question Template not found: " + publicId));
         ScreeningQuestionsForm plan = screeningQuestionTemplateRepository.findByPublicIdAndDeactivatedFalse(publicId).orElseThrow(() -> new InternalServerException("Screening Question Template not found: " + publicId));
         screeningQuestionTemplateAccessService.assertReadAccess(AuthService.getLoggedInUser(), plan);
-        return ScreeningQuestionsFormDetailsRes.from(plan);
+        return ScreeningQuestionsFormDetailsRes.from(plan, userService.findByUserId(plan.getOwnerId()).get().getName());
     }
 
     @Transactional(readOnly = true)
@@ -247,7 +261,7 @@ public class ScreeningQuestionsFormService {
         Page<ScreeningQuestionsForm> page = isAdmin 
             ? screeningQuestionTemplateRepository.findAllForTenantAdmin(AuthService.getLoggedInTenantId(), query.toPageable()) 
             : screeningQuestionTemplateRepository.findAllForTenantNonAdmin(AuthService.getLoggedInTenantId(), AuthService.getLoggedInUser().getUserId(), query.toPageable());
-        return AtsPageRsp.of(page.map(ScreeningQuestionsFormRes::from));
+        return this.getResponseFromPage(page);
     }
 
     /**
@@ -261,13 +275,12 @@ public class ScreeningQuestionsFormService {
         List<ScreeningQuestionsForm> plans = isAdmin 
             ? screeningQuestionTemplateRepository.findAllForTenantAdminAsList(AuthService.getLoggedInTenantId()) 
             : screeningQuestionTemplateRepository.findAllForTenantNonAdminAsList(AuthService.getLoggedInTenantId(), AuthService.getLoggedInUser().getUserId());
-        return plans.stream().map(ScreeningQuestionsFormRes::from).toList();
+        return plans.stream().map(e -> ScreeningQuestionsFormRes.from(e, this.getOwnerNamesByPlans(plans).get(e.getOwnerId()))).toList();
     }
 
     @Transactional(readOnly = true)
     public AtsPageRsp<ScreeningQuestionsFormRes> findAllSystemTemplates(AtsPageQuery query) {
-        Page<ScreeningQuestionsForm> page = screeningQuestionTemplateRepository.findByDeactivatedFalseAndIsPublicForAllTrue(query.toPageable());
-        return AtsPageRsp.of(page.map(ScreeningQuestionsFormRes::from));
+        return this.getResponseFromPage(screeningQuestionTemplateRepository.findByDeactivatedFalseAndIsPublicForAllTrue(query.toPageable()));
     }
 
     /**
@@ -279,8 +292,7 @@ public class ScreeningQuestionsFormService {
     @Transactional(readOnly = true)
     public AtsPageRsp<ScreeningQuestionsFormRes> findAllSharedWithUser(AtsPageQuery query) {
         LoggedInUserDetails loggedInUser = AuthService.getLoggedInUser();
-        Page<ScreeningQuestionsForm> page = screeningQuestionTemplateRepository.findPublicOrSharedForTenant(loggedInUser.getTenantId(), loggedInUser.getUserId(),  query.toPageable());
-        return AtsPageRsp.of(page.map(ScreeningQuestionsFormRes::from));
+        return this.getResponseFromPage(screeningQuestionTemplateRepository.findPublicOrSharedForTenant(loggedInUser.getTenantId(), loggedInUser.getUserId(),  query.toPageable()));
     }
 
     /**
@@ -292,8 +304,7 @@ public class ScreeningQuestionsFormService {
     @Transactional(readOnly = true)
     public AtsPageRsp<ScreeningQuestionsFormRes> findAllForPlanOwner(AtsPageQuery query) {
         LoggedInUserDetails loggedInUser = AuthService.getLoggedInUser();
-        Page<ScreeningQuestionsForm> page = screeningQuestionTemplateRepository.findByDeactivatedFalseAndTenantIdAndOwnerId(loggedInUser.getTenantId(), loggedInUser.getUserId(), query.toPageable());
-        return AtsPageRsp.of(page.map(ScreeningQuestionsFormRes::from));
+        return this.getResponseFromPage(screeningQuestionTemplateRepository.findByDeactivatedFalseAndTenantIdAndOwnerId(loggedInUser.getTenantId(), loggedInUser.getUserId(), query.toPageable()));
     }
 
     /**
@@ -303,9 +314,7 @@ public class ScreeningQuestionsFormService {
      * @return a paginated response containing interview plans for the tenant
      */
     private AtsPageRsp<ScreeningQuestionsFormRes> findAllForTenant(AtsPageQuery query) {
-        Long tenantId = AuthService.getLoggedInTenantId();
-        Page<ScreeningQuestionsForm> page = screeningQuestionTemplateRepository.findByDeactivatedFalseAndTenantId(tenantId, query.toPageable());
-        return AtsPageRsp.of(page.map(ScreeningQuestionsFormRes::from));
+        return this.getResponseFromPage(screeningQuestionTemplateRepository.findByDeactivatedFalseAndTenantId(AuthService.getLoggedInTenantId(), query.toPageable()));
     }
 
     private void setAnotherUserAsOwner(ScreeningQuestionsForm template, AccessType loggedInUserAccessType, String ownerId) {
@@ -366,6 +375,18 @@ public class ScreeningQuestionsFormService {
 
     public Optional<ScreeningQuestionsForm> findByDeactivatedFalseAndPublicId(String publicId) {
         return screeningQuestionTemplateRepository.findByDeactivatedFalseAndPublicId(publicId);
+    }
+
+    private AtsPageRsp<ScreeningQuestionsFormRes> getResponseFromPage(Page<ScreeningQuestionsForm> page) {
+        return AtsPageRsp.of(page.map(e -> ScreeningQuestionsFormRes.from(e, this.getOwnerNamesByPlans(page.getContent()).get(e.getOwnerId()))));
+    }
+
+    private HashMap<Long, String> getOwnerNamesByPlans(List<ScreeningQuestionsForm> plans) {
+        HashSet<Long> ownerIds = new HashSet<>();
+        for(ScreeningQuestionsForm plan : plans) {
+            ownerIds.add(plan.getOwnerId());
+        }
+        return userService.findNameByUserIds(ownerIds);
     }
 
 }

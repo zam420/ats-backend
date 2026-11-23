@@ -1,6 +1,7 @@
 package com.deepconnect.ats.recruitmentpipeline.dto;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.List;
 import java.util.Set;
@@ -10,27 +11,22 @@ import org.springframework.util.CollectionUtils;
 
 import com.deepconnect.ats.recruitmentpipeline.model.RecruitmentPipeline;
 
-@Data
-public class RecruitmentPipelineDetailsRes {
-    private String id;
-    private String name;
-    private String description;
-    private Boolean isPublic;
-    private Boolean isSystemTemplate;
-    private Boolean isSharedWithinTenant;
+@Getter
+@Setter
+public class RecruitmentPipelineDetailsRes extends RecruitmentPipelineResBase {
+    
     private List<RecruitmentPipelineRoundRes> rounds;
     private Set<String> sharedWithUserIds;
     private String ownerId;
 
+    protected RecruitmentPipelineDetailsRes(RecruitmentPipeline entity) {
+        super(entity);
+    }
+
     public static RecruitmentPipelineDetailsRes from(RecruitmentPipeline entity) {
         if(entity == null)
             return null;
-        RecruitmentPipelineDetailsRes res = new RecruitmentPipelineDetailsRes();
-        res.setId(entity.getPublicId());
-        res.setName(entity.getName());
-        res.setDescription(entity.getDescription());
-        res.setIsPublic(entity.getIsPublicForTenant());
-        res.setIsSystemTemplate(entity.getIsPublicForAll());
+        RecruitmentPipelineDetailsRes res = new RecruitmentPipelineDetailsRes(entity);
         res.setRounds(
             entity.getRounds() == null
                 ? List.of()

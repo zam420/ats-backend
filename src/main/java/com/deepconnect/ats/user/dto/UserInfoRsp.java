@@ -40,7 +40,7 @@ public class UserInfoRsp {
         if (user == null) return null;
         return UserInfoRsp.builder()
                 .id(user.getPublicId())
-                .name(user.getFullName())
+                .name(user.getName())
                 .email(user.getEmail())
                 .phone(user.getPhone())
                 .type(user.getType())

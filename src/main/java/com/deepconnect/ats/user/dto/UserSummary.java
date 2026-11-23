@@ -19,7 +19,7 @@ public class UserSummary {
         if (user == null) return null;
         return UserSummary.builder()
                 .id(user.getPublicId())
-                .name(user.getFullName())
+                .name(user.getName())
                 .email(user.getEmail())
                 .build();
     }

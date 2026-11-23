@@ -39,24 +39,4 @@ class ScreeningQuestionResTest {
         }
     }
 
-    @Test
-    void headingLevelRoundTripsAndIsValidated() throws Exception {
-        ObjectMapper mapper = new ObjectMapper().setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE);
-        ScreeningQuestion question = mapper.readValue("{\"heading_level\":3}", ScreeningQuestion.class);
-        assertEquals(3, question.getHeadingLevel());
-        assertEquals(3, mapper.valueToTree(ScreeningQuestionRes.from(question)).get("heading_level").asInt());
-        try (var factory = Validation.buildDefaultValidatorFactory()) {
-            var validator = factory.getValidator();
-            for (int level = 1; level <= 3; level++) {
-                question.setHeadingLevel(level);
-                assertTrue(validator.validateProperty(question, "headingLevel").isEmpty());
-            }
-            question.setHeadingLevel(0);
-            assertFalse(validator.validateProperty(question, "headingLevel").isEmpty());
-            question.setHeadingLevel(4);
-            assertFalse(validator.validateProperty(question, "headingLevel").isEmpty());
-            question.setHeadingLevel(null);
-            assertTrue(validator.validateProperty(question, "headingLevel").isEmpty());
-        }
-    }
 }

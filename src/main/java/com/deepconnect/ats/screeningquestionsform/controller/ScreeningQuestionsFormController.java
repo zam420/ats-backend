@@ -14,8 +14,10 @@ import com.deepconnect.ats.common.dto.EnumsExtendedRes;
 import com.deepconnect.ats.dto.ApiResult;
 import com.deepconnect.ats.dto.AtsPageQuery;
 import com.deepconnect.ats.dto.AtsPageRsp;
+import com.deepconnect.ats.job.dto.JobFiltersRes;
 import com.deepconnect.ats.screeningquestionsform.dto.ScreeningQuestionsFormRes;
 import com.deepconnect.ats.screeningquestionsform.dto.ScreeningQuestionsFormDetailsRes;
+import com.deepconnect.ats.screeningquestionsform.dto.ScreeningQuestionsFormFiltersRes;
 
 import java.util.Collections;
 import java.util.List;
@@ -53,12 +55,6 @@ public class ScreeningQuestionsFormController {
         @PathVariable @NotBlank(message = "{field.common.id}{validation.notBlank}") String id) {
         screeningQuestionTemplateService.deactivate(id);
         return ApiResult.success(true);
-    }
-
-    @PreAuthorize("hasAuthority('sqts')")
-    @GetMapping("/controltypes")
-    public ApiResult<List<EnumsExtendedRes>> findAllScreeningQuestionTypes() throws Exception {
-        return ApiResult.success(screeningQuestionTemplateService.findAllScreeningQuestionTypes());
     }
 
     @PreAuthorize("hasAuthority('sqts')")
@@ -102,6 +98,12 @@ public class ScreeningQuestionsFormController {
     @PostMapping("/templates/update")
     public ApiResult<Map<String, String>> updateSystemTemplate(@RequestBody @Valid ScreeningQuestionsFormReq req) {
         return ApiResult.success(Collections.singletonMap("id", screeningQuestionTemplateService.updateSystemTemplate(req)));
+    }
+
+    @PreAuthorize("hasAuthority('sqts')")
+    @GetMapping("/filters")
+    public ApiResult<ScreeningQuestionsFormFiltersRes> getFilters() throws Exception {
+        return ApiResult.success(screeningQuestionTemplateService.getFilters());
     }
 
     /**

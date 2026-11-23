@@ -58,11 +58,6 @@ public abstract class ScreeningQuestionBase extends BaseEntity {
     @Column(nullable = true)
     private Integer maxChars;
 
-    @Column(name = "heading_level")
-    @Min(1)
-    @Max(3)
-    private Integer headingLevel;
-
     @Enumerated(EnumType.STRING)
     @NotNull(message = "{field.screeningQuestion.screeningQuestionType}{validation.notBlank}")
     @Column(nullable = false)

@@ -80,8 +80,7 @@ public final class ScreeningQuestionHelper {
                     || !Objects.equals(x.getDefaultOption(), y.getDefaultOption())
                     || !Objects.equals(x.getIsMandatory(), y.getIsMandatory())
                     || !Objects.equals(x.getIsDropDownMultiSelect(), y.getIsDropDownMultiSelect())
-                    || !Objects.equals(x.getMaxChars(), y.getMaxChars())
-                    || !Objects.equals(x.getHeadingLevel(), y.getHeadingLevel())) {
+                    || !Objects.equals(x.getMaxChars(), y.getMaxChars())) {
                 return false;
             }
         }

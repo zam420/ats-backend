@@ -1,6 +1,7 @@
 package com.deepconnect.ats.evaluationplan.dto;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.List;
 import java.util.Set;
@@ -9,22 +10,21 @@ import java.util.stream.Collectors;
 import com.deepconnect.ats.evaluationplan.model.EvaluationPlan;
 import com.nimbusds.oauth2.sdk.util.CollectionUtils;
 
-@Data
-public class EvaluationPlanDetailsRes {
-    private String id;
-    private String name;
-    private String description;
-    private Boolean isPublic;
-    private Boolean isSystemTemplate;
-    private Boolean isSharedWithinTenant;
+@Getter
+@Setter 
+public class EvaluationPlanDetailsRes extends EvaluationPlanResBase {
     private List<EvaluationPlanRoundRes> rounds;
     private Set<String> sharedWithUserIds;
     private String ownerId;
 
+    protected EvaluationPlanDetailsRes(EvaluationPlan entity) {
+        super(entity);
+    }
+
     public static EvaluationPlanDetailsRes from(EvaluationPlan entity) {
         if(entity == null)
             return null;
-        EvaluationPlanDetailsRes res = new EvaluationPlanDetailsRes();
+        EvaluationPlanDetailsRes res = new EvaluationPlanDetailsRes(entity);
         res.setId(entity.getPublicId());
         res.setName(entity.getName());
         res.setDescription(entity.getDescription());

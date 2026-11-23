@@ -44,7 +44,7 @@ public class JobPositionSummaryResForCandidate {
         return entities.stream().map(JobPositionSummaryResForCandidate::from).toList();
     }
 
-    public static JobPositionSummaryResForCandidate from(JobPositionResForCandidate entity, int maxWords) {
+    public static JobPositionSummaryResForCandidate from(JobPositionCandidateRes entity, int maxWords) {
         JobPositionSummaryResForCandidate res = new JobPositionSummaryResForCandidate();
         res.setId(entity.getId());
         res.setTitle(entity.getTitle());
@@ -60,7 +60,7 @@ public class JobPositionSummaryResForCandidate {
         return res;
     }
 
-    public static List<JobPositionSummaryResForCandidate> fromListForCandidate(List<JobPositionResForCandidate> entities, int maxWords) {
+    public static List<JobPositionSummaryResForCandidate> fromListForCandidate(List<JobPositionCandidateRes> entities, int maxWords) {
         return entities.stream().map(entity -> from(entity, maxWords)).toList();
     }
 

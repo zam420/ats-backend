@@ -1,6 +1,8 @@
 package com.deepconnect.ats.evaluationplan.dto;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
+
 import org.springframework.util.CollectionUtils;
 
 import java.util.Comparator;
@@ -10,27 +12,18 @@ import java.util.stream.Collectors;
 import com.deepconnect.ats.evaluationplan.model.EvaluationPlan;
 import com.deepconnect.ats.evaluationplan.model.EvaluationPlanRound;
 
-@Data
-public class EvaluationPlanRes {
-    private String id;
-    private String name;
-    private String description;
-    private Boolean isPublic;
-    private Boolean isSystemTemplate;
-    private Boolean isSharedWithinTenant;
-    private String ownerId;
-    // Round names in order, joined as "name1 -> name2"; generated on the fly, never stored
-    private String roundSequence;
+@Getter
+@Setter 
+public class EvaluationPlanRes extends EvaluationPlanResBase {
+    
+    private String roundSequence;// Round names in order, joined as "name1 -> name2"; generated on the fly, never stored
+
+    protected EvaluationPlanRes(EvaluationPlan entity) {
+        super(entity);
+    }
     
     public static EvaluationPlanRes from(EvaluationPlan entity) {
-        EvaluationPlanRes res = new EvaluationPlanRes();
-        res.setId(entity.getPublicId());
-        res.setName(entity.getName());
-        res.setDescription(entity.getDescription());
-        res.setIsPublic(entity.getIsPublicForTenant());
-        res.setIsSystemTemplate(entity.getIsPublicForAll());
-        res.setIsSharedWithinTenant(entity.getIsSharedWithinTenant());
-        res.setOwnerId(entity.getOwnerPublicId());
+        EvaluationPlanRes res = new EvaluationPlanRes(entity);        
         if (!CollectionUtils.isEmpty(entity.getRounds())) {
             res.setRoundSequence(entity.getRounds().stream()
                 .sorted(Comparator.comparing(EvaluationPlanRound::getOrder, Comparator.nullsLast(Comparator.naturalOrder())))

@@ -57,7 +57,7 @@ public class User extends BaseWithTenantEntity {
     private LocalDateTime joinDate;
 
     @JsonIgnore
-    public String getFullName() {
+    public String getName() {
         return ((firstName == null ? "" : firstName) + " " + (lastName == null ? "" : lastName)).trim();
     }
 
@@ -122,7 +122,4 @@ public class User extends BaseWithTenantEntity {
     @Column(nullable = true)
     private String lockedByUserName; // Denormalized for quick access
 
-    public String getName() {
-        return ((firstName == null ? "" : firstName) + " " + (lastName == null ? "" : lastName)).trim();
-    }
 }

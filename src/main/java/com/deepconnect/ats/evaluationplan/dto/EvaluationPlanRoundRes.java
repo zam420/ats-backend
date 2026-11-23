@@ -4,7 +4,7 @@ import lombok.Data;
 
 import java.util.List;
 
-import com.deepconnect.ats.evaluationplan.model.EvaluationPlanRound;
+import com.deepconnect.ats.evaluationplan.model.EvaluationPlanRoundBase;
 import com.deepconnect.ats.evaluationplan.enums.EvaluationPlanRoundType;
 
 @Data
@@ -16,7 +16,7 @@ public class EvaluationPlanRoundRes {
     private List<String> interviewers;
     private Integer order;
 
-    public static EvaluationPlanRoundRes from(EvaluationPlanRound entity) {
+    public static EvaluationPlanRoundRes from(EvaluationPlanRoundBase entity) {
         if(entity == null)
             return null;
         EvaluationPlanRoundRes res = new EvaluationPlanRoundRes();
@@ -29,7 +29,7 @@ public class EvaluationPlanRoundRes {
         return res;
     }
 
-    public static List<EvaluationPlanRoundRes> fromList(List<EvaluationPlanRound> entities) {
+    public static List<EvaluationPlanRoundRes> fromList(List<EvaluationPlanRoundBase> entities) {
         return entities.stream().map(EvaluationPlanRoundRes::from).toList();
     }
 }

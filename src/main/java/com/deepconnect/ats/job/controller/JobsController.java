@@ -16,7 +16,7 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import com.deepconnect.ats.job.dto.JobFiltersResForCandidate;
-import com.deepconnect.ats.job.dto.JobPositionResForCandidate;
+import com.deepconnect.ats.job.dto.JobPositionCandidateRes;
 import com.deepconnect.ats.tenant.service.TenantLogoStorage;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -51,7 +51,7 @@ public class JobsController {
 
     @PreAuthorize("hasAuthority('jpsc')")
     @GetMapping("/{id}")
-    public ApiResult<JobPositionResForCandidate> findById(
+    public ApiResult<JobPositionCandidateRes> findById(
         @PathVariable @NotBlank(message = "{field.common.id}{validation.notBlank}")String id) {
         return ApiResult.success(jobPositionService.findByPublicIdForCandidate(id));
     }

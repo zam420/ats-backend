@@ -227,6 +227,19 @@ public class UserServiceV2 {
         return userRepository.findById(userId);
     }
 
+    public List<User> findByUserIdIn(Set<Long> userIds){
+        return userRepository.findByIdIn(userIds);
+    }
+
+    public HashMap<Long, String> findNameByUserIds(Set<Long> userIds){
+        List<User> users = userRepository.findByIdIn(userIds);
+        HashMap<Long, String> userIdToFullName = new HashMap<>();
+        for(User user : users) {
+            userIdToFullName.put(user.getId(), user.getName());
+        }
+        return userIdToFullName;
+    }
+
     public Optional<User> findByPublicIdAndDeactivatedFalseAndLockedFalse(String publicId){
         return userRepository.findByPublicIdAndDeactivatedFalseAndLockedFalse(publicId);
     }

@@ -130,12 +130,12 @@ public abstract class HashMapUtils {
     //The method takes a list of objects, the names of the two fields to be used as keys, and the classes of the key and value types.
     //It returns a HashMap where the key is the value of field name specified by subKeyFieldName and the value is the object itself.
     //The method uses reflection to access the fields of the object and create the composite key.
-    public static <MainKeyType, SubKeyType, ValueType> HashMap<SubKeyType, ValueType> getMapFromListForCompositeKey(List<ValueType> list, String mainKeyFieldName, String subKeyFieldName, Class<MainKeyType> clazzMainKeyType, Class<SubKeyType> clazzSubKeyType, Class<ValueType> clazzValueType) {
-        HashMap<SubKeyType, ValueType> result = new HashMap<>();
+    public static <MainKeyType, SubKeyType, ListType> HashMap<SubKeyType, ListType> getMapFromListForCompositeKey(List<ListType> list, String mainKeyFieldName, String subKeyFieldName, Class<MainKeyType> clazzMainKeyType, Class<SubKeyType> clazzSubKeyType, Class<ListType> clazzValueType) {
+        HashMap<SubKeyType, ListType> result = new HashMap<>();
         
         try {
             Field mainKeyField = clazzValueType.getDeclaredField(mainKeyFieldName);
-            for(ValueType listItem : list){
+            for(ListType listItem : list){
                 mainKeyField.setAccessible(true);
                 MainKeyType mainKey = (MainKeyType)mainKeyField.get(listItem); 
                 //MainKeyType subKey = (SubKeyType)mainKey.get(listItem); 
@@ -157,12 +157,30 @@ public abstract class HashMapUtils {
         return result;    
     }
 
-    public static <KeyType, ValueType> HashMap<KeyType, ValueType> getMapFromList(List<ValueType> list, String keyFieldName, Class<KeyType> clazzKeyType, Class<ValueType> clazzValueType) {
-        HashMap<KeyType, ValueType> result = new HashMap<>();
+    /**
+     * Converts a list of objects into a HashMap where the key is extracted from the specified field of each object.
+     * The key is obtained using reflection based on the provided keyFieldName and clazzKeyType.
+     * The value in the map is the object itself.
+     * 
+     * @param <KeyType>
+     * @param <ListType>
+     * @param list
+     * @param keyFieldName
+     * @param clazzKeyType
+     * @param clazzValueType
+     * @return
+     */
+    public static <KeyType, ListType> HashMap<KeyType, ListType> getMapFromList(
+        List<ListType> list, 
+        String keyFieldName, 
+        Class<KeyType> clazzKeyType, 
+        Class<ListType> clazzValueType
+    ) {
+        HashMap<KeyType, ListType> result = new HashMap<>();
 
         try {
             Field keyField = clazzValueType.getDeclaredField(keyFieldName);
-            for(ValueType listItem : list){
+            for(ListType listItem : list){
                 keyField.setAccessible(true);
                 result.put((KeyType)keyField.get(listItem), listItem);
             } 
@@ -181,15 +199,60 @@ public abstract class HashMapUtils {
         return result;    
     }
 
-    public static <KeyType, ValueType> HashMap<KeyType, List<ValueType>> getMapFromListForListValueType(List<ValueType> list, String keyFieldName, Class<KeyType> clazzKeyType, Class<ValueType> clazzValueType) {
-        HashMap<KeyType, List<ValueType>> result = new HashMap<>();
+    /**
+     * Get a map from a list using a key field and a value field from the list items.
+     * The key is extracted from the keyFieldName and the value is extracted from the valueFieldName.
+     * 
+     * @param <KeyType>
+     * @param <ValueType>
+     * @param <ListType>
+     * @param list
+     * @param keyFieldName
+     * @param clazzKeyType
+     * @param valueFieldName
+     * @param clazzValueType
+     * @param clazzListType
+     * @return
+     */
+    public static <KeyType, ValueType, ListType> HashMap<KeyType, ValueType> getMapFromList(
+        List<ListType> list, 
+        String keyFieldName, Class<KeyType> clazzKeyType, 
+        String valueFieldName, 
+        Class<ValueType> clazzValueType, 
+        Class<ListType> clazzListType
+    ) {
+        HashMap<KeyType, ValueType> result = new HashMap<>();
+        try {
+            Field keyField = clazzListType.getDeclaredField(keyFieldName);
+            Field valueField = clazzListType.getDeclaredField(valueFieldName);
+            for(ListType listItem : list){
+                keyField.setAccessible(true);
+                result.put((KeyType)keyField.get(listItem), (ValueType)valueField.get(listItem));
+            } 
+        }
+        catch (IllegalArgumentException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (NoSuchFieldException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        
+        return result;    
+    }
+
+    public static <KeyType, ListType> HashMap<KeyType, List<ListType>> getMapFromListForListValueType(List<ListType> list, String keyFieldName, Class<KeyType> clazzKeyType, Class<ListType> clazzValueType) {
+        HashMap<KeyType, List<ListType>> result = new HashMap<>();
         if(list == null || list.size() == 0){
             return result;
         }
         
         try {
             Field keyField = clazzValueType.getDeclaredField(keyFieldName);
-            for(ValueType listItem : list){
+            for(ListType listItem : list){
                 keyField.setAccessible(true);
                 HashMapUtils.putValueInList(result, (KeyType)keyField.get(listItem), listItem);
             }

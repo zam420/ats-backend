@@ -1,7 +1,9 @@
 package com.deepconnect.ats.screeningquestionsform.dto;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -9,27 +11,22 @@ import java.util.stream.Collectors;
 import com.deepconnect.ats.screeningquestionsform.model.ScreeningQuestionsForm;
 import com.nimbusds.oauth2.sdk.util.CollectionUtils;
 
-@Data
-public class ScreeningQuestionsFormDetailsRes {
-    private String id;
-    private String name;
-    private String description;
-    private Boolean isPublic;
-    private Boolean isSystemTemplate;
-    private Boolean isSharedWithinTenant;
+@Getter
+@Setter
+public class ScreeningQuestionsFormDetailsRes extends ScreeningQuestionsFormResBase {
+
     private List<ScreeningQuestionRes> questions;
     private Set<String> sharedWithUserIds;
     private String ownerId;
 
-    public static ScreeningQuestionsFormDetailsRes from(ScreeningQuestionsForm entity) {
+    protected ScreeningQuestionsFormDetailsRes(ScreeningQuestionsForm entity, String ownerName) {
+        super(entity, ownerName);
+    }
+
+    public static ScreeningQuestionsFormDetailsRes from(ScreeningQuestionsForm entity, String ownerName) {
         if(entity == null)
             return null;
-        ScreeningQuestionsFormDetailsRes res = new ScreeningQuestionsFormDetailsRes();
-        res.setId(entity.getPublicId());
-        res.setName(entity.getName());
-        res.setDescription(entity.getDescription());
-        res.setIsPublic(entity.getIsPublicForTenant());
-        res.setIsSystemTemplate(entity.getIsPublicForAll());
+        ScreeningQuestionsFormDetailsRes res = new ScreeningQuestionsFormDetailsRes(entity, ownerName);
         res.setQuestions(
         entity.getQuestions() == null
             ? List.of()
@@ -48,7 +45,8 @@ public class ScreeningQuestionsFormDetailsRes {
         return res;
     }
 
-    public static List<ScreeningQuestionsFormDetailsRes> fromList(List<ScreeningQuestionsForm> entities) {
-        return entities.stream().map(ScreeningQuestionsFormDetailsRes::from).toList();
+    public static List<ScreeningQuestionsFormDetailsRes> from(List<ScreeningQuestionsForm> entities, HashMap<Long, String> ownerNamesById) {
+        return entities.stream().map(e -> ScreeningQuestionsFormDetailsRes.from(e, ownerNamesById.get(e.getOwnerId()))).toList();
     }
+
 }
