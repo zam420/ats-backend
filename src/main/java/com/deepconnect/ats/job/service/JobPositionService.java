@@ -429,7 +429,6 @@ public class JobPositionService {
             enumsResService.from(JobEmploymentType.values()),
             enumsResService.from(JobWorkArrangementType.values()),
             enumsResService.from(JobExperienceLevelType.values()),
-            enumsResService.from(JobStatus.values()),
             enumsResService.from(JobPostedDateType.values()),
             enumsResService.from(ScreeningQuestionType.values())
         );

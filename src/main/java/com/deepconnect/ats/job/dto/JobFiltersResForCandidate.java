@@ -12,7 +12,6 @@ public class JobFiltersResForCandidate {
     private List<EnumsRes> employmentTypes;
     private List<EnumsRes> workArrangementTypes;
     private List<EnumsRes> experienceLevelTypes;
-    private List<EnumsRes> jobStatus;
     private List<EnumsRes> jobPostedDateTypes;
     private List<EnumsExtendedRes> screeningQuestionTypes;
     
@@ -20,7 +19,6 @@ public class JobFiltersResForCandidate {
         List<EnumsRes> employmentTypes, 
         List<EnumsRes> workArrangementTypes, 
         List<EnumsRes> experienceLevelTypes,
-        List<EnumsRes> jobStatus,
         List<EnumsRes> jobPostedDateTypes,
         List<EnumsExtendedRes> screeningQuestionTypes)
     {
@@ -28,7 +26,6 @@ public class JobFiltersResForCandidate {
         res.setEmploymentTypes(employmentTypes);
         res.setWorkArrangementTypes(workArrangementTypes);
         res.setExperienceLevelTypes(experienceLevelTypes);
-        res.setJobStatus(jobStatus);
         res.setJobPostedDateTypes(jobPostedDateTypes);
         res.setScreeningQuestionTypes(screeningQuestionTypes);
         return res;
