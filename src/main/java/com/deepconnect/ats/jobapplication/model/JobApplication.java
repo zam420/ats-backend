@@ -6,9 +6,13 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.validator.constraints.Length;
 
 import com.deepconnect.ats.common.model.BaseEntity;
+import com.deepconnect.ats.job.model.JobPosition;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.Email;
@@ -28,6 +32,10 @@ public class JobApplication extends BaseEntity {
     @Column(name = "job_position_id", nullable = false)
     @NotNull(message = "{field.jobApplication.jobPosition}{validation.notBlank}")
     private Long jobPositionId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "job_position_id", insertable = false, updatable = false)
+    private JobPosition jobPosition;
 
     /*The ID of the recruitment pipeline stage the application is currently in.
     It can be null when a candidate was rejected in a custom stage, and later that stage was deleted from the job by job owner or hra.

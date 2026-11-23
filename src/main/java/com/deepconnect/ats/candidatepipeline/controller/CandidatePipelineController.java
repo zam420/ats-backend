@@ -16,6 +16,7 @@ import com.deepconnect.ats.candidatepipeline.dto.MoveCandidateReq;
 import com.deepconnect.ats.candidatepipeline.dto.RejectCandidateReq;
 import com.deepconnect.ats.candidatepipeline.service.CandidatePipelineService;
 import com.deepconnect.ats.dto.ApiResult;
+import com.deepconnect.ats.job.dto.JobPositionCandidatePipelineRes;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -30,7 +31,7 @@ public class CandidatePipelineController {
     private final CandidatePipelineService service;
 
     @GetMapping("/jobs")
-    public ApiResult<List<CandidatePipelineRes.Job>> jobs() {
+    public ApiResult<List<JobPositionCandidatePipelineRes>> jobs() {
         return ApiResult.success(service.jobs());
     }
 

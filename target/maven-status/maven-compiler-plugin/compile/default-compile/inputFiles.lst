@@ -17,6 +17,7 @@ C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\auth\servi
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\auth\service\GoogleAuthService.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\auth\service\LoggedInUserDetailsService.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\auth\service\RefreshTokenService.java
+C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\candidate\dto\CandidateResBase.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\candidatepipeline\controller\CandidatePipelineController.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\candidatepipeline\dto\CandidatePipelineRes.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\candidatepipeline\dto\MoveCandidateReq.java
@@ -53,6 +54,7 @@ C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\common\con
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\common\constant\enums\WorkExperience.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\common\dto\EnumsExtendedRes.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\common\dto\EnumsRes.java
+C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\common\dto\TemplateFiltersRes.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\common\email\EmailContent.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\common\email\EmailLocalizationService.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\common\email\EmailService.java
@@ -138,6 +140,7 @@ C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\evaluation
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\evaluationplan\dto\EvaluationPlanDetailsRes.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\evaluationplan\dto\EvaluationPlanReq.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\evaluationplan\dto\EvaluationPlanRes.java
+C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\evaluationplan\dto\EvaluationPlanResBase.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\evaluationplan\dto\EvaluationPlanResMin.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\evaluationplan\dto\EvaluationPlanRoundRes.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\evaluationplan\enums\EvaluationPlanRoundType.java
@@ -156,9 +159,11 @@ C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\job\contro
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\job\controller\JobsController.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\job\dto\JobFiltersRes.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\job\dto\JobFiltersResForCandidate.java
+C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\job\dto\JobPositionCandidateRes.java
+C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\job\dto\JobPositionDetailsRes.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\job\dto\JobPositionReq.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\job\dto\JobPositionRes.java
-C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\job\dto\JobPositionResForCandidate.java
+C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\job\dto\JobPositionResBase.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\job\dto\JobPositionSearchQuery.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\job\dto\JobPositionSummaryResForCandidate.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\job\enums\JobEmploymentType.java
@@ -181,7 +186,10 @@ C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\job\securi
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\job\security\JobRichTextSerializer.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\job\service\JobPositionAccessService.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\job\service\JobPositionService.java
+C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\jobapplication\controller\JobApplicationController.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\jobapplication\dto\JobApplicationReq.java
+C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\jobapplication\dto\JobApplicationSearchQuery.java
+C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\jobapplication\dto\JobApplicationSummaryRes.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\jobapplication\interfaces\PositionCount.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\jobapplication\model\JobApplication.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\jobapplication\model\JobApplicationScreeningQuestionAnswer.java
@@ -239,6 +247,7 @@ C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\recruitmen
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\recruitmentpipeline\dto\RecruitmentPipelineDetailsRes.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\recruitmentpipeline\dto\RecruitmentPipelineReq.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\recruitmentpipeline\dto\RecruitmentPipelineRes.java
+C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\recruitmentpipeline\dto\RecruitmentPipelineResBase.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\recruitmentpipeline\dto\RecruitmentPipelineResMin.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\recruitmentpipeline\dto\RecruitmentPipelineRoundRes.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\recruitmentpipeline\enums\RecruitmentPipelineRoundType.java
@@ -300,6 +309,7 @@ C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\screeningq
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\screeningquestionsform\dto\ScreeningQuestionsFormDetailsRes.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\screeningquestionsform\dto\ScreeningQuestionsFormReq.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\screeningquestionsform\dto\ScreeningQuestionsFormRes.java
+C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\screeningquestionsform\dto\ScreeningQuestionsFormResBase.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\screeningquestionsform\dto\ScreeningQuestionsFormResMin.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\screeningquestionsform\enums\ScreeningQuestionType.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\screeningquestionsform\model\ScreeningQuestion.java

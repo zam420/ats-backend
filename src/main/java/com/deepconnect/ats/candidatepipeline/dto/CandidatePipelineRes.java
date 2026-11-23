@@ -1,14 +1,38 @@
 package com.deepconnect.ats.candidatepipeline.dto;
 
 import java.util.List;
-import java.time.LocalDateTime;
 
-public record CandidatePipelineRes(String jobId, String jobTitle, long totalApplications, long pipelineCount,
-        List<Stage> stages, List<Candidate> rejectedCandidates) {
-    public record Stage(String id, String name, String stageType, int order, List<Candidate> candidates) {}
-    public record Candidate(String id, String firstName, String lastName, String preferredName,
-            String email, String currentLocation, LocalDateTime createdAt,
-            String rejectionReason, Boolean considerForOtherOpenings, LocalDateTime rejectedAt,
-            String rejectedStageName, String rejectedStageType) {}
-    public record Job(String id, String title) {}
+import com.deepconnect.ats.candidate.dto.CandidateResBase;
+
+import lombok.Data;
+
+@Data 
+public class CandidatePipelineRes {
+
+    public String jobId;
+    public String jobTitle;
+    public long totalApplications;
+    public long pipelineCount;
+    
+    public List<CandidatePipelineStageRes> stages;
+    public List<CandidateResBase> rejectedCandidates;
+
+    public static CandidatePipelineRes from(
+        String jobId, 
+        String jobTitle, 
+        long totalApplications, 
+        long pipelineCount,
+        List<CandidatePipelineStageRes> stages, 
+        List<CandidateResBase> rejectedCandidates
+    ) {
+        CandidatePipelineRes res = new CandidatePipelineRes();
+        res.jobId = jobId;
+        res.jobTitle = jobTitle;
+        res.totalApplications = totalApplications;
+        res.pipelineCount = pipelineCount;
+        res.stages = stages;
+        res.rejectedCandidates = rejectedCandidates;
+        return res;
+    }
+    
 }

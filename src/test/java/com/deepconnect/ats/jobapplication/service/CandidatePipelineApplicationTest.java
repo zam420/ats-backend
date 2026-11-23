@@ -42,6 +42,7 @@ class CandidatePipelineApplicationTest {
     @BeforeEach
     void setUp(@TempDir Path temp) {
         ReflectionTestUtils.setField(service, "storageRoot", temp.toString());
+        ReflectionTestUtils.setField(service, "maxResumeSizeBytes", 5L * 1024 * 1024);
         var user = new LoggedInUserDetails(2L, 1L, "user", "user@example.com", false, false, List.of());
         SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(user, null, List.of()));
         TransactionSynchronizationManager.initSynchronization();
@@ -87,5 +88,20 @@ class CandidatePipelineApplicationTest {
         when(stages.findByJobPositionIdOrderByOrderAsc(5L)).thenReturn(List.of(stage));
         assertThrows(CustomException.class, () -> service.submit("job", request, null));
         verify(applications, never()).saveAndFlush(any());
+    }
+
+    @Test
+    void enforcesConfiguredResumeSizeLimit() {
+        ReflectionTestUtils.setField(service, "maxResumeSizeBytes", 2L);
+        var stage = new JobRecruitmentPipelineRound();
+        stage.setRoundType(RecruitmentPipelineRoundType.APPLIED);
+        when(stages.findByJobPositionIdOrderByOrderAsc(5L)).thenReturn(List.of(stage));
+        var tooLarge = new MockMultipartFile("resume", "resume.pdf", "application/pdf", new byte[] {1, 2, 3});
+        assertThrows(CustomException.class, () -> service.submit("job", request, tooLarge));
+        verify(applications, never()).saveAndFlush(any());
+
+        var atLimit = new MockMultipartFile("resume", "resume.pdf", "application/pdf", new byte[] {1, 2});
+        service.submit("job", request, atLimit);
+        verify(applications).saveAndFlush(any(JobApplication.class));
     }
 }

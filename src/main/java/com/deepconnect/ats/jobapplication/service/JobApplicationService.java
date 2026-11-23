@@ -29,14 +29,18 @@ import com.deepconnect.ats.job.model.JobPosition;
 import com.deepconnect.ats.job.model.JobScreeningQuestion;
 import com.deepconnect.ats.job.model.JobRecruitmentPipelineRound;
 import com.deepconnect.ats.job.repo.JobPositionRepository;
+import com.deepconnect.ats.job.repo.JobPositionSearchSpecification;
 import com.deepconnect.ats.job.repo.JobRecruitmentPipelineRoundRepository;
 import com.deepconnect.ats.recruitmentpipeline.enums.RecruitmentPipelineRoundType;
 import com.deepconnect.ats.jobapplication.dto.JobApplicationReq;
+import com.deepconnect.ats.jobapplication.dto.JobApplicationSearchQuery;
+import com.deepconnect.ats.jobapplication.dto.JobApplicationSummaryRes;
 import com.deepconnect.ats.jobapplication.model.JobApplication;
 import com.deepconnect.ats.jobapplication.model.JobApplicationScreeningQuestionAnswer;
 import com.deepconnect.ats.jobapplication.repo.JobApplicationAnswerRepository;
 import com.deepconnect.ats.jobapplication.repo.JobApplicationRepository;
 import com.deepconnect.ats.screeningquestionsform.enums.ScreeningQuestionType;
+import com.deepconnect.ats.dto.AtsPageRsp;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -45,7 +49,6 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 @Slf4j
 public class JobApplicationService {
-    private static final long MAX_RESUME_SIZE = 5L * 1024 * 1024;
     private final JobPositionRepository jobPositionRepository;
     private final JobApplicationRepository jobApplicationRepository;
     private final JobApplicationAnswerRepository jobApplicationAnswerRepository;
@@ -53,6 +56,20 @@ public class JobApplicationService {
 
     @Value("${ats.storage.root:./uploads}")
     private String storageRoot;
+
+    @Value("${jobApplication.maxResumeSizeBytes}")
+    private long maxResumeSizeBytes;
+
+    @Value("${ats.logo.public-base-url:}")
+    private String publicLogoBaseUrl;
+
+    @Transactional(readOnly = true)
+    public AtsPageRsp<JobApplicationSummaryRes> findAllForCandidate(JobApplicationSearchQuery query) {
+        Long candidateUserId = AuthService.getLoggedInUser().getUserId();
+        return AtsPageRsp.of(jobApplicationRepository.findAll(
+                JobPositionSearchSpecification.forApplications(query, candidateUserId), query.toPageable())
+                .map(application -> new JobApplicationSummaryRes(application, publicLogoBaseUrl)));
+    }
 
     @Transactional
     public String submit(String publicId, JobApplicationReq request, MultipartFile resume) {
@@ -74,7 +91,7 @@ public class JobApplicationService {
         originalName = originalName.substring(originalName.lastIndexOf('/') + 1);
         int dot = originalName.lastIndexOf('.');
         String extension = dot < 0 ? "" : originalName.substring(dot).toLowerCase(Locale.ROOT);
-        if (resume == null || resume.isEmpty() || resume.getSize() > MAX_RESUME_SIZE
+        if (resume == null || resume.isEmpty() || resume.getSize() > maxResumeSizeBytes
                 || originalName.length() > 255 || !Set.of(".pdf", ".doc", ".docx").contains(extension)) {
             throw new CustomException(CustomExceptionType.JOB_APPLICATION_INVALID);
         }

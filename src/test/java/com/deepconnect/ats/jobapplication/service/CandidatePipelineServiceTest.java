@@ -121,15 +121,15 @@ class CandidatePipelineServiceTest {
         rejected.setRecruitmentPipelineStage(null);
         when(applications.findByJobPositionIdOrderByCreatedAtDesc(5L)).thenReturn(List.of(application, rejected));
         var result = service.board("job");
-        assertEquals(2, result.totalApplications());
-        assertEquals(1, result.pipelineCount());
-        assertEquals(1, result.stages().get(0).candidates().size());
-        assertEquals(1, result.rejectedCandidates().size());
-        assertEquals("Experience", result.rejectedCandidates().get(0).rejectionReason());
-        assertEquals(Boolean.FALSE, result.rejectedCandidates().get(0).considerForOtherOpenings());
-        assertEquals("Original stage", result.rejectedCandidates().get(0).rejectedStageName());
-        assertEquals("SCREENING", result.rejectedCandidates().get(0).rejectedStageType());
-        assertEquals(rejected.getRejectedAt(), result.rejectedCandidates().get(0).rejectedAt());
+        assertEquals(2, result.getTotalApplications());
+        assertEquals(1, result.getPipelineCount());
+        assertEquals(1, result.getStages().get(0).getCandidates().size());
+        assertEquals(1, result.getRejectedCandidates().size());
+        assertEquals("Experience", result.getRejectedCandidates().get(0).getRejectionReason());
+        assertEquals(Boolean.FALSE, result.getRejectedCandidates().get(0).getConsiderForOtherOpenings());
+        assertEquals("Original stage", result.getRejectedCandidates().get(0).getRejectedStageName());
+        assertEquals("SCREENING", result.getRejectedCandidates().get(0).getRejectedStageType());
+        assertEquals(rejected.getRejectedAt(), result.getRejectedCandidates().get(0).getRejectedAt());
     }
 
     @Test
@@ -149,7 +149,7 @@ class CandidatePipelineServiceTest {
         LocalDateTime createdAt = LocalDateTime.of(2026, 11, 18, 12, 0);
         application.setCreatedAt(createdAt);
         var result = service.board("job");
-        assertEquals(createdAt, result.stages().get(0).candidates().get(0).createdAt());
+        assertEquals(createdAt, result.getStages().get(0).getCandidates().get(0).getCreatedAt());
         var mapper = new ObjectMapper().findAndRegisterModules()
                 .setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE)
                 .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
@@ -173,6 +173,6 @@ class CandidatePipelineServiceTest {
         when(stages.findByJobPositionIdOrderByOrderAsc(5L)).thenReturn(List.of(approval, background, custom));
         var result = service.board("job");
         assertEquals(List.of("OFFER_APPROVAL", "BACKGROUND_CHECK", "CUSTOM"),
-                result.stages().stream().map(stage -> stage.stageType()).toList());
+                result.getStages().stream().map(stage -> stage.getStageType()).toList());
     }
 }
