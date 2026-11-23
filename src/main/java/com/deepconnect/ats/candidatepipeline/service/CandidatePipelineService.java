@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.deepconnect.ats.auth.service.AuthService;
+import com.deepconnect.ats.candidate.dto.CandidateClosureRes;
 import com.deepconnect.ats.candidate.dto.CandidateResBase;
 import com.deepconnect.ats.candidatepipeline.dto.CandidatePipelineRes;
 import com.deepconnect.ats.candidatepipeline.dto.CandidatePipelineStageRes;
@@ -55,14 +56,14 @@ public class CandidatePipelineService {
         List<JobRecruitmentPipelineRound> rounds = stages.findByJobPositionIdOrderByOrderAsc(job.getId());
         List<JobApplication> candidates = applications.findByJobPositionIdOrderByCreatedAtDesc(job.getId());
         Map<Long, List<CandidateResBase>> candidatesByRecruitmentPipelineStage = new HashMap<>();
-        List<CandidateResBase> rejected = new ArrayList<>();
+        List<CandidateClosureRes> rejected = new ArrayList<>();
 
         for (JobRecruitmentPipelineRound round : rounds) 
                 candidatesByRecruitmentPipelineStage.put(round.getId(), new ArrayList<>());
 
         int closedApplicationCount = 0;
         for (JobApplication application : candidates) {
-            CandidateResBase result = CandidateResBase.from(application);
+            CandidateResBase candidate = CandidateResBase.from(application);
             if (application.isClosed()) {
                 closedApplicationCount++;
                 if (application.getApplicationCloseType() != JobApplicationCloseType.REJECTED) {
@@ -71,7 +72,7 @@ public class CandidatePipelineService {
                 if (application.getConsiderForOtherOpenings() == null) {
                     throw new InternalServerException("Rejected application is missing its consideration preference");
                 }
-                rejected.add(result);
+                rejected.add(CandidateClosureRes.from(application));
                 continue;
             }
 
@@ -79,7 +80,7 @@ public class CandidatePipelineService {
             if (stageCandidates == null) 
                 throw new InternalServerException("Application references a missing pipeline stage");
 
-            stageCandidates.add(result);
+            stageCandidates.add(candidate);
         }
 
         List<CandidatePipelineStageRes> stageRes = rounds.stream().map(round -> CandidatePipelineStageRes.from(round, candidatesByRecruitmentPipelineStage.get(round.getId()))).toList();

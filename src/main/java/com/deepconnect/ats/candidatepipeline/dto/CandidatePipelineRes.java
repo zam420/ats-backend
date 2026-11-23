@@ -2,7 +2,7 @@ package com.deepconnect.ats.candidatepipeline.dto;
 
 import java.util.List;
 
-import com.deepconnect.ats.candidate.dto.CandidateResBase;
+import com.deepconnect.ats.candidate.dto.CandidateClosureRes;
 
 import lombok.Data;
 
@@ -15,7 +15,7 @@ public class CandidatePipelineRes {
     public long pipelineCount;
     
     public List<CandidatePipelineStageRes> stages;
-    public List<CandidateResBase> rejectedCandidates;
+    public List<CandidateClosureRes> rejectedCandidates;
 
     public static CandidatePipelineRes from(
         String jobId, 
@@ -23,7 +23,7 @@ public class CandidatePipelineRes {
         long totalApplications, 
         long pipelineCount,
         List<CandidatePipelineStageRes> stages, 
-        List<CandidateResBase> rejectedCandidates
+        List<CandidateClosureRes> rejectedCandidates
     ) {
         CandidatePipelineRes res = new CandidatePipelineRes();
         res.jobId = jobId;
