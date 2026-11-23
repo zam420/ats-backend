@@ -16,7 +16,7 @@ public class EvaluationPlanResBase {
     protected String ownerId;
     protected String ownerName; 
 
-    protected EvaluationPlanResBase(EvaluationPlan entity, String ownerName) {
+    protected EvaluationPlanResBase(EvaluationPlan entity) {
         this.id = entity.getPublicId();
         this.name = entity.getName();
         this.description = entity.getDescription();
@@ -24,11 +24,11 @@ public class EvaluationPlanResBase {
         this.isSystemTemplate = entity.getIsPublicForAll();
         this.isSharedWithinTenant = entity.getIsSharedWithinTenant();
         this.ownerId = entity.getOwnerPublicId();
-        this.ownerName = ownerName;
+        this.ownerName = entity.getOwnerName();
     }
     
-    public static EvaluationPlanResBase from(EvaluationPlan entity, String ownerName) {
-        return new EvaluationPlanResBase(entity, ownerName);
+    public static EvaluationPlanResBase from(EvaluationPlan entity) {
+        return new EvaluationPlanResBase(entity);
     }
 
 }

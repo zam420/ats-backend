@@ -5,7 +5,6 @@ import lombok.Setter;
 
 import org.springframework.util.CollectionUtils;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -18,12 +17,12 @@ public class RecruitmentPipelineRes extends RecruitmentPipelineResBase {
     
     private String roundSequence;// Round names in order, joined as "name1 -> name2"; generated on the fly, never stored
 
-    protected RecruitmentPipelineRes(RecruitmentPipeline entity, String ownerName) {
-        super(entity, ownerName);
+    protected RecruitmentPipelineRes(RecruitmentPipeline entity) {
+        super(entity);
     }
     
-    public static RecruitmentPipelineRes from(RecruitmentPipeline entity, String ownerName) {
-        RecruitmentPipelineRes res = new RecruitmentPipelineRes(entity, ownerName);
+    public static RecruitmentPipelineRes from(RecruitmentPipeline entity) {
+        RecruitmentPipelineRes res = new RecruitmentPipelineRes(entity);
         if (!CollectionUtils.isEmpty(entity.getRounds())) {
             res.setRoundSequence(entity.getRounds().stream()
                 .sorted(Comparator.comparing(RecruitmentPipelineRound::getOrder, Comparator.nullsLast(Comparator.naturalOrder())))
@@ -34,7 +33,7 @@ public class RecruitmentPipelineRes extends RecruitmentPipelineResBase {
         return res;
     }
 
-    public static List<RecruitmentPipelineRes> fromList(List<RecruitmentPipeline> entities, HashMap<Long, String> ownerNamesById) {
-        return entities.stream().map(e -> RecruitmentPipelineRes.from(e, ownerNamesById.get(e.getOwnerId()))).toList();
+    public static List<RecruitmentPipelineRes> fromList(List<RecruitmentPipeline> entities) {
+        return entities.stream().map(RecruitmentPipelineRes::from).toList();
     }
 }

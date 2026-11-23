@@ -16,7 +16,7 @@ public class ScreeningQuestionsFormResBase {
     protected String ownerId;
     protected String ownerName;
 
-    protected ScreeningQuestionsFormResBase(ScreeningQuestionsForm entity, String ownerName) {
+    protected ScreeningQuestionsFormResBase(ScreeningQuestionsForm entity) {
         this.id = entity.getPublicId();
         this.name = entity.getName();
         this.description = entity.getDescription();
@@ -24,11 +24,11 @@ public class ScreeningQuestionsFormResBase {
         this.isSystemTemplate = entity.getIsPublicForAll();
         this.isSharedWithinTenant = entity.getIsSharedWithinTenant();
         this.ownerId = entity.getOwnerPublicId();
-        this.ownerName = ownerName;
+        this.ownerName = entity.getOwnerName();
     }
     
-    public static ScreeningQuestionsFormResBase from(ScreeningQuestionsForm entity, String ownerName) {
-        return new ScreeningQuestionsFormResBase(entity, ownerName);
+    public static ScreeningQuestionsFormResBase from(ScreeningQuestionsForm entity) {
+        return new ScreeningQuestionsFormResBase(entity);
     }
     
 }

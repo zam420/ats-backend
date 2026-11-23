@@ -16,7 +16,7 @@ public class RecruitmentPipelineResBase {
     protected String ownerId;
     protected String ownerName;
 
-    protected RecruitmentPipelineResBase(RecruitmentPipeline entity, String ownerName) {
+    protected RecruitmentPipelineResBase(RecruitmentPipeline entity) {
         this.id = entity.getPublicId();
         this.name = entity.getName();
         this.description = entity.getDescription();
@@ -24,11 +24,11 @@ public class RecruitmentPipelineResBase {
         this.isSystemTemplate = entity.getIsPublicForAll();
         this.isSharedWithinTenant = entity.getIsSharedWithinTenant();
         this.ownerId = entity.getOwnerPublicId();
-        this.ownerName = ownerName;
+        this.ownerName = entity.getOwnerName();
     }
     
-    public static RecruitmentPipelineResBase from(RecruitmentPipeline entity, String ownerName) {
-        return new RecruitmentPipelineResBase(entity, ownerName);
+    public static RecruitmentPipelineResBase from(RecruitmentPipeline entity) {
+        return new RecruitmentPipelineResBase(entity);
     }
 
 }

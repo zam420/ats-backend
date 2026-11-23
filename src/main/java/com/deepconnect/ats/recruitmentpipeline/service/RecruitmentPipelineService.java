@@ -10,9 +10,6 @@ import com.deepconnect.ats.recruitmentpipeline.dto.RecruitmentPipelineReq;
 import com.deepconnect.ats.recruitmentpipeline.model.RecruitmentPipeline;
 import com.deepconnect.ats.recruitmentpipeline.repo.RecruitmentPipelineRepository;
 import com.deepconnect.ats.recruitmentpipeline.repo.RecruitmentPipelineShareRepository;
-import com.deepconnect.ats.screeningquestionsform.dto.ScreeningQuestionsFormDetailsRes;
-import com.deepconnect.ats.screeningquestionsform.dto.ScreeningQuestionsFormRes;
-import com.deepconnect.ats.screeningquestionsform.model.ScreeningQuestionsForm;
 import com.deepconnect.ats.dto.AtsPageQuery;
 import com.deepconnect.ats.dto.AtsPageRsp;
 import com.deepconnect.ats.recruitmentpipeline.dto.RecruitmentPipelineRes;
@@ -227,7 +224,7 @@ public class RecruitmentPipelineService {
         //RecruitmentPipeline plan = recruitmentPipelineRepository.findByPublicIdAndTenantIdAndDeactivatedFalse(publicId, AuthService.getLoggedInTenantId()).orElseThrow(() -> new InternalServerException("Evaluation plan not found: " + publicId));
         RecruitmentPipeline plan = recruitmentPipelineRepository.findByPublicIdAndDeactivatedFalse(publicId).orElseThrow(() -> new InternalServerException("Evaluation plan not found: " + publicId));
         recruitmentPipelineAccessService.assertReadAccess(AuthService.getLoggedInUser(), plan);
-        return RecruitmentPipelineDetailsRes.from(plan, userService.findByUserId(plan.getOwnerId()).get().getName());
+        return RecruitmentPipelineDetailsRes.from(plan);
     }
 
     @Transactional(readOnly = true)
@@ -250,7 +247,7 @@ public class RecruitmentPipelineService {
         List<RecruitmentPipeline> plans = isAdmin 
             ? recruitmentPipelineRepository.findAllForTenantAdminAsList(AuthService.getLoggedInTenantId()) 
             : recruitmentPipelineRepository.findAllForTenantNonAdminAsList(AuthService.getLoggedInTenantId(), AuthService.getLoggedInUser().getUserId());
-        return plans.stream().map(e -> RecruitmentPipelineRes.from(e, userService.getOwnerNamesByIds(plans).get(e.getOwnerId()))).toList();
+        return plans.stream().map(RecruitmentPipelineRes::from).toList();
     }
 
     @Transactional(readOnly = true)
@@ -360,6 +357,6 @@ public class RecruitmentPipelineService {
     }
 
     private AtsPageRsp<RecruitmentPipelineRes> getResponseFromPage(Page<RecruitmentPipeline> page) {
-        return AtsPageRsp.of(page.map(e -> RecruitmentPipelineRes.from(e, userService.getOwnerNamesByIds(page.getContent()).get(e.getOwnerId()))));
+        return AtsPageRsp.of(page.map(RecruitmentPipelineRes::from));
     }
 }

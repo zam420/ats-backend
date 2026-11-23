@@ -1,5 +1,4 @@
 package com.deepconnect.ats.evaluationplan.dto;
-import java.util.HashMap;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -17,14 +16,14 @@ public class EvaluationPlanDetailsRes extends EvaluationPlanResBase {
     private Set<String> sharedWithUserIds;
     private String ownerId;
 
-    protected EvaluationPlanDetailsRes(EvaluationPlan entity, String ownerName) {
-        super(entity, ownerName);
+    protected EvaluationPlanDetailsRes(EvaluationPlan entity) {
+        super(entity);
     }
 
-    public static EvaluationPlanDetailsRes from(EvaluationPlan entity, String ownerName) {
+    public static EvaluationPlanDetailsRes from(EvaluationPlan entity) {
         if(entity == null)
             return null;
-        EvaluationPlanDetailsRes res = new EvaluationPlanDetailsRes(entity, ownerName);
+        EvaluationPlanDetailsRes res = new EvaluationPlanDetailsRes(entity);
         res.setId(entity.getPublicId());
         res.setName(entity.getName());
         res.setDescription(entity.getDescription());
@@ -48,7 +47,7 @@ public class EvaluationPlanDetailsRes extends EvaluationPlanResBase {
         return res;
     }
 
-    public static List<EvaluationPlanDetailsRes> fromList(List<EvaluationPlan> entities, HashMap<Long, String> ownerNamesById) {
-        return entities.stream().map(e -> EvaluationPlanDetailsRes.from(e, ownerNamesById.get(e.getOwnerId()))).toList();
+    public static List<EvaluationPlanDetailsRes> fromList(List<EvaluationPlan> entities) {
+        return entities.stream().map(EvaluationPlanDetailsRes::from).toList();
     }
 }

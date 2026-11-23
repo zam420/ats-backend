@@ -17,11 +17,8 @@ import com.deepconnect.ats.evaluationplan.model.EvaluationPlanRound;
 import com.deepconnect.ats.evaluationplan.repo.EvaluationPlanRoundRepository;
 import com.deepconnect.ats.evaluationplan.model.EvaluationPlanShare;
 import com.deepconnect.ats.evaluationplan.repo.EvaluationPlanShareRepository;
-import com.deepconnect.ats.recruitmentpipeline.dto.RecruitmentPipelineRes;
-import com.deepconnect.ats.recruitmentpipeline.model.RecruitmentPipeline;
 import com.deepconnect.ats.user.model.User;
 import com.deepconnect.ats.user.service.UserServiceV2;
-import com.deepconnect.ats.common.dto.EnumsExtendedRes;
 import com.deepconnect.ats.common.dto.TemplateFiltersRes;
 import com.deepconnect.ats.common.enums.AccessType;
 import com.deepconnect.ats.common.utils.StringUtils;
@@ -232,7 +229,7 @@ public class EvaluationPlanService {
         //EvaluationPlan plan = evaluationPlanRepository.findByPublicIdAndTenantIdAndDeactivatedFalse(publicId, AuthService.getLoggedInTenantId()).orElseThrow(() -> new InternalServerException("Evaluation plan not found: " + publicId));
         EvaluationPlan plan = evaluationPlanRepository.findByPublicIdAndDeactivatedFalse(publicId).orElseThrow(() -> new InternalServerException("Evaluation plan not found: " + publicId));
         evaluationPlanAccessService.assertReadAccess(AuthService.getLoggedInUser(), plan);
-        return EvaluationPlanDetailsRes.from(plan, userService.findByUserId(plan.getOwnerId()).get().getName());
+        return EvaluationPlanDetailsRes.from(plan);
     }
 
     @Transactional(readOnly = true)
@@ -255,7 +252,7 @@ public class EvaluationPlanService {
         List<EvaluationPlan> plans = isAdmin 
             ? evaluationPlanRepository.findAllForTenantAdminAsList(AuthService.getLoggedInTenantId()) 
             : evaluationPlanRepository.findAllForTenantNonAdminAsList(AuthService.getLoggedInTenantId(), AuthService.getLoggedInUser().getUserId());
-        return plans.stream().map(e -> EvaluationPlanRes.from(e, userService.getOwnerNamesByIds(plans).get(e.getOwnerId()))).toList();
+        return plans.stream().map(EvaluationPlanRes::from).toList();
     }
 
     @Transactional(readOnly = true)
@@ -365,7 +362,7 @@ public class EvaluationPlanService {
     }
 
     private AtsPageRsp<EvaluationPlanRes> getResponseFromPage(Page<EvaluationPlan> page) {
-        return AtsPageRsp.of(page.map(e -> EvaluationPlanRes.from(e, userService.getOwnerNamesByIds(page.getContent()).get(e.getOwnerId()))));
+        return AtsPageRsp.of(page.map(EvaluationPlanRes::from));
     }
 
 }

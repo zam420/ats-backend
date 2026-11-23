@@ -32,4 +32,7 @@ public abstract class OperatableBaseWithTenantEntity extends OperatableBaseEntit
     @Column(nullable = false)
     private String ownerPublicId;
 
+    @Column(nullable = false, length = 100)
+    private String ownerName;
+
 }

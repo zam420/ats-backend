@@ -3,7 +3,6 @@ package com.deepconnect.ats.screeningquestionsform.dto;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -19,14 +18,14 @@ public class ScreeningQuestionsFormDetailsRes extends ScreeningQuestionsFormResB
     private Set<String> sharedWithUserIds;
     private String ownerId;
 
-    protected ScreeningQuestionsFormDetailsRes(ScreeningQuestionsForm entity, String ownerName) {
-        super(entity, ownerName);
+    protected ScreeningQuestionsFormDetailsRes(ScreeningQuestionsForm entity) {
+        super(entity);
     }
 
-    public static ScreeningQuestionsFormDetailsRes from(ScreeningQuestionsForm entity, String ownerName) {
+    public static ScreeningQuestionsFormDetailsRes from(ScreeningQuestionsForm entity) {
         if(entity == null)
             return null;
-        ScreeningQuestionsFormDetailsRes res = new ScreeningQuestionsFormDetailsRes(entity, ownerName);
+        ScreeningQuestionsFormDetailsRes res = new ScreeningQuestionsFormDetailsRes(entity);
         res.setQuestions(
         entity.getQuestions() == null
             ? List.of()
@@ -45,8 +44,8 @@ public class ScreeningQuestionsFormDetailsRes extends ScreeningQuestionsFormResB
         return res;
     }
 
-    public static List<ScreeningQuestionsFormDetailsRes> from(List<ScreeningQuestionsForm> entities, HashMap<Long, String> ownerNamesById) {
-        return entities.stream().map(e -> ScreeningQuestionsFormDetailsRes.from(e, ownerNamesById.get(e.getOwnerId()))).toList();
+    public static List<ScreeningQuestionsFormDetailsRes> fromList(List<ScreeningQuestionsForm> entities) {
+        return entities.stream().map(ScreeningQuestionsFormDetailsRes::from).toList();
     }
 
 }

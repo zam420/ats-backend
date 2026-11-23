@@ -235,7 +235,7 @@ public class ScreeningQuestionsFormService {
         //ScreeningQuestionsForm plan = screeningQuestionTemplateRepository.findByPublicIdAndTenantIdAndDeactivatedFalse(publicId, AuthService.getLoggedInTenantId()).orElseThrow(() -> new InternalServerException("Screening Question Template not found: " + publicId));
         ScreeningQuestionsForm plan = screeningQuestionTemplateRepository.findByPublicIdAndDeactivatedFalse(publicId).orElseThrow(() -> new InternalServerException("Screening Question Template not found: " + publicId));
         screeningQuestionTemplateAccessService.assertReadAccess(AuthService.getLoggedInUser(), plan);
-        return ScreeningQuestionsFormDetailsRes.from(plan, userService.findByUserId(plan.getOwnerId()).get().getName());
+        return ScreeningQuestionsFormDetailsRes.from(plan);
     }
 
     @Transactional(readOnly = true)
@@ -258,7 +258,7 @@ public class ScreeningQuestionsFormService {
         List<ScreeningQuestionsForm> plans = isAdmin 
             ? screeningQuestionTemplateRepository.findAllForTenantAdminAsList(AuthService.getLoggedInTenantId()) 
             : screeningQuestionTemplateRepository.findAllForTenantNonAdminAsList(AuthService.getLoggedInTenantId(), AuthService.getLoggedInUser().getUserId());
-        return plans.stream().map(e -> ScreeningQuestionsFormRes.from(e, userService.getOwnerNamesByIds(plans).get(e.getOwnerId()))).toList();
+        return plans.stream().map(ScreeningQuestionsFormRes::from).toList();
     }
 
     @Transactional(readOnly = true)
@@ -368,7 +368,7 @@ public class ScreeningQuestionsFormService {
     }
 
     private AtsPageRsp<ScreeningQuestionsFormRes> getResponseFromPage(Page<ScreeningQuestionsForm> page) {
-        return AtsPageRsp.of(page.map(e -> ScreeningQuestionsFormRes.from(e, userService.getOwnerNamesByIds(page.getContent()).get(e.getOwnerId()))));
+        return AtsPageRsp.of(page.map(ScreeningQuestionsFormRes::from));
     }
 
 }
