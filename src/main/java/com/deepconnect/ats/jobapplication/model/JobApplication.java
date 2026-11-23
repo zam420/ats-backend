@@ -7,9 +7,12 @@ import org.hibernate.validator.constraints.Length;
 
 import com.deepconnect.ats.common.model.BaseEntity;
 import com.deepconnect.ats.job.model.JobPosition;
+import com.deepconnect.ats.jobapplication.enums.JobApplicationCloseType;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -38,31 +41,35 @@ public class JobApplication extends BaseEntity {
     private JobPosition jobPosition;
 
     /*The ID of the recruitment pipeline stage the application is currently in.
-    It can be null when a candidate was rejected in a custom stage, and later that stage was deleted from the job by job owner or hra.
+    It can be null when a closed application's stage was later deleted.
     */
     @Column(name = "recruitment_pipeline_stage")
     private Long recruitmentPipelineStage;
 
     @Column(nullable = false)
-    private boolean rejected;
+    private boolean closed;
 
-    @Column(name = "rejection_reason", length = 2000)
-    @Length(max = 2000, message = "{field.jobApplication.rejectionReason}{validation.lengthMax}")
-    private String rejectionReason;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "application_close_type", length = 30)
+    private JobApplicationCloseType applicationCloseType;
+
+    @Column(name = "closed_reason", length = 2000)
+    @Length(max = 2000, message = "{field.jobApplication.closedReason}{validation.lengthMax}")
+    private String closedReason;
 
     @Column(name = "consider_for_other_openings")
     private Boolean considerForOtherOpenings;
 
-    @Column(name = "rejected_at")
-    private LocalDateTime rejectedAt;
+    @Column(name = "closed_at")
+    private LocalDateTime closedAt;
 
-    @Column(name = "rejected_stage_name", length = 30)
-    @Length(max = 30, message = "{field.jobApplication.rejectedStageName}{validation.lengthMax}")
-    private String rejectedStageName;
+    @Column(name = "closed_at_stage_name", length = 30)
+    @Length(max = 30, message = "{field.jobApplication.closedAtStageName}{validation.lengthMax}")
+    private String closedAtStageName;
 
-    @Column(name = "rejected_stage_type", length = 30)
-    @Length(max = 30, message = "{field.jobApplication.rejectedStageType}{validation.lengthMax}")
-    private String rejectedStageType;
+    @Column(name = "closed_at_stage_type", length = 30)
+    @Length(max = 30, message = "{field.jobApplication.closedAtStageType}{validation.lengthMax}")
+    private String closedAtStageType;
 
     @Column(name = "candidate_user_id", nullable = false)
     @NotNull(message = "{field.jobApplication.candidate}{validation.notBlank}")

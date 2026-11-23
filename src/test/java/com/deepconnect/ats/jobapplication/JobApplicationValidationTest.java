@@ -28,12 +28,12 @@ class JobApplicationValidationTest {
             assertFalse(validator.validateProperty(application, "resumeName").isEmpty());
             assertTrue(validator.validateProperty(application, "recruitmentPipelineStage").isEmpty());
             assertTrue(validator.validateProperty(application, "preferredName").isEmpty());
-            assertTrue(validator.validateProperty(application, "rejectionReason").isEmpty());
+            assertTrue(validator.validateProperty(application, "closedReason").isEmpty());
 
-            application.setRejectionReason("x".repeat(2000));
-            assertTrue(validator.validateProperty(application, "rejectionReason").isEmpty());
-            application.setRejectionReason("x".repeat(2001));
-            assertFalse(validator.validateProperty(application, "rejectionReason").isEmpty());
+            application.setClosedReason("x".repeat(2000));
+            assertTrue(validator.validateProperty(application, "closedReason").isEmpty());
+            application.setClosedReason("x".repeat(2001));
+            assertFalse(validator.validateProperty(application, "closedReason").isEmpty());
         }
     }
 

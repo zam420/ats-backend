@@ -24,7 +24,7 @@ public interface JobApplicationRepository extends JpaRepository<JobApplication, 
 
     boolean existsByJobPositionIdAndEmail(Long jobPositionId, String email);
 
-    boolean existsByRecruitmentPipelineStageAndRejectedFalse(Long stageId);
+    boolean existsByRecruitmentPipelineStageAndClosedFalse(Long stageId);
 
     List<JobApplication> findByJobPositionIdOrderByCreatedAtDesc(Long jobPositionId);
 
@@ -32,8 +32,8 @@ public interface JobApplicationRepository extends JpaRepository<JobApplication, 
 
     @Modifying
     @Query("update JobApplication a set a.recruitmentPipelineStage = null "
-            + "where a.rejected = true and a.recruitmentPipelineStage in :stageIds")
-    void clearRejectedStages(@Param("stageIds") Collection<Long> stageIds);
+            + "where a.closed = true and a.recruitmentPipelineStage in :stageIds")
+    void clearClosedStages(@Param("stageIds") Collection<Long> stageIds);
 
     @Query("select a.jobPositionId as jobPositionId, count(a) as applicationCount from JobApplication a "
             + "where a.jobPositionId in :ids group by a.jobPositionId")

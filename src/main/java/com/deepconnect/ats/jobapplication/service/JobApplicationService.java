@@ -193,17 +193,11 @@ public class JobApplicationService {
         return result;
     }
 
-    public boolean existsByRecruitmentPipelineStageAndRejectedFalse(Long stageId) {
-        return jobApplicationRepository.existsByRecruitmentPipelineStageAndRejectedFalse(stageId);
+    public boolean existsByRecruitmentPipelineStageAndClosedFalse(Long stageId) {
+        return jobApplicationRepository.existsByRecruitmentPipelineStageAndClosedFalse(stageId);
     }
 
-    /**When a candidate was rejected in a custom stage, and if that stage is being deleted, thenclear the stage reference from job applications table. 
-     * When a pipeline stage is removed, its foreign key would otherwise prevent deletion.
-     * The rejection stage’s name and type are saved separately as snapshots, so they remain visible in the Rejected table. 
-     * Stages containing active candidates cannot be removed.
-     * @param stageIds
-     */
-    public void clearRejectedStages(List<Long> stageIds) {
-        jobApplicationRepository.clearRejectedStages(stageIds);
+    public void clearClosedStages(List<Long> stageIds) {
+        jobApplicationRepository.clearClosedStages(stageIds);
     }
 }

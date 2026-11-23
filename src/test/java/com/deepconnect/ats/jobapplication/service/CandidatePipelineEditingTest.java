@@ -39,16 +39,40 @@ class CandidatePipelineEditingTest {
     private final JobPositionRepository positions = mock(JobPositionRepository.class);
     private final JobRecruitmentPipelineRoundRepository stages = mock(JobRecruitmentPipelineRoundRepository.class);
     private final JobApplicationRepository applications = mock(JobApplicationRepository.class);
+    private final JobApplicationService applicationService = mock(JobApplicationService.class);
     private final JobPositionService service = new JobPositionService(mock(EvaluationPlanService.class),
             mock(RecruitmentPipelineService.class), mock(JobPositionAccessService.class),
-            mock(ScreeningQuestionsFormService.class), mock(JobApplicationService.class),
+            mock(ScreeningQuestionsFormService.class), applicationService,
             mock(UserServiceV2.class), mock(EnumsResService.class),
             positions, mock(JobEvaluationPlanRoundRepository.class), stages,
             mock(JobScreeningQuestionRepository.class), applications);
     private final JobPosition job = new JobPosition();
     private final JobPositionReq request = new JobPositionReq();
     private final JobRecruitmentPipelineRound applied = stage(10L, "applied", RecruitmentPipelineRoundType.APPLIED, 0, "Applied");
-    private final JobRecruitmentPipelineRound screening = stage(11L, "screening", RecruitmentPipelineRoundType.SCREENING, 1, "Screening");
+    private final JobRecruitmentPipelineRound screening = stage(11L, "custom", RecruitmentPipelineRoundType.CUSTOM, 1, "Screening");
+    private final List<JobRecruitmentPipelineRound> existing = existingStages();
+
+    private List<JobRecruitmentPipelineRound> existingStages() {
+        List<JobRecruitmentPipelineRound> rounds = new ArrayList<>(List.of(applied, screening));
+        int order = 2;
+        for (RecruitmentPipelineRoundType type : List.of(RecruitmentPipelineRoundType.SCREENING,
+                RecruitmentPipelineRoundType.EVALUATING, RecruitmentPipelineRoundType.OFFERED,
+                RecruitmentPipelineRoundType.HIRED, RecruitmentPipelineRoundType.ONBOARDED)) {
+            rounds.add(stage(20L + order, type.name(), type, order, type.name()));
+            order++;
+        }
+        return rounds;
+    }
+
+    private List<JobRecruitmentPipelineRound> requestStages(boolean includeCustom, String customName) {
+        List<JobRecruitmentPipelineRound> rounds = new ArrayList<>();
+        for (JobRecruitmentPipelineRound current : existing) {
+            if (current == screening && !includeCustom) continue;
+            rounds.add(stage(null, current.getPublicId(), current.getRoundType(), rounds.size(),
+                    current == screening ? customName : current.getName()));
+        }
+        return rounds;
+    }
 
     @BeforeEach
     void setUp() {
@@ -58,7 +82,7 @@ class CandidatePipelineEditingTest {
         ReflectionTestUtils.setField(service, "shortDescriptionMaxWords", 70);
         job.setId(5L);
         job.setPublicId("job");
-        job.setRecruitmentPipelineRounds(new ArrayList<>(List.of(applied, screening)));
+        job.setRecruitmentPipelineRounds(new ArrayList<>(existing));
         job.setEvaluationPlanRounds(List.of());
         job.setScreeningQuestions(List.of());
         request.setId("job");
@@ -67,7 +91,7 @@ class CandidatePipelineEditingTest {
         request.setScreeningQuestions(List.of());
         when(positions.findForUpdate("job", 2L)).thenReturn(Optional.of(job));
         when(positions.save(any(JobPosition.class))).thenAnswer(invocation -> invocation.getArgument(0));
-        when(stages.findByJobPositionIdOrderByOrderAsc(5L)).thenReturn(List.of(applied, screening));
+        when(stages.findByJobPositionIdOrderByOrderAsc(5L)).thenReturn(existing);
     }
 
     @AfterEach
@@ -87,8 +111,8 @@ class CandidatePipelineEditingTest {
 
     @Test
     void preventsRemovingAnOccupiedStage() {
-        request.setRecruitmentPipelineRounds(List.of(stage(null, "applied", RecruitmentPipelineRoundType.APPLIED, 0, "Applied")));
-        when(applications.existsByRecruitmentPipelineStageAndRejectedFalse(11L)).thenReturn(true);
+        request.setRecruitmentPipelineRounds(requestStages(false, null));
+        when(applicationService.existsByRecruitmentPipelineStageAndClosedFalse(11L)).thenReturn(true);
         CustomException error = assertThrows(CustomException.class, () -> service.update(request));
         assertEquals(CustomException.getFullMessageKey(CustomExceptionType.JOB_PIPELINE_OCCUPIED_STAGE), error.getMessageKey());
         verify(stages, never()).saveAllAndFlush(any());
@@ -96,9 +120,7 @@ class CandidatePipelineEditingTest {
 
     @Test
     void preservesOccupiedStageIdentityWhenRenamed() {
-        request.setRecruitmentPipelineRounds(List.of(
-                stage(null, "applied", RecruitmentPipelineRoundType.APPLIED, 0, "Applied"),
-                stage(null, "screening", RecruitmentPipelineRoundType.SCREENING, 1, "Review")));
+        request.setRecruitmentPipelineRounds(requestStages(true, "Review"));
         service.update(request);
         assertEquals(11L, screening.getId());
         assertEquals("Review", screening.getName());
@@ -108,9 +130,9 @@ class CandidatePipelineEditingTest {
 
     @Test
     void clearsRejectedReferencesBeforeRemovingAnEmptyStage() {
-        request.setRecruitmentPipelineRounds(List.of(stage(null, "applied", RecruitmentPipelineRoundType.APPLIED, 0, "Applied")));
+        request.setRecruitmentPipelineRounds(requestStages(false, null));
         service.update(request);
-        verify(applications).clearRejectedStages(List.of(11L));
+        verify(applicationService).clearClosedStages(List.of(11L));
         assertFalse(job.getRecruitmentPipelineRounds().contains(screening));
     }
 }

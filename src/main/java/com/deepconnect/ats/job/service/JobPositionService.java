@@ -272,22 +272,19 @@ public class JobPositionService {
             }
         }
 
-        // Check whether any existing stages omitted from the incoming pipeline are still referenced by non-rejected job applications.
+        // Check whether omitted stages are still referenced by active job applications.
         // Such stages cannot be removed because active applications depend on them.
         for (JobRecruitmentPipelineRound old : existing) {
-            if (!used.contains(old.getPublicId()) && jobApplicationService.existsByRecruitmentPipelineStageAndRejectedFalse(old.getId())) {
+            if (!used.contains(old.getPublicId()) && jobApplicationService.existsByRecruitmentPipelineStageAndClosedFalse(old.getId())) {
                 throw new CustomException(CustomExceptionType.JOB_PIPELINE_OCCUPIED_STAGE);
             }
         }
-        /*When a candidate was rejected in a custom stage, and if that stage is being deleted, thenclear the stage reference from job applications table. 
-        When a pipeline stage is removed, its foreign key would otherwise prevent deletion.
-        The rejection stage’s name and type are saved separately as snapshots, so they remain visible in the Rejected table. 
-        Stages containing active candidates cannot be removed. */
+        // Closed applications retain stage snapshots when their stage is deleted.
         for (int i = 0; i < existing.size(); i++) existing.get(i).setOrder(-i - 1);
         jobRecruitmentPipelineRoundRepository.saveAllAndFlush(existing);
         List<JobRecruitmentPipelineRound> removed = existing.stream().filter(stage -> !used.contains(stage.getPublicId())).toList();
         if (!removed.isEmpty()) {
-            jobApplicationService.clearRejectedStages(removed.stream().map(JobRecruitmentPipelineRound::getId).toList());
+            jobApplicationService.clearClosedStages(removed.stream().map(JobRecruitmentPipelineRound::getId).toList());
         }
         position.getRecruitmentPipelineRounds().removeAll(removed);
         jobRecruitmentPipelineRoundRepository.flush();

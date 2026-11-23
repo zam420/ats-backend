@@ -25,6 +25,7 @@ import com.deepconnect.ats.job.repo.JobPositionRepository;
 import com.deepconnect.ats.job.repo.JobRecruitmentPipelineRoundRepository;
 import com.deepconnect.ats.job.service.JobPositionAccessService;
 import com.deepconnect.ats.jobapplication.model.JobApplication;
+import com.deepconnect.ats.jobapplication.enums.JobApplicationCloseType;
 import com.deepconnect.ats.jobapplication.repo.JobApplicationRepository;
 import com.deepconnect.ats.recruitmentpipeline.enums.RecruitmentPipelineRoundType;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -86,13 +87,14 @@ class CandidatePipelineServiceTest {
     @Test
     void recordsRejectionAndPreventsFurtherMoves() {
         service.reject("job", "candidate", new RejectCandidateReq("a", "  Not a fit  ", true));
-        assertTrue(application.isRejected());
-        assertEquals("Not a fit", application.getRejectionReason());
+        assertTrue(application.isClosed());
+        assertEquals(JobApplicationCloseType.REJECTED, application.getApplicationCloseType());
+        assertEquals("Not a fit", application.getClosedReason());
         assertEquals(Boolean.TRUE, application.getConsiderForOtherOpenings());
         assertEquals(10L, application.getRecruitmentPipelineStage());
-        assertEquals("Stage a", application.getRejectedStageName());
-        assertEquals("APPLIED", application.getRejectedStageType());
-        assertNotNull(application.getRejectedAt());
+        assertEquals("Stage a", application.getClosedAtStageName());
+        assertEquals("APPLIED", application.getClosedAtStageType());
+        assertNotNull(application.getClosedAt());
         assertThrows(CustomException.class, () -> service.move("job", "candidate", new MoveCandidateReq("a", "b")));
         assertThrows(CustomException.class, () -> service.reject("job", "candidate", new RejectCandidateReq("a", null, false)));
         verify(applications, times(1)).save(application);
@@ -101,7 +103,7 @@ class CandidatePipelineServiceTest {
     @Test
     void rejectsStaleRejectionWithoutModifyingApplication() {
         assertThrows(CustomException.class, () -> service.reject("job", "candidate", new RejectCandidateReq("b", null, false)));
-        assertFalse(application.isRejected());
+        assertFalse(application.isClosed());
         verify(applications, never()).save(any());
     }
 
@@ -112,12 +114,13 @@ class CandidatePipelineServiceTest {
         job.setPublicId("job");
         when(positions.findByPublicIdAndTenantIdAndDeactivatedFalse("job", 2L)).thenReturn(Optional.of(job));
         JobApplication rejected = new JobApplication();
-        rejected.setRejected(true);
+        rejected.setClosed(true);
+        rejected.setApplicationCloseType(JobApplicationCloseType.REJECTED);
         rejected.setConsiderForOtherOpenings(false);
-        rejected.setRejectionReason("Experience");
-        rejected.setRejectedStageName("Original stage");
-        rejected.setRejectedStageType("SCREENING");
-        rejected.setRejectedAt(LocalDateTime.of(2026, 11, 20, 12, 0));
+        rejected.setClosedReason("Experience");
+        rejected.setClosedAtStageName("Original stage");
+        rejected.setClosedAtStageType("SCREENING");
+        rejected.setClosedAt(LocalDateTime.of(2026, 11, 20, 12, 0));
         rejected.setRecruitmentPipelineStage(null);
         when(applications.findByJobPositionIdOrderByCreatedAtDesc(5L)).thenReturn(List.of(application, rejected));
         var result = service.board("job");
@@ -125,11 +128,33 @@ class CandidatePipelineServiceTest {
         assertEquals(1, result.getPipelineCount());
         assertEquals(1, result.getStages().get(0).getCandidates().size());
         assertEquals(1, result.getRejectedCandidates().size());
-        assertEquals("Experience", result.getRejectedCandidates().get(0).getRejectionReason());
+        assertEquals("Experience", result.getRejectedCandidates().get(0).getClosedReason());
         assertEquals(Boolean.FALSE, result.getRejectedCandidates().get(0).getConsiderForOtherOpenings());
-        assertEquals("Original stage", result.getRejectedCandidates().get(0).getRejectedStageName());
-        assertEquals("SCREENING", result.getRejectedCandidates().get(0).getRejectedStageType());
-        assertEquals(rejected.getRejectedAt(), result.getRejectedCandidates().get(0).getRejectedAt());
+        assertEquals("Original stage", result.getRejectedCandidates().get(0).getClosedAtStageName());
+        assertEquals("SCREENING", result.getRejectedCandidates().get(0).getClosedAtStageType());
+        assertEquals(rejected.getClosedAt(), result.getRejectedCandidates().get(0).getClosedAt());
+        var json = new ObjectMapper().findAndRegisterModules()
+                .setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE)
+                .valueToTree(result).path("rejected_candidates").get(0);
+        assertTrue(json.path("closed").asBoolean());
+        assertEquals(0, json.path("application_close_type").asInt());
+        assertEquals("Experience", json.path("closed_reason").asText());
+        assertEquals("Original stage", json.path("closed_at_stage_name").asText());
+        assertEquals("SCREENING", json.path("closed_at_stage_type").asText());
+        assertTrue(json.hasNonNull("closed_at"));
+        assertFalse(json.has("rejection_reason"));
+    }
+
+    @Test
+    void doesNotMisclassifyOtherClosureTypesAsRejections() {
+        JobPosition job = new JobPosition();
+        job.setId(5L);
+        when(positions.findByPublicIdAndTenantIdAndDeactivatedFalse("job", 2L)).thenReturn(Optional.of(job));
+        application.setClosed(true);
+        application.setApplicationCloseType(JobApplicationCloseType.OFFER_CANCELLED);
+        when(applications.findByJobPositionIdOrderByCreatedAtDesc(5L)).thenReturn(List.of(application));
+        assertThrows(InternalServerException.class, () -> service.board("job"));
+        assertThrows(CustomException.class, () -> service.move("job", "candidate", new MoveCandidateReq("a", "b")));
     }
 
     @Test
