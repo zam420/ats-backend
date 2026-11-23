@@ -13,6 +13,7 @@ import com.deepconnect.ats.common.enums.CustomExceptionType;
 import com.deepconnect.ats.common.enums.EmailType;
 import com.deepconnect.ats.rbac.enums.RoleType;
 import com.deepconnect.ats.common.exception.UnauthorizedException;
+import com.deepconnect.ats.common.model.OperatableBaseWithTenantEntity;
 import com.deepconnect.ats.common.exception.CustomException;
 import com.deepconnect.ats.common.security.PasswordEncoderService;
 import com.deepconnect.ats.notification.repo.NotificationRepository;
@@ -25,6 +26,7 @@ import com.deepconnect.ats.tenant.enums.TenantType;
 import com.deepconnect.ats.rbac.repo.UserRoleRepository;
 import com.deepconnect.ats.rbac.repo.RolePermissionRepository;
 import com.deepconnect.ats.rbac.service.UserRoleService;
+import com.deepconnect.ats.screeningquestionsform.model.ScreeningQuestionsForm;
 import com.deepconnect.ats.auth.service.AuthService;
 
 import lombok.RequiredArgsConstructor;
@@ -238,6 +240,14 @@ public class UserServiceV2 {
             userIdToFullName.put(user.getId(), user.getName());
         }
         return userIdToFullName;
+    }
+
+    public HashMap<Long, String> getOwnerNamesByIds(List<? extends OperatableBaseWithTenantEntity> entities){
+        HashSet<Long> ownerIds = new HashSet<>();
+        for(OperatableBaseWithTenantEntity entity : entities) {
+            ownerIds.add(entity.getOwnerId());
+        }
+        return this.findNameByUserIds(ownerIds);
     }
 
     public Optional<User> findByPublicIdAndDeactivatedFalseAndLockedFalse(String publicId){

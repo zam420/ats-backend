@@ -1,23 +1,22 @@
-package com.deepconnect.ats.screeningquestionsform.dto;
+package com.deepconnect.ats.common.dto;
 
 import lombok.Data;
 
 import java.util.List;
 
-import com.deepconnect.ats.common.dto.EnumsExtendedRes;
 import com.deepconnect.ats.user.dto.UserSummary;
 
 @Data
-public class ScreeningQuestionsFormFiltersRes {
+public class TemplateFiltersRes {
 
     private List<EnumsExtendedRes> controlTypes;
     private List<UserSummary> users;
     
-    public static ScreeningQuestionsFormFiltersRes from(
+    public static TemplateFiltersRes from(
         List<EnumsExtendedRes> controlTypes, 
         List<UserSummary> users) 
     {
-        ScreeningQuestionsFormFiltersRes res = new ScreeningQuestionsFormFiltersRes();
+        TemplateFiltersRes res = new TemplateFiltersRes();
         res.setControlTypes(controlTypes);
         res.setUsers(users);
         return res;

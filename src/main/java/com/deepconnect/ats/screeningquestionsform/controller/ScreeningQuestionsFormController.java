@@ -10,17 +10,14 @@ import com.deepconnect.ats.screeningquestionsform.service.ScreeningQuestionsForm
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
-import com.deepconnect.ats.common.dto.EnumsExtendedRes;
+import com.deepconnect.ats.common.dto.TemplateFiltersRes;
 import com.deepconnect.ats.dto.ApiResult;
 import com.deepconnect.ats.dto.AtsPageQuery;
 import com.deepconnect.ats.dto.AtsPageRsp;
-import com.deepconnect.ats.job.dto.JobFiltersRes;
 import com.deepconnect.ats.screeningquestionsform.dto.ScreeningQuestionsFormRes;
 import com.deepconnect.ats.screeningquestionsform.dto.ScreeningQuestionsFormDetailsRes;
-import com.deepconnect.ats.screeningquestionsform.dto.ScreeningQuestionsFormFiltersRes;
 
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -88,6 +85,12 @@ public class ScreeningQuestionsFormController {
         return ApiResult.success(screeningQuestionTemplateService.findAllSystemTemplates(query));
     }
 
+    @PreAuthorize("hasAuthority('sqts')")
+    @GetMapping("/filters")
+    public ApiResult<TemplateFiltersRes> getFilters() throws Exception {
+        return ApiResult.success(screeningQuestionTemplateService.getFilters());
+    }
+
     @PreAuthorize("hasAuthority('sqtsa')")
     @PostMapping("/templates/create")
     public ApiResult<Map<String, String>> createSystemTemplate(@RequestBody @Valid ScreeningQuestionsFormReq req) {
@@ -98,12 +101,6 @@ public class ScreeningQuestionsFormController {
     @PostMapping("/templates/update")
     public ApiResult<Map<String, String>> updateSystemTemplate(@RequestBody @Valid ScreeningQuestionsFormReq req) {
         return ApiResult.success(Collections.singletonMap("id", screeningQuestionTemplateService.updateSystemTemplate(req)));
-    }
-
-    @PreAuthorize("hasAuthority('sqts')")
-    @GetMapping("/filters")
-    public ApiResult<ScreeningQuestionsFormFiltersRes> getFilters() throws Exception {
-        return ApiResult.success(screeningQuestionTemplateService.getFilters());
     }
 
     /**

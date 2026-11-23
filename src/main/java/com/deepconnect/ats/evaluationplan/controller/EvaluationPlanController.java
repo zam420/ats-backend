@@ -10,7 +10,7 @@ import com.deepconnect.ats.evaluationplan.service.EvaluationPlanService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
-import com.deepconnect.ats.common.dto.EnumsExtendedRes;
+import com.deepconnect.ats.common.dto.TemplateFiltersRes;
 import com.deepconnect.ats.dto.ApiResult;
 import com.deepconnect.ats.dto.AtsPageQuery;
 import com.deepconnect.ats.dto.AtsPageRsp;
@@ -18,7 +18,6 @@ import com.deepconnect.ats.evaluationplan.dto.EvaluationPlanRes;
 import com.deepconnect.ats.evaluationplan.dto.EvaluationPlanDetailsRes;
 
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -56,12 +55,6 @@ public class EvaluationPlanController {
     }
 
     @PreAuthorize("hasAuthority('ipts')")
-    @GetMapping("/roundtypes")
-    public ApiResult<List<EnumsExtendedRes>> findAllRoundTypes() throws Exception {
-        return ApiResult.success(evaluationPlanService.findAllRoundTypes());
-    }
-
-    @PreAuthorize("hasAuthority('ipts')")
     @GetMapping("/all")
     public ApiResult<AtsPageRsp<EvaluationPlanRes>> findAll(AtsPageQuery query) {
         return ApiResult.success(evaluationPlanService.findAll(query));
@@ -90,6 +83,12 @@ public class EvaluationPlanController {
     @GetMapping("/templates")
     public ApiResult<AtsPageRsp<EvaluationPlanRes>> findAllSystemTemplates(AtsPageQuery query) {
         return ApiResult.success(evaluationPlanService.findAllSystemTemplates(query));
+    }
+
+    @PreAuthorize("hasAuthority('ipts')")
+    @GetMapping("/filters")
+    public ApiResult<TemplateFiltersRes> getFilters() throws Exception {
+        return ApiResult.success(evaluationPlanService.getFilters());
     }
 
     @PreAuthorize("hasAuthority('iptsa')")

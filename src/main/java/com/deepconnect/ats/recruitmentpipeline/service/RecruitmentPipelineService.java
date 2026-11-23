@@ -10,6 +10,9 @@ import com.deepconnect.ats.recruitmentpipeline.dto.RecruitmentPipelineReq;
 import com.deepconnect.ats.recruitmentpipeline.model.RecruitmentPipeline;
 import com.deepconnect.ats.recruitmentpipeline.repo.RecruitmentPipelineRepository;
 import com.deepconnect.ats.recruitmentpipeline.repo.RecruitmentPipelineShareRepository;
+import com.deepconnect.ats.screeningquestionsform.dto.ScreeningQuestionsFormDetailsRes;
+import com.deepconnect.ats.screeningquestionsform.dto.ScreeningQuestionsFormRes;
+import com.deepconnect.ats.screeningquestionsform.model.ScreeningQuestionsForm;
 import com.deepconnect.ats.dto.AtsPageQuery;
 import com.deepconnect.ats.dto.AtsPageRsp;
 import com.deepconnect.ats.recruitmentpipeline.dto.RecruitmentPipelineRes;
@@ -19,15 +22,13 @@ import com.deepconnect.ats.recruitmentpipeline.enums.RecruitmentPipelineRoundTyp
 import com.deepconnect.ats.recruitmentpipeline.repo.RecruitmentPipelineRoundRepository;
 import com.deepconnect.ats.user.model.User;
 import com.deepconnect.ats.user.service.UserServiceV2;
-import com.deepconnect.ats.common.dto.EnumsExtendedRes;
+import com.deepconnect.ats.common.dto.TemplateFiltersRes;
 import com.deepconnect.ats.common.enums.AccessType;
 import com.deepconnect.ats.common.utils.StringUtils;
 import com.deepconnect.ats.common.utils.Validation;
-import com.deepconnect.ats.common.utils.HashMapUtils;
 import com.deepconnect.ats.recruitmentpipeline.model.RecruitmentPipelineShare;
 import com.deepconnect.ats.common.enums.CustomExceptionType;
 import com.deepconnect.ats.common.enums.ValidationFieldType;
-import com.deepconnect.ats.common.exception.ValidationException;
 import com.deepconnect.ats.common.service.EnumsResService;
 import com.deepconnect.ats.common.exception.CustomException;
 
@@ -37,7 +38,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -57,10 +57,6 @@ public class RecruitmentPipelineService {
     private final RecruitmentPipelineRepository recruitmentPipelineRepository;
     private final RecruitmentPipelineRoundRepository recruitmentPipelineRoundRepository;
     private final RecruitmentPipelineShareRepository recruitmentPipelineShareRepository;
-
-    public List<EnumsExtendedRes> findAllRoundTypes() {
-        return enumsResService.from(RecruitmentPipelineRoundType.values());
-    }
 
     private String save(RecruitmentPipeline plan, RecruitmentPipelineReq req, boolean roundsChanged, boolean sharedWithUsersChanged, boolean isPublicForTenant, boolean isPublicForAll) {
         Validation.validateMustAdd(ValidationFieldType.RECRUITMENT_PIPELINE_STAGE, req.getRounds());
@@ -231,7 +227,7 @@ public class RecruitmentPipelineService {
         //RecruitmentPipeline plan = recruitmentPipelineRepository.findByPublicIdAndTenantIdAndDeactivatedFalse(publicId, AuthService.getLoggedInTenantId()).orElseThrow(() -> new InternalServerException("Evaluation plan not found: " + publicId));
         RecruitmentPipeline plan = recruitmentPipelineRepository.findByPublicIdAndDeactivatedFalse(publicId).orElseThrow(() -> new InternalServerException("Evaluation plan not found: " + publicId));
         recruitmentPipelineAccessService.assertReadAccess(AuthService.getLoggedInUser(), plan);
-        return RecruitmentPipelineDetailsRes.from(plan);
+        return RecruitmentPipelineDetailsRes.from(plan, userService.findByUserId(plan.getOwnerId()).get().getName());
     }
 
     @Transactional(readOnly = true)
@@ -240,7 +236,7 @@ public class RecruitmentPipelineService {
         Page<RecruitmentPipeline> page = isAdmin 
             ? recruitmentPipelineRepository.findAllForTenantAdmin(AuthService.getLoggedInTenantId(), query.toPageable()) 
             : recruitmentPipelineRepository.findAllForTenantNonAdmin(AuthService.getLoggedInTenantId(), AuthService.getLoggedInUser().getUserId(), query.toPageable());
-        return AtsPageRsp.of(page.map(RecruitmentPipelineRes::from));
+        return this.getResponseFromPage(page);
     }
 
     /**
@@ -254,13 +250,12 @@ public class RecruitmentPipelineService {
         List<RecruitmentPipeline> plans = isAdmin 
             ? recruitmentPipelineRepository.findAllForTenantAdminAsList(AuthService.getLoggedInTenantId()) 
             : recruitmentPipelineRepository.findAllForTenantNonAdminAsList(AuthService.getLoggedInTenantId(), AuthService.getLoggedInUser().getUserId());
-        return plans.stream().map(RecruitmentPipelineRes::from).toList();
+        return plans.stream().map(e -> RecruitmentPipelineRes.from(e, userService.getOwnerNamesByIds(plans).get(e.getOwnerId()))).toList();
     }
 
     @Transactional(readOnly = true)
     public AtsPageRsp<RecruitmentPipelineRes> findAllSystemTemplates(AtsPageQuery query) {
-        Page<RecruitmentPipeline> page = recruitmentPipelineRepository.findByDeactivatedFalseAndIsPublicForAllTrue(query.toPageable());
-        return AtsPageRsp.of(page.map(RecruitmentPipelineRes::from));
+        return this.getResponseFromPage(recruitmentPipelineRepository.findByDeactivatedFalseAndIsPublicForAllTrue(query.toPageable()));
     }
 
     /**
@@ -272,8 +267,7 @@ public class RecruitmentPipelineService {
     @Transactional(readOnly = true)
     public AtsPageRsp<RecruitmentPipelineRes> findAllSharedWithUser(AtsPageQuery query) {
         LoggedInUserDetails loggedInUser = AuthService.getLoggedInUser();
-        Page<RecruitmentPipeline> page = recruitmentPipelineRepository.findPublicOrSharedForTenant(loggedInUser.getTenantId(), loggedInUser.getUserId(), query.toPageable());
-        return AtsPageRsp.of(page.map(RecruitmentPipelineRes::from));
+        return this.getResponseFromPage(recruitmentPipelineRepository.findPublicOrSharedForTenant(loggedInUser.getTenantId(), loggedInUser.getUserId(), query.toPageable()));
     }
 
     /**
@@ -285,8 +279,7 @@ public class RecruitmentPipelineService {
     @Transactional(readOnly = true)
     public AtsPageRsp<RecruitmentPipelineRes> findAllForPlanOwner(AtsPageQuery query) {
         LoggedInUserDetails loggedInUser = AuthService.getLoggedInUser();
-        Page<RecruitmentPipeline> page = recruitmentPipelineRepository.findByDeactivatedFalseAndTenantIdAndOwnerId(loggedInUser.getTenantId(), loggedInUser.getUserId(), query.toPageable());
-        return AtsPageRsp.of(page.map(RecruitmentPipelineRes::from));
+        return this.getResponseFromPage(recruitmentPipelineRepository.findByDeactivatedFalseAndTenantIdAndOwnerId(loggedInUser.getTenantId(), loggedInUser.getUserId(), query.toPageable()));
     }
 
     /**
@@ -296,9 +289,7 @@ public class RecruitmentPipelineService {
      * @return a paginated response containing recruitment pipelines for the tenant
      */
     private AtsPageRsp<RecruitmentPipelineRes> findAllForTenant(AtsPageQuery query) {
-        Long tenantId = AuthService.getLoggedInTenantId();
-        Page<RecruitmentPipeline> page = recruitmentPipelineRepository.findByDeactivatedFalseAndTenantId(tenantId, query.toPageable());
-        return AtsPageRsp.of(page.map(RecruitmentPipelineRes::from));
+        return this.getResponseFromPage(recruitmentPipelineRepository.findByDeactivatedFalseAndTenantId(AuthService.getLoggedInTenantId(), query.toPageable()));
     }
 
     private void setAnotherUserAsOwner(RecruitmentPipeline recruitmentPipeline, AccessType loggedInUserAccessType, String ownerId) {
@@ -359,5 +350,16 @@ public class RecruitmentPipelineService {
 
     public Optional<RecruitmentPipeline> findByDeactivatedFalseAndPublicId(String publicId) {
         return recruitmentPipelineRepository.findByDeactivatedFalseAndPublicId(publicId);
+    }
+
+    public TemplateFiltersRes getFilters() {
+        return TemplateFiltersRes.from(
+            enumsResService.from(RecruitmentPipelineRoundType.values()),
+            userService.findActiveUsersForTenant()
+        );
+    }
+
+    private AtsPageRsp<RecruitmentPipelineRes> getResponseFromPage(Page<RecruitmentPipeline> page) {
+        return AtsPageRsp.of(page.map(e -> RecruitmentPipelineRes.from(e, userService.getOwnerNamesByIds(page.getContent()).get(e.getOwnerId()))));
     }
 }

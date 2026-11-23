@@ -182,14 +182,5 @@ public class JobPosition extends OperatableBaseWithTenantEntity {
 
     @Column(name = "publishedAt", nullable = true)
     private LocalDateTime publishedAt;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "ownerId", referencedColumnName = "id", insertable = false, updatable = false)
-    private User owner;
-
-    @Column(name = "ownerId", nullable = false)
-    private Long ownerId;
-
-    @Column(name = "ownerPublicId", nullable = false)
-    private String ownerPublicId;
+    
 }

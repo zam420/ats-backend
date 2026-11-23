@@ -17,9 +17,12 @@ import com.deepconnect.ats.evaluationplan.model.EvaluationPlanRound;
 import com.deepconnect.ats.evaluationplan.repo.EvaluationPlanRoundRepository;
 import com.deepconnect.ats.evaluationplan.model.EvaluationPlanShare;
 import com.deepconnect.ats.evaluationplan.repo.EvaluationPlanShareRepository;
+import com.deepconnect.ats.recruitmentpipeline.dto.RecruitmentPipelineRes;
+import com.deepconnect.ats.recruitmentpipeline.model.RecruitmentPipeline;
 import com.deepconnect.ats.user.model.User;
 import com.deepconnect.ats.user.service.UserServiceV2;
 import com.deepconnect.ats.common.dto.EnumsExtendedRes;
+import com.deepconnect.ats.common.dto.TemplateFiltersRes;
 import com.deepconnect.ats.common.enums.AccessType;
 import com.deepconnect.ats.common.utils.StringUtils;
 import com.deepconnect.ats.common.utils.Validation;
@@ -54,10 +57,6 @@ public class EvaluationPlanService {
     private final EvaluationPlanRepository evaluationPlanRepository;
     private final EvaluationPlanRoundRepository evaluationPlanRoundRepository;
     private final EvaluationPlanShareRepository evaluationPlanShareRepository;
-
-    public List<EnumsExtendedRes> findAllRoundTypes() {
-        return enumsResService.from(EvaluationPlanRoundType.values());
-    }
 
     private String save(EvaluationPlan plan, EvaluationPlanReq req, boolean roundsChanged, boolean sharedWithUsersChanged, boolean isPublicForTenant, boolean isPublicForAll) {
         LoggedInUserDetails loggedInUser = AuthService.getLoggedInUser();
@@ -233,7 +232,7 @@ public class EvaluationPlanService {
         //EvaluationPlan plan = evaluationPlanRepository.findByPublicIdAndTenantIdAndDeactivatedFalse(publicId, AuthService.getLoggedInTenantId()).orElseThrow(() -> new InternalServerException("Evaluation plan not found: " + publicId));
         EvaluationPlan plan = evaluationPlanRepository.findByPublicIdAndDeactivatedFalse(publicId).orElseThrow(() -> new InternalServerException("Evaluation plan not found: " + publicId));
         evaluationPlanAccessService.assertReadAccess(AuthService.getLoggedInUser(), plan);
-        return EvaluationPlanDetailsRes.from(plan);
+        return EvaluationPlanDetailsRes.from(plan, userService.findByUserId(plan.getOwnerId()).get().getName());
     }
 
     @Transactional(readOnly = true)
@@ -242,7 +241,7 @@ public class EvaluationPlanService {
         Page<EvaluationPlan> page = isAdmin 
             ? evaluationPlanRepository.findAllForTenantAdmin(AuthService.getLoggedInTenantId(), query.toPageable()) 
             : evaluationPlanRepository.findAllForTenantNonAdmin(AuthService.getLoggedInTenantId(), AuthService.getLoggedInUser().getUserId(), query.toPageable());
-        return AtsPageRsp.of(page.map(EvaluationPlanRes::from));
+        return this.getResponseFromPage(page);
     }
 
     /**
@@ -256,13 +255,12 @@ public class EvaluationPlanService {
         List<EvaluationPlan> plans = isAdmin 
             ? evaluationPlanRepository.findAllForTenantAdminAsList(AuthService.getLoggedInTenantId()) 
             : evaluationPlanRepository.findAllForTenantNonAdminAsList(AuthService.getLoggedInTenantId(), AuthService.getLoggedInUser().getUserId());
-        return plans.stream().map(EvaluationPlanRes::from).toList();
+        return plans.stream().map(e -> EvaluationPlanRes.from(e, userService.getOwnerNamesByIds(plans).get(e.getOwnerId()))).toList();
     }
 
     @Transactional(readOnly = true)
     public AtsPageRsp<EvaluationPlanRes> findAllSystemTemplates(AtsPageQuery query) {
-        Page<EvaluationPlan> page = evaluationPlanRepository.findByDeactivatedFalseAndIsPublicForAllTrue(query.toPageable());
-        return AtsPageRsp.of(page.map(EvaluationPlanRes::from));
+        return this.getResponseFromPage(evaluationPlanRepository.findByDeactivatedFalseAndIsPublicForAllTrue(query.toPageable()));
     }
 
     /**
@@ -274,8 +272,7 @@ public class EvaluationPlanService {
     @Transactional(readOnly = true)
     public AtsPageRsp<EvaluationPlanRes> findAllSharedWithUser(AtsPageQuery query) {
         LoggedInUserDetails loggedInUser = AuthService.getLoggedInUser();
-        Page<EvaluationPlan> page = evaluationPlanRepository.findPublicOrSharedForTenant(loggedInUser.getTenantId(), loggedInUser.getUserId(), query.toPageable());
-        return AtsPageRsp.of(page.map(EvaluationPlanRes::from));
+        return this.getResponseFromPage(evaluationPlanRepository.findPublicOrSharedForTenant(loggedInUser.getTenantId(), loggedInUser.getUserId(), query.toPageable()));
     }
 
     /**
@@ -287,8 +284,7 @@ public class EvaluationPlanService {
     @Transactional(readOnly = true)
     public AtsPageRsp<EvaluationPlanRes> findAllForPlanOwner(AtsPageQuery query) {
         LoggedInUserDetails loggedInUser = AuthService.getLoggedInUser();
-        Page<EvaluationPlan> page = evaluationPlanRepository.findByDeactivatedFalseAndTenantIdAndOwnerId(loggedInUser.getTenantId(), loggedInUser.getUserId(), query.toPageable());
-        return AtsPageRsp.of(page.map(EvaluationPlanRes::from));
+        return this.getResponseFromPage(evaluationPlanRepository.findByDeactivatedFalseAndTenantIdAndOwnerId(loggedInUser.getTenantId(), loggedInUser.getUserId(), query.toPageable()));
     }
 
     /**
@@ -298,9 +294,7 @@ public class EvaluationPlanService {
      * @return a paginated response containing interview plans for the tenant
      */
     private AtsPageRsp<EvaluationPlanRes> findAllForTenant(AtsPageQuery query) {
-        Long tenantId = AuthService.getLoggedInTenantId();
-        Page<EvaluationPlan> page = evaluationPlanRepository.findByDeactivatedFalseAndTenantId(tenantId, query.toPageable());
-        return AtsPageRsp.of(page.map(EvaluationPlanRes::from));
+        return this.getResponseFromPage(evaluationPlanRepository.findByDeactivatedFalseAndTenantId(AuthService.getLoggedInTenantId(), query.toPageable()));
     }
 
     private void setAnotherUserAsOwner(EvaluationPlan evaluationPlan, AccessType loggedInUserAccessType, String ownerId) {
@@ -361,6 +355,17 @@ public class EvaluationPlanService {
 
     public Optional<EvaluationPlan> findByDeactivatedFalseAndPublicId(String publicId) {
         return evaluationPlanRepository.findByDeactivatedFalseAndPublicId(publicId);
+    }
+
+    public TemplateFiltersRes getFilters() {
+        return TemplateFiltersRes.from(
+            enumsResService.from(EvaluationPlanRoundType.values()),
+            userService.findActiveUsersForTenant()
+        );
+    }
+
+    private AtsPageRsp<EvaluationPlanRes> getResponseFromPage(Page<EvaluationPlan> page) {
+        return AtsPageRsp.of(page.map(e -> EvaluationPlanRes.from(e, userService.getOwnerNamesByIds(page.getContent()).get(e.getOwnerId()))));
     }
 
 }

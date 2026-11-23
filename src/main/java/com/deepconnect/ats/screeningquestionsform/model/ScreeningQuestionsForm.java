@@ -13,8 +13,6 @@ import java.util.List;
 
 import org.hibernate.validator.constraints.Length;
 
-import com.deepconnect.ats.user.model.User;
-
 @Entity
 @Table(name = "screening_questions_form", uniqueConstraints = {
         @UniqueConstraint(name = "uk_screening_questions_form_name_tenant_deactivated",
@@ -64,15 +62,5 @@ public class ScreeningQuestionsForm extends OperatableBaseWithTenantEntity {
     @JsonManagedReference("sharedWithUsers")
     @OneToMany(mappedBy = "screeningQuestionsForm", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ScreeningQuestionsFormShare> sharedWithUsers;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "ownerId", referencedColumnName = "id", insertable = false, updatable = false)
-    private User owner; // By default, the user who created this record. Can be changed.
-
-    @Column(name = "ownerId", nullable = false)
-    private Long ownerId;
-
-    @Column(nullable = false)
-    private String ownerPublicId;
 
 }

@@ -19,6 +19,7 @@ import com.deepconnect.ats.job.security.JobRichTextSanitizer;
 import com.deepconnect.ats.job.repo.JobPositionRepository;
 import com.deepconnect.ats.job.repo.JobPositionSearchSpecification;
 import com.deepconnect.ats.job.repo.JobEvaluationPlanRoundRepository;
+import com.deepconnect.ats.evaluationplan.enums.EvaluationPlanRoundType;
 import com.deepconnect.ats.evaluationplan.service.EvaluationPlanRoundHelper;
 import com.deepconnect.ats.evaluationplan.service.EvaluationPlanService;
 import com.deepconnect.ats.recruitmentpipeline.service.RecruitmentPipelineService;
@@ -417,8 +418,8 @@ public class JobPositionService {
             screeningQuestionsFormService.findAllAsList(),
             userService.findActiveByRolesForTenant(Set.of(RoleType.RECRUITER, RoleType.HR_ADMIN)),
             userService.findActiveByRolesForTenant(Set.of(RoleType.HIRING_MANAGER, RoleType.HR_ADMIN, RoleType.RECRUITER)),
-            evaluationPlanService.findAllRoundTypes(),
-            recruitmentPipelineService.findAllRoundTypes(),
+            enumsResService.from(EvaluationPlanRoundType.values()),
+            enumsResService.from(RecruitmentPipelineRoundType.values()),
             enumsResService.from(ScreeningQuestionType.values())
         );
     }

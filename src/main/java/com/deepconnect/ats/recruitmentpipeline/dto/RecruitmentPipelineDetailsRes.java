@@ -1,5 +1,5 @@
 package com.deepconnect.ats.recruitmentpipeline.dto;
-
+import java.util.HashMap;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -19,14 +19,14 @@ public class RecruitmentPipelineDetailsRes extends RecruitmentPipelineResBase {
     private Set<String> sharedWithUserIds;
     private String ownerId;
 
-    protected RecruitmentPipelineDetailsRes(RecruitmentPipeline entity) {
-        super(entity);
+    protected RecruitmentPipelineDetailsRes(RecruitmentPipeline entity, String ownerName) {
+        super(entity, ownerName);
     }
 
-    public static RecruitmentPipelineDetailsRes from(RecruitmentPipeline entity) {
+    public static RecruitmentPipelineDetailsRes from(RecruitmentPipeline entity, String ownerName) {
         if(entity == null)
             return null;
-        RecruitmentPipelineDetailsRes res = new RecruitmentPipelineDetailsRes(entity);
+        RecruitmentPipelineDetailsRes res = new RecruitmentPipelineDetailsRes(entity, ownerName);
         res.setRounds(
             entity.getRounds() == null
                 ? List.of()
@@ -45,7 +45,7 @@ public class RecruitmentPipelineDetailsRes extends RecruitmentPipelineResBase {
         return res;
     }
 
-    public static List<RecruitmentPipelineDetailsRes> fromList(List<RecruitmentPipeline> entities) {
-        return entities.stream().map(RecruitmentPipelineDetailsRes::from).toList();
+    public static List<RecruitmentPipelineDetailsRes> fromList(List<RecruitmentPipeline> entities, HashMap<Long, String> ownerNamesById) {
+        return entities.stream().map(e -> RecruitmentPipelineDetailsRes.from(e, ownerNamesById.get(e.getOwnerId()))).toList();
     }
 }

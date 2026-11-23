@@ -9,7 +9,7 @@ import com.deepconnect.ats.recruitmentpipeline.service.RecruitmentPipelineServic
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
-import com.deepconnect.ats.common.dto.EnumsExtendedRes;
+import com.deepconnect.ats.common.dto.TemplateFiltersRes;
 import com.deepconnect.ats.dto.ApiResult;
 import com.deepconnect.ats.dto.AtsPageQuery;
 import com.deepconnect.ats.dto.AtsPageRsp;
@@ -19,7 +19,6 @@ import com.deepconnect.ats.recruitmentpipeline.dto.RecruitmentPipelineRes;
 import com.deepconnect.ats.recruitmentpipeline.dto.RecruitmentPipelineDetailsRes;
 
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -64,12 +63,6 @@ public class RecruitmentPipelineController {
     }
 
     @PreAuthorize("hasAuthority('rpts')")
-    @GetMapping("/roundtypes")
-    public ApiResult<List<EnumsExtendedRes>> findAllRoundTypes() throws Exception {
-        return ApiResult.success(recruitmentPipelineService.findAllRoundTypes());
-    }
-
-    @PreAuthorize("hasAuthority('rpts')")
     @GetMapping("/all")
     public ApiResult<AtsPageRsp<RecruitmentPipelineRes>> findAll(AtsPageQuery query) {
         return ApiResult.success(recruitmentPipelineService.findAll(query));
@@ -91,6 +84,12 @@ public class RecruitmentPipelineController {
     @GetMapping("/templates")
     public ApiResult<AtsPageRsp<RecruitmentPipelineRes>> findAllSystemTemplates(AtsPageQuery query) {
         return ApiResult.success(recruitmentPipelineService.findAllSystemTemplates(query));
+    }
+
+    @PreAuthorize("hasAuthority('rpts')")
+    @GetMapping("/filters")
+    public ApiResult<TemplateFiltersRes> getFilters() throws Exception {
+        return ApiResult.success(recruitmentPipelineService.getFilters());
     }
 
     @PreAuthorize("hasAuthority('rptsa')")
