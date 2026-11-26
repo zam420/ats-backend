@@ -2,6 +2,7 @@ package com.deepconnect.ats.candidatepipeline.dto;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 
 import com.deepconnect.ats.candidatepipeline.enums.CandidateEvaluationDecision;
 import com.deepconnect.ats.candidatepipeline.enums.CandidateEvaluationResult;
@@ -11,17 +12,26 @@ import com.deepconnect.ats.candidatepipeline.service.CandidateEvaluationWorkflow
 import com.deepconnect.ats.jobapplication.model.JobApplication;
 
 public record CandidateEvaluationSummary(String currentRoundName, CandidateEvaluationStatus currentStatus,
-        long completedRounds, int totalRounds, long passed, long failed, long cancelled,
+        List<String> currentOwners, long completedRounds, int totalRounds,
+        long strongYes, long yes, long no, long strongNo, long cancelled,
         CandidateEvaluationDecision decision) {
-    public static CandidateEvaluationSummary from(JobApplication application, List<CandidateEvaluationRound> rounds) {
+    public static CandidateEvaluationSummary from(JobApplication application, List<CandidateEvaluationRound> rounds,
+            String jobOwner, Map<String, String> interviewerNames) {
         CandidateEvaluationRound current = CandidateEvaluationWorkflow.currentRound(application, rounds);
         CandidateEvaluationRound displayed = current != null ? current : rounds.stream()
                 .max(Comparator.comparing(CandidateEvaluationRound::getOrder)).orElse(null);
+        List<String> owners = current == null ? List.of()
+                : current.getStatus() == CandidateEvaluationStatus.PENDING
+                    ? (jobOwner == null || jobOwner.isBlank() ? List.of() : List.of(jobOwner))
+                    : current.getInterviewers() == null ? List.of()
+                    : current.getInterviewers().stream().map(id -> interviewerNames.getOrDefault(id, id)).toList();
         return new CandidateEvaluationSummary(displayed == null ? null : displayed.getName(),
                 current == null ? CandidateEvaluationStatus.COMPLETED : current.getStatus(),
+                owners,
                 rounds.stream().filter(round -> round.getStatus() == CandidateEvaluationStatus.COMPLETED).count(),
-                rounds.size(), count(rounds, CandidateEvaluationResult.PASSED),
-                count(rounds, CandidateEvaluationResult.FAILED), count(rounds, CandidateEvaluationResult.CANCELLED),
+                rounds.size(), count(rounds, CandidateEvaluationResult.STRONG_YES),
+                count(rounds, CandidateEvaluationResult.YES), count(rounds, CandidateEvaluationResult.NO),
+                count(rounds, CandidateEvaluationResult.STRONG_NO), count(rounds, CandidateEvaluationResult.CANCELLED),
                 application.getEvaluationDecision());
     }
 

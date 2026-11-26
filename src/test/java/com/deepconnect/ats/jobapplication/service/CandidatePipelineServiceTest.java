@@ -36,6 +36,8 @@ import com.deepconnect.ats.jobapplication.model.JobApplication;
 import com.deepconnect.ats.jobapplication.enums.JobApplicationCloseType;
 import com.deepconnect.ats.jobapplication.repo.JobApplicationRepository;
 import com.deepconnect.ats.recruitmentpipeline.enums.RecruitmentPipelineRoundType;
+import com.deepconnect.ats.user.model.User;
+import com.deepconnect.ats.user.repo.UserRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -48,7 +50,9 @@ class CandidatePipelineServiceTest {
     private final CandidateEvaluationService evaluations = mock(CandidateEvaluationService.class);
     private final CandidateEvaluationRoundRepository evaluationRounds = mock(CandidateEvaluationRoundRepository.class);
     private final JobEvaluationPlanRoundRepository evaluationPlans = mock(JobEvaluationPlanRoundRepository.class);
-    private final CandidatePipelineService service = new CandidatePipelineService(positions, stages, applications, access,         evaluations, evaluationRounds, evaluationPlans);
+    private final UserRepository users = mock(UserRepository.class);
+    private final CandidatePipelineService service = new CandidatePipelineService(positions, stages, applications, access,
+            evaluations, evaluationRounds, evaluationPlans, users);
     private final JobApplication application = new JobApplication();
 
     @BeforeEach
@@ -146,7 +150,7 @@ class CandidatePipelineServiceTest {
         assertThrows(CustomException.class, () -> service.move("job", "candidate", new MoveCandidateReq("a", "b")));
         assertEquals(10L, application.getRecruitmentPipelineStage());
         round.setStatus(CandidateEvaluationStatus.COMPLETED);
-        round.setResult(CandidateEvaluationResult.PASSED);
+        round.setResult(CandidateEvaluationResult.STRONG_YES);
         service.move("job", "candidate", new MoveCandidateReq("a", "b"));
         assertEquals(11L, application.getRecruitmentPipelineStage());
     }
@@ -172,6 +176,13 @@ class CandidatePipelineServiceTest {
         JobPosition job = new JobPosition();
         job.setId(5L);
         job.setPublicId("job");
+        job.setTenantId(2L);
+        job.setOwnerId(20L);
+        var owner = new User();
+        owner.setTenantId(2L);
+        owner.setFirstName("Job");
+        owner.setLastName("Owner");
+        when(users.findById(20L)).thenReturn(Optional.of(owner));
         when(positions.findByPublicIdAndTenantIdAndDeactivatedFalse("job", 2L)).thenReturn(Optional.of(job));
         var stage = stage(10L, "a");
         stage.setRoundType(RecruitmentPipelineRoundType.EVALUATING);
@@ -184,19 +195,26 @@ class CandidatePipelineServiceTest {
         first.setOrder(0);
         first.setName("First");
         first.setStatus(CandidateEvaluationStatus.COMPLETED);
-        first.setResult(CandidateEvaluationResult.PASSED);
+        first.setResult(CandidateEvaluationResult.STRONG_YES);
         var last = new CandidateEvaluationRound();
         last.setJobApplicationId(7L);
         last.setOrder(1);
         last.setName("Final");
         last.setStatus(CandidateEvaluationStatus.SCHEDULED);
+        last.setInterviewers(List.of("interviewer"));
+        var interviewer = new User();
+        interviewer.setPublicId("interviewer");
+        interviewer.setFirstName("Interview");
+        interviewer.setLastName("Person");
+        when(users.findByTenantIdAndPublicIdIn(2L, java.util.Set.of("interviewer"))).thenReturn(List.of(interviewer));
         when(evaluationRounds.findByJobApplicationIdInOrderByOrderAsc(List.of(7L))).thenReturn(List.of(first, last));
         var summary = service.board("job").getStages().get(0).getCandidates().get(0).getEvaluation();
         assertEquals("Final", summary.currentRoundName());
         assertEquals(CandidateEvaluationStatus.SCHEDULED, summary.currentStatus());
         assertEquals(1, summary.completedRounds());
         assertEquals(2, summary.totalRounds());
-        assertEquals(1, summary.passed());
+        assertEquals(1, summary.strongYes());
+        assertEquals(List.of("Interview Person"), summary.currentOwners());
         var json = new ObjectMapper().findAndRegisterModules()
                 .setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE)
                 .valueToTree(service.board("job")).path("stages").get(0).path("candidates").get(0).path("evaluation");
@@ -204,12 +222,18 @@ class CandidatePipelineServiceTest {
         assertEquals(1, json.path("current_status").asInt());
         assertEquals(1, json.path("completed_rounds").asInt());
         assertEquals(2, json.path("total_rounds").asInt());
+        assertEquals("Interview Person", json.path("current_owners").get(0).asText());
+        assertEquals(1, json.path("strong_yes").asInt());
+        last.setStatus(CandidateEvaluationStatus.PENDING);
+        summary = service.board("job").getStages().get(0).getCandidates().get(0).getEvaluation();
+        assertEquals(List.of("Job Owner"), summary.currentOwners());
         last.setStatus(CandidateEvaluationStatus.COMPLETED);
-        last.setResult(CandidateEvaluationResult.FAILED);
+        last.setResult(CandidateEvaluationResult.STRONG_NO);
         summary = service.board("job").getStages().get(0).getCandidates().get(0).getEvaluation();
         assertEquals("Final", summary.currentRoundName());
         assertEquals(CandidateEvaluationStatus.COMPLETED, summary.currentStatus());
-        assertEquals(1, summary.failed());
+        assertEquals(1, summary.strongNo());
+        assertTrue(summary.currentOwners().isEmpty());
     }
 
     @Test

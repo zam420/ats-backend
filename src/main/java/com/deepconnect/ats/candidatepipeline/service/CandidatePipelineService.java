@@ -36,6 +36,8 @@ import com.deepconnect.ats.jobapplication.model.JobApplication;
 import com.deepconnect.ats.jobapplication.enums.JobApplicationCloseType;
 import com.deepconnect.ats.jobapplication.repo.JobApplicationRepository;
 import com.deepconnect.ats.recruitmentpipeline.enums.RecruitmentPipelineRoundType;
+import com.deepconnect.ats.user.repo.UserRepository;
+import com.deepconnect.ats.user.model.User;
 
 import lombok.RequiredArgsConstructor;
 
@@ -49,6 +51,7 @@ public class CandidatePipelineService {
     private final CandidateEvaluationService evaluations;
     private final CandidateEvaluationRoundRepository evaluationRounds;
     private final JobEvaluationPlanRoundRepository evaluationPlans;
+    private final UserRepository users;
 
     @Transactional(readOnly = true)
     public List<JobPositionCandidatePipelineRes> jobs() {
@@ -76,6 +79,16 @@ public class CandidatePipelineService {
         Map<Long, List<CandidateEvaluationRound>> evaluationsByCandidate = evaluatingIds.isEmpty() ? Map.of()
                 : evaluationRounds.findByJobApplicationIdInOrderByOrderAsc(evaluatingIds).stream()
                     .collect(Collectors.groupingBy(CandidateEvaluationRound::getJobApplicationId));
+        Set<String> interviewerIds = evaluationsByCandidate.values().stream().flatMap(List::stream)
+                .filter(round -> round.getInterviewers() != null).flatMap(round -> round.getInterviewers().stream())
+                .collect(Collectors.toSet());
+        Map<String, String> interviewerNames = interviewerIds.isEmpty() ? Map.of()
+                : users.findByTenantIdAndPublicIdIn(job.getTenantId(), interviewerIds).stream()
+                    .collect(Collectors.toMap(User::getPublicId, user ->
+                            user.getName().isBlank() ? user.getPublicId() : user.getName()));
+        String jobOwner = evaluatingIds.isEmpty() || job.getOwnerId() == null ? null
+                : users.findById(job.getOwnerId()).filter(owner -> job.getTenantId().equals(owner.getTenantId()))
+                    .map(User::getName).orElse(null);
         Map<Long, List<CandidateResBase>> candidatesByRecruitmentPipelineStage = new HashMap<>();
         List<CandidateClosureRes> rejected = new ArrayList<>();
 
@@ -103,7 +116,7 @@ public class CandidatePipelineService {
 
             if (application.isEvaluationsInitialized() && evaluationStageIds.contains(application.getRecruitmentPipelineStage())) {
                 candidate.setEvaluation(CandidateEvaluationSummary.from(application,
-                        evaluationsByCandidate.getOrDefault(application.getId(), List.of())));
+                        evaluationsByCandidate.getOrDefault(application.getId(), List.of()), jobOwner, interviewerNames));
             }
             stageCandidates.add(candidate);
         }

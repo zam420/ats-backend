@@ -94,7 +94,7 @@ class CandidateEvaluationServiceTest {
         assertEquals(CandidateEvaluationStatus.SCHEDULED, round.getStatus());
         verify(rounds).save(round);
         round.setStatus(CandidateEvaluationStatus.COMPLETED);
-        round.setResult(CandidateEvaluationResult.PASSED);
+        round.setResult(CandidateEvaluationResult.STRONG_YES);
         assertThrows(InternalServerException.class,
                 () -> service.decide("job", "candidate", CandidateEvaluationDecision.PASSED));
         assertNull(application.getEvaluationDecision());
@@ -105,7 +105,7 @@ class CandidateEvaluationServiceTest {
         login(2L, "manager", false);
         assertThrows(CustomException.class, () -> service.decide("job", "candidate", CandidateEvaluationDecision.PASSED));
         round.setStatus(CandidateEvaluationStatus.COMPLETED);
-        round.setResult(CandidateEvaluationResult.FAILED);
+        round.setResult(CandidateEvaluationResult.STRONG_NO);
         service.decide("job", "candidate", CandidateEvaluationDecision.PASSED);
         assertEquals(CandidateEvaluationDecision.PASSED, application.getEvaluationDecision());
         application.setEvaluationDecision(null);
@@ -133,7 +133,7 @@ class CandidateEvaluationServiceTest {
     void rejectsMutationsOutsideEvaluationStage() {
         stage.setRoundType(RecruitmentPipelineRoundType.SCREENING);
         assertThrows(CustomException.class,
-                () -> service.recordResult("job", "candidate", "round", CandidateEvaluationResult.PASSED));
+                () -> service.recordResult("job", "candidate", "round", CandidateEvaluationResult.STRONG_YES));
         verify(rounds, never()).save(any());
     }
 

@@ -21,7 +21,7 @@ class CandidateEvaluationRoundTest {
 
             round.setStatus(CandidateEvaluationStatus.COMPLETED);
             assertFalse(validator.validateProperty(round, "resultConsistent").isEmpty());
-            round.setResult(CandidateEvaluationResult.FAILED);
+            round.setResult(CandidateEvaluationResult.STRONG_NO);
             assertTrue(validator.validateProperty(round, "resultConsistent").isEmpty());
 
             round.setStatus(CandidateEvaluationStatus.SCHEDULED);

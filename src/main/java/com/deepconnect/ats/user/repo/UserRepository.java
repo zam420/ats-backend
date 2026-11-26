@@ -31,6 +31,7 @@ public interface UserRepository extends OperatableBaseRepository<User, Long>, Jp
     Optional<User> findByEmail(String email);
 
     List<User> findByTenantIdAndDeactivatedFalseAndLockedFalse(Long tenantId);
+    List<User> findByTenantIdAndPublicIdIn(Long tenantId, Set<String> publicIds);
 
     @Query("SELECT ur.roleCode FROM UserRole ur WHERE ur.userId = :userId")
     List<String> findRoleCodesByUserId(@Param("userId") Long userId);

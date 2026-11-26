@@ -6,9 +6,11 @@ import lombok.Getter;
 
 @Getter
 public enum CandidateEvaluationResult implements LocalizedBaseEnum {
-    PASSED(0, "passed"),
-    FAILED(1, "failed"),
-    CANCELLED(2, "cancelled");
+    STRONG_YES(0, "strongYes"),
+    STRONG_NO(1, "strongNo"),
+    CANCELLED(2, "cancelled"),
+    YES(3, "yes"),
+    NO(4, "no");
 
     @JsonValue
     private final Integer id;

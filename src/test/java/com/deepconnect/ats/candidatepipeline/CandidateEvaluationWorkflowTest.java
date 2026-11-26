@@ -73,11 +73,11 @@ class CandidateEvaluationWorkflowTest {
         assertEquals(CandidateEvaluationStatus.PENDING, rounds.get(0).getStatus());
         assertEquals("first", CandidateEvaluationWorkflow.currentRound(application, rounds).getPublicId());
         assertThrows(CustomException.class, () -> CandidateEvaluationWorkflow.recordResult(application, rounds,
-                "second", CandidateEvaluationResult.PASSED));
+                "second", CandidateEvaluationResult.STRONG_YES));
         assertThrows(CustomException.class, () -> CandidateEvaluationWorkflow.decide(application, rounds,
                 CandidateEvaluationDecision.PASSED));
 
-        CandidateEvaluationWorkflow.recordResult(application, rounds, "first", CandidateEvaluationResult.FAILED);
+        CandidateEvaluationWorkflow.recordResult(application, rounds, "first", CandidateEvaluationResult.STRONG_NO);
         assertEquals("second", CandidateEvaluationWorkflow.currentRound(application, rounds).getPublicId());
         CandidateEvaluationWorkflow.recordResult(application, rounds, "second", CandidateEvaluationResult.CANCELLED);
         assertNull(CandidateEvaluationWorkflow.currentRound(application, rounds));
@@ -141,7 +141,7 @@ class CandidateEvaluationWorkflowTest {
         assertEquals(CandidateEvaluationStatus.PENDING, extra.getStatus());
         CandidateEvaluationWorkflow.changeInterviewers(application, rounds, "extra", List.of("new-user"));
         assertEquals(List.of("new-user"), extra.getInterviewers());
-        CandidateEvaluationWorkflow.recordResult(application, rounds, "first", CandidateEvaluationResult.PASSED);
+        CandidateEvaluationWorkflow.recordResult(application, rounds, "first", CandidateEvaluationResult.STRONG_YES);
         assertEquals("extra", CandidateEvaluationWorkflow.currentRound(application, rounds).getPublicId());
         assertThrows(CustomException.class, () -> CandidateEvaluationWorkflow.changeInterviewers(application, rounds,
                 "first", List.of("new-user")));
