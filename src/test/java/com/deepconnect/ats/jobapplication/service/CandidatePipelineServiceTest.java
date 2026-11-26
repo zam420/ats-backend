@@ -207,7 +207,7 @@ class CandidatePipelineServiceTest {
         interviewer.setFirstName("Interview");
         interviewer.setLastName("Person");
         when(users.findByTenantIdAndPublicIdIn(2L, java.util.Set.of("interviewer"))).thenReturn(List.of(interviewer));
-        when(evaluationRounds.findByJobApplicationIdInOrderByOrderAsc(List.of(7L))).thenReturn(List.of(first, last));
+        when(evaluationRounds.findByJobApplicationIdInOrderByOrderAsc(List.of(7L))).thenReturn(List.of(last, first));
         var summary = service.board("job").getStages().get(0).getCandidates().get(0).getEvaluation();
         assertEquals("Final", summary.currentRoundName());
         assertEquals(CandidateEvaluationStatus.SCHEDULED, summary.currentStatus());
@@ -224,6 +224,11 @@ class CandidatePipelineServiceTest {
         assertEquals(2, json.path("total_rounds").asInt());
         assertEquals("Interview Person", json.path("current_owners").get(0).asText());
         assertEquals(1, json.path("strong_yes").asInt());
+        assertEquals(2, json.path("round_results").size());
+        assertEquals("First", json.path("round_results").get(0).path("name").asText());
+        assertEquals(0, json.path("round_results").get(0).path("result").asInt());
+        assertEquals("Final", json.path("round_results").get(1).path("name").asText());
+        assertTrue(json.path("round_results").get(1).path("result").isNull());
         last.setStatus(CandidateEvaluationStatus.PENDING);
         summary = service.board("job").getStages().get(0).getCandidates().get(0).getEvaluation();
         assertEquals(List.of("Job Owner"), summary.currentOwners());
@@ -234,6 +239,7 @@ class CandidatePipelineServiceTest {
         assertEquals(CandidateEvaluationStatus.COMPLETED, summary.currentStatus());
         assertEquals(1, summary.strongNo());
         assertTrue(summary.currentOwners().isEmpty());
+        assertEquals(CandidateEvaluationResult.STRONG_NO, summary.roundResults().get(1).result());
     }
 
     @Test

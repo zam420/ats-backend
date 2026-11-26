@@ -35,8 +35,6 @@ C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\candidatep
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\candidatepipeline\model\CandidateEvaluationRound.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\candidatepipeline\repo\CandidateEvaluationRoundRepository.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\candidatepipeline\service\CandidateApplicationService.java
-C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\candidatepipeline\service\CandidateEvaluationPlanImpact.java
-C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\candidatepipeline\service\CandidateEvaluationPlanSync.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\candidatepipeline\service\CandidateEvaluationService.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\candidatepipeline\service\CandidateEvaluationWorkflow.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\candidatepipeline\service\CandidatePipelineService.java

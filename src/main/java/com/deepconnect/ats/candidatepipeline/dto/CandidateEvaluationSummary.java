@@ -14,7 +14,9 @@ import com.deepconnect.ats.jobapplication.model.JobApplication;
 public record CandidateEvaluationSummary(String currentRoundName, CandidateEvaluationStatus currentStatus,
         List<String> currentOwners, long completedRounds, int totalRounds,
         long strongYes, long yes, long no, long strongNo, long cancelled,
-        CandidateEvaluationDecision decision) {
+        List<RoundResult> roundResults, CandidateEvaluationDecision decision) {
+    public record RoundResult(String name, CandidateEvaluationResult result) {}
+
     public static CandidateEvaluationSummary from(JobApplication application, List<CandidateEvaluationRound> rounds,
             String jobOwner, Map<String, String> interviewerNames) {
         CandidateEvaluationRound current = CandidateEvaluationWorkflow.currentRound(application, rounds);
@@ -32,6 +34,8 @@ public record CandidateEvaluationSummary(String currentRoundName, CandidateEvalu
                 rounds.size(), count(rounds, CandidateEvaluationResult.STRONG_YES),
                 count(rounds, CandidateEvaluationResult.YES), count(rounds, CandidateEvaluationResult.NO),
                 count(rounds, CandidateEvaluationResult.STRONG_NO), count(rounds, CandidateEvaluationResult.CANCELLED),
+                rounds.stream().sorted(Comparator.comparing(CandidateEvaluationRound::getOrder))
+                        .map(round -> new RoundResult(round.getName(), round.getResult())).toList(),
                 application.getEvaluationDecision());
     }
 
