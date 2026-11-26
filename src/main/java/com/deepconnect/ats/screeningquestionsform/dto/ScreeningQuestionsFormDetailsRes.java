@@ -14,7 +14,7 @@ import com.nimbusds.oauth2.sdk.util.CollectionUtils;
 @Setter
 public class ScreeningQuestionsFormDetailsRes extends ScreeningQuestionsFormResBase {
 
-    private List<ScreeningQuestionRes> questions;
+    private List<ScreeningQuestionReqRes> questions;
     private Set<String> sharedWithUserIds;
     private String ownerId;
 
@@ -29,7 +29,7 @@ public class ScreeningQuestionsFormDetailsRes extends ScreeningQuestionsFormResB
         res.setQuestions(
         entity.getQuestions() == null
             ? List.of()
-            : entity.getQuestions().stream().map(ScreeningQuestionRes::from).toList()
+            : entity.getQuestions().stream().map(ScreeningQuestionReqRes::from).toList()
         );
         if(!CollectionUtils.isEmpty(entity.getSharedWithUsers())){
             res.setIsPublic(false);

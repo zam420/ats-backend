@@ -4,7 +4,6 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 import org.hibernate.validator.constraints.Length;
-import com.deepconnect.ats.screeningquestionsform.model.ScreeningQuestion;
 
 import java.util.List;
 import java.util.Set;
@@ -25,7 +24,7 @@ public class ScreeningQuestionsFormReq {
     private Boolean isSystemTemplate;
 
     @Valid
-    private List<ScreeningQuestion> questions;
+    private List<ScreeningQuestionReqRes> questions;
 
     private Set<String> sharedWithUserIds;
 

@@ -1,6 +1,5 @@
 package com.deepconnect.ats.evaluationplan.dto;
 
-import com.deepconnect.ats.evaluationplan.model.EvaluationPlanRound;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
@@ -11,6 +10,7 @@ import java.util.Set;
 
 @Data
 public class EvaluationPlanReq {
+
     private String id;
 
     @Length(max = 100, message = "{field.evaluationPlan.name}{validation.lengthMax}")
@@ -25,9 +25,10 @@ public class EvaluationPlanReq {
     private Boolean isSystemTemplate;
 
     @Valid
-    private List<EvaluationPlanRound> rounds;
+    private List<EvaluationPlanRoundReqRes> rounds;
 
     private Set<String> sharedWithUserIds;
 
     private String ownerId;
+    
 }

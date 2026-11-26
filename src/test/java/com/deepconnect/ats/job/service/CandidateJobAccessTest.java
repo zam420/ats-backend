@@ -36,7 +36,8 @@ class CandidateJobAccessTest {
         mock(ScreeningQuestionsFormService.class), mock(JobApplicationService.class),
         mock(UserServiceV2.class), mock(EnumsResService.class),
         positions, mock(JobEvaluationPlanRoundRepository.class), mock(JobRecruitmentPipelineRoundRepository.class), 
-        mock(JobScreeningQuestionRepository.class), mock(JobApplicationRepository.class)
+        mock(JobScreeningQuestionRepository.class), mock(JobApplicationRepository.class),
+        mock(com.deepconnect.ats.candidatepipeline.service.CandidateEvaluationPlanImpact.class)
         );
 
     @AfterEach
@@ -68,7 +69,7 @@ class CandidateJobAccessTest {
 
     @Test
     void rejectsJobsNotAvailableAsOpen() {
-        var user = new LoggedInUserDetails(2L, 1L, "user", "user@example.com", false, false, List.of());
+        var user = new LoggedInUserDetails(2L, 1L, "user", "user@example.com", "user name", false, false, List.of());
         SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(user, null, List.of()));
         when(positions.findByPublicIdAndStatusAndDeactivatedFalse("job", JobStatus.OPEN)).thenReturn(Optional.empty());
 

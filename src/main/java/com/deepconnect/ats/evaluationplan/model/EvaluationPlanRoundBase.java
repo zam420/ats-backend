@@ -9,6 +9,7 @@ import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
 import com.deepconnect.ats.common.model.BaseEntity;
+import com.deepconnect.ats.evaluationplan.dto.EvaluationPlanRoundReqRes;
 import com.deepconnect.ats.evaluationplan.enums.EvaluationPlanRoundType;
 
 import java.util.List;
@@ -19,7 +20,7 @@ import java.util.List;
 @AllArgsConstructor
 @SuperBuilder
 @MappedSuperclass
-public abstract class EvaluationPlanRoundBase extends BaseEntity {
+public class EvaluationPlanRoundBase extends BaseEntity {
 
     @Column(nullable = true, length = 30)
     @Length(max = 30, message = "{field.evaluationPlanRound.name}{validation.lengthMax}")
@@ -41,5 +42,20 @@ public abstract class EvaluationPlanRoundBase extends BaseEntity {
     @Column(name = "`order`", nullable = false)
     @NotNull(message = "{field.evaluationPlanRound.order}{validation.notBlank}")
     private Integer order;
+
+    protected EvaluationPlanRoundBase(EvaluationPlanRoundReqRes dto) {
+        this.setPublicId(dto.getId());
+        this.setName(dto.getName());
+        this.setDescription(dto.getDescription());
+        this.setRoundType(dto.getRoundType());
+        this.setInterviewers(dto.getInterviewers());
+        this.setOrder(dto.getOrder());
+    }
+
+    public static EvaluationPlanRoundBase from(EvaluationPlanRoundReqRes dto) {
+        if(dto == null)
+            return null;
+        return new EvaluationPlanRoundBase(dto);
+    }
 
 }

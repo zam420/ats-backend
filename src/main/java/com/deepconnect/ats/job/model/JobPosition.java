@@ -149,6 +149,8 @@ public class JobPosition extends OperatableBaseWithTenantEntity {
     @Valid
     @JsonManagedReference("evaluation_plan_rounds")
     @OneToMany(mappedBy = "jobPosition", cascade = CascadeType.ALL, orphanRemoval = true)
+    @SQLRestriction("active = true")
+    @OrderBy("order ASC")
     private List<JobEvaluationPlanRound> evaluationPlanRounds;
 
     @Enumerated(EnumType.STRING)

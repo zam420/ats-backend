@@ -79,14 +79,13 @@ public class EvaluationPlanService {
             if (req.getRounds().size() > maxRounds) {
                 throw new InternalServerException(String.format("Too many rounds. User: %s. Plan: %s. Rounds: %d", loggedInUser.getPublicId(), plan.getPublicId(), req.getRounds().size()));
             }
-            for (EvaluationPlanRound roundTemplate : req.getRounds()) {
-                roundTemplate.setEvaluationPlan(plan);
-                roundTemplate.setEvaluationPlanId(plan.getId());
-                if(!StringUtils.hasText(roundTemplate.getName())) {
-                    roundTemplate.setName(enumsResService.from(roundTemplate.getRoundType()).getName());
+            List<EvaluationPlanRound> rounds = EvaluationPlanRound.from(req.getRounds(), plan.getId()); 
+            for (EvaluationPlanRound round : rounds) {
+                if(!StringUtils.hasText(round.getName())) {
+                    round.setName(enumsResService.from(round.getRoundType()).getName());
                 }
             }
-            evaluationPlanRoundRepository.saveAll(req.getRounds());
+            evaluationPlanRoundRepository.saveAll(rounds);
         }
         
         if(sharedWithUsersChanged) {
@@ -122,6 +121,7 @@ public class EvaluationPlanService {
         if(req.getOwnerId() == null || req.getOwnerId().equals(loggedInUser.getPublicId())) {
             plan.setOwnerId(loggedInUser.getUserId());
             plan.setOwnerPublicId(loggedInUser.getPublicId());
+            plan.setOwnerName(loggedInUser.getUsername());
         }
         else {
             setAnotherUserAsOwner(plan, evaluationPlanAccessService.getAccessType(loggedInUser, plan), req.getOwnerId());
@@ -145,7 +145,8 @@ public class EvaluationPlanService {
             setAnotherUserAsOwner(plan, evaluationPlanAccessService.getAccessType(loggedInUser, plan), req.getOwnerId());
         }
 
-        boolean roundsChanged = !EvaluationPlanRoundHelper.roundsEqual(plan.getRounds(), req.getRounds());
+        List<EvaluationPlanRound> incomingRounds = EvaluationPlanRound.from(req.getRounds(), plan.getId()); 
+        boolean roundsChanged = !EvaluationPlanRoundHelper.roundsEqual(plan.getRounds(), incomingRounds);
         if (roundsChanged) {
             evaluationPlanRoundRepository.deleteByEvaluationPlanId(plan.getId());
         }
@@ -182,6 +183,7 @@ public class EvaluationPlanService {
         plan.setTenantId(loggedInUser.getTenantId());
         plan.setOwnerId(loggedInUser.getUserId());
         plan.setOwnerPublicId(loggedInUser.getPublicId());
+        plan.setOwnerName(loggedInUser.getUsername());
         return this.save(plan, req, true, false, false, true);
     }
 
@@ -205,7 +207,8 @@ public class EvaluationPlanService {
         LoggedInUserDetails loggedInUser = AuthService.getLoggedInUser();
         this.assertUniqueWithinAllForUpdate(req.getName(), plan.getId());
         evaluationPlanAccessService.assertWriteAccess(loggedInUser, plan);
-        boolean roundsChanged = !EvaluationPlanRoundHelper.roundsEqual(plan.getRounds(), req.getRounds());
+        List<EvaluationPlanRound> incomingRounds = EvaluationPlanRound.from(req.getRounds(), plan.getId()); 
+        boolean roundsChanged = !EvaluationPlanRoundHelper.roundsEqual(plan.getRounds(), incomingRounds);
         if (roundsChanged) {
             evaluationPlanRoundRepository.deleteByEvaluationPlanId(plan.getId());
         }
@@ -294,7 +297,7 @@ public class EvaluationPlanService {
         return this.getResponseFromPage(evaluationPlanRepository.findByDeactivatedFalseAndTenantId(AuthService.getLoggedInTenantId(), query.toPageable()));
     }
 
-    private void setAnotherUserAsOwner(EvaluationPlan evaluationPlan, AccessType loggedInUserAccessType, String ownerId) {
+    private void setAnotherUserAsOwner(EvaluationPlan plan, AccessType loggedInUserAccessType, String ownerId) {
         LoggedInUserDetails loggedInUser = AuthService.getLoggedInUser();
         if(loggedInUserAccessType != AccessType.TENANT_ADMIN && loggedInUserAccessType != AccessType.SYSTEM_ADMIN) {
             throw new InternalServerException("Attempt to set another user as owner without permission by " + loggedInUser.getPublicId());
@@ -304,8 +307,9 @@ public class EvaluationPlanService {
         if(!user.getTenantId().equals(loggedInUser.getTenantId())) {
             throw new InternalServerException("Owner must belong to the same tenant as the logged in user. Owner: " + ownerId + ", Request by: " + loggedInUser.getPublicId());
         }
-        evaluationPlan.setOwnerId(user.getId());
-        evaluationPlan.setOwnerPublicId(user.getPublicId());
+        plan.setOwnerId(user.getId());
+        plan.setOwnerPublicId(user.getPublicId());
+        plan.setOwnerName(user.getName());
     }
 
     /**

@@ -43,7 +43,8 @@ class JobRichTextWriteTest {
             mock(UserServiceV2.class), mock(EnumsResService.class),
             positions, 
             mock(JobEvaluationPlanRoundRepository.class), mock(JobRecruitmentPipelineRoundRepository.class), 
-            mock(JobScreeningQuestionRepository.class), mock(JobApplicationRepository.class));
+            mock(JobScreeningQuestionRepository.class), mock(JobApplicationRepository.class),
+            mock(com.deepconnect.ats.candidatepipeline.service.CandidateEvaluationPlanImpact.class));
 
     @AfterEach
     void clearAuthentication() {
@@ -53,8 +54,7 @@ class JobRichTextWriteTest {
     @Test
     void createAndUpdateBothSanitizeAllRichTextFields() {
         ReflectionTestUtils.setField(service, "shortDescriptionMaxWords", 70);
-        LoggedInUserDetails user = new LoggedInUserDetails(1L, 2L, "user", "user@example.com",
-                false, false, List.of());
+        LoggedInUserDetails user = new LoggedInUserDetails(1L, 2L, "user", "user@example.com", "user name", false, false, List.of());
         SecurityContextHolder.getContext().setAuthentication(
                 new UsernamePasswordAuthenticationToken(user, null, List.of()));
         EvaluationPlan plan = new EvaluationPlan();

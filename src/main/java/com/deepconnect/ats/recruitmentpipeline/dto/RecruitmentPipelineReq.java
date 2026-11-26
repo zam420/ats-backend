@@ -1,6 +1,5 @@
 package com.deepconnect.ats.recruitmentpipeline.dto;
 
-import com.deepconnect.ats.recruitmentpipeline.model.RecruitmentPipelineRound;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
@@ -25,7 +24,7 @@ public class RecruitmentPipelineReq {
     private Boolean isSystemTemplate;
 
     @Valid
-    private List<RecruitmentPipelineRound> rounds;
+    private List<RecruitmentPipelineRoundReqRes> rounds;
 
     private Set<String> sharedWithUserIds;
 

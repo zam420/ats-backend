@@ -7,6 +7,7 @@ import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 import com.deepconnect.ats.common.model.BaseEntity;
+import com.deepconnect.ats.recruitmentpipeline.dto.RecruitmentPipelineRoundReqRes;
 import com.deepconnect.ats.recruitmentpipeline.enums.RecruitmentPipelineRoundType;
 
 @Getter
@@ -15,7 +16,7 @@ import com.deepconnect.ats.recruitmentpipeline.enums.RecruitmentPipelineRoundTyp
 @AllArgsConstructor
 @SuperBuilder
 @MappedSuperclass
-public abstract class RecruitmentPipelineRoundBase extends BaseEntity {
+public class RecruitmentPipelineRoundBase extends BaseEntity {
 
     @Column(nullable = true, length = 30)
     @Length(max = 30, message = "{field.recruitmentPipelineRound.name}{validation.lengthMax}")
@@ -33,5 +34,19 @@ public abstract class RecruitmentPipelineRoundBase extends BaseEntity {
     @Column(name = "`order`", nullable = false)
     @NotNull(message = "{field.recruitmentPipelineRound.order}{validation.notBlank}")
     private Integer order;
+
+    protected RecruitmentPipelineRoundBase(RecruitmentPipelineRoundReqRes dto) {
+        this.setPublicId(dto.getId());
+        this.setName(dto.getName());
+        this.setDescription(dto.getDescription());
+        this.setRoundType(dto.getRoundType());
+        this.setOrder(dto.getOrder());
+    }
+
+    public static RecruitmentPipelineRoundBase from(RecruitmentPipelineRoundReqRes dto) {
+        if(dto == null)
+            return null;
+        return new RecruitmentPipelineRoundBase(dto);
+    }
 
 }

@@ -1,5 +1,7 @@
 package com.deepconnect.ats.recruitmentpipeline.service;
 
+import com.deepconnect.ats.common.enums.CustomExceptionType;
+import com.deepconnect.ats.common.exception.CustomException;
 import com.deepconnect.ats.common.exception.InternalServerException;
 import com.deepconnect.ats.common.utils.StringUtils;
 import com.deepconnect.ats.recruitmentpipeline.model.RecruitmentPipelineRoundBase;
@@ -15,8 +17,12 @@ public final class RecruitmentPipelineRoundHelper {
     private RecruitmentPipelineRoundHelper() {
     }
 
-    public static void assertMandatoryRoundsPresent(List<? extends RecruitmentPipelineRoundBase> addedRounds,
-            String loggedInUserPublicId, String planPublicId) {
+    public static void validate(List<? extends RecruitmentPipelineRoundBase> addedRounds, String loggedInUserPublicId, String ownerPublicId){
+        RecruitmentPipelineRoundHelper.assertMandatoryRoundsPresent(addedRounds, loggedInUserPublicId, ownerPublicId);
+        RecruitmentPipelineRoundHelper.assertRoundTypeOrder(addedRounds, loggedInUserPublicId, ownerPublicId);  
+    }
+
+    public static void assertMandatoryRoundsPresent(List<? extends RecruitmentPipelineRoundBase> addedRounds, String loggedInUserPublicId, String ownerPublicId) {
         Set<Integer> coreTypeIds = List.of(RecruitmentPipelineRoundType.values()).stream()
             .filter(type -> !Boolean.TRUE.equals(type.getIsCustom()))
             .map(RecruitmentPipelineRoundType::getId)
@@ -28,12 +34,31 @@ public final class RecruitmentPipelineRoundHelper {
             .collect(Collectors.toSet());
 
         if (!coreIdsInAddedRounds.containsAll(coreTypeIds)) {
-            throw new InternalServerException("Mandatory rounds missing. Plan: " + planPublicId + ", Request by: " + loggedInUserPublicId);
+            throw new InternalServerException("Mandatory rounds missing. Plan: " + ownerPublicId + ", Request by: " + loggedInUserPublicId);
         }
     }
 
-    public static void assertRoundTypeOrder(List<? extends RecruitmentPipelineRoundBase> addedRounds,
-            String loggedInUserPublicId, String planPublicId) {
+    public static void assertRoundTypeOrder(List<? extends RecruitmentPipelineRoundBase> addedRounds, String loggedInUserPublicId, String ownerPublicId) {
+        /*Asserts that the first recruitment pipeline round is of type APPLIED and that the rounds are valid.*/
+        if (addedRounds == null || addedRounds.isEmpty() || addedRounds.stream().anyMatch(round -> round.getOrder() == null)
+                || addedRounds.stream().anyMatch(round -> round.getOrder() < 0 || round.getRoundType() == null)
+                || addedRounds.stream().map(RecruitmentPipelineRoundBase::getOrder).distinct().count() != addedRounds.size()
+                || addedRounds.stream().min(Comparator.comparing(RecruitmentPipelineRoundBase::getOrder))
+                    .orElseThrow().getRoundType() != RecruitmentPipelineRoundType.APPLIED) {
+            throw new CustomException(CustomExceptionType.JOB_PIPELINE_INVALID);
+        }
+
+        /*Asserts that the OFFER_APPROVAL round comes before the OFFERED round.*/
+        Integer offeredOrder = addedRounds.stream()
+            .filter(round -> round.getRoundType() == RecruitmentPipelineRoundType.OFFERED)
+            .map(RecruitmentPipelineRoundBase::getOrder)
+            .findFirst()
+            .orElse(null);
+        if (offeredOrder != null && addedRounds.stream().anyMatch(round ->
+                round.getRoundType() == RecruitmentPipelineRoundType.OFFER_APPROVAL && round.getOrder() > offeredOrder)) {
+            throw new InternalServerException("Invalid round type order. Plan: " + ownerPublicId + ", Request by: " + loggedInUserPublicId);
+        }
+        
         Set<Integer> coreTypeIds = List.of(RecruitmentPipelineRoundType.values()).stream()
             .filter(type -> !Boolean.TRUE.equals(type.getIsCustom()))
             .map(RecruitmentPipelineRoundType::getId)
@@ -47,7 +72,7 @@ public final class RecruitmentPipelineRoundHelper {
 
         for (int i = 1; i < coreIdsInOrder.size(); i++) {
             if (coreIdsInOrder.get(i - 1) >= coreIdsInOrder.get(i)) {
-                throw new InternalServerException("Invalid round type order. Plan: " + planPublicId + ", Request by: " + loggedInUserPublicId);
+                throw new InternalServerException("Invalid round type order. Plan: " + ownerPublicId + ", Request by: " + loggedInUserPublicId);
             }
         }
     }
@@ -74,7 +99,8 @@ public final class RecruitmentPipelineRoundHelper {
             if (!Objects.equals(x.getOrder(), y.getOrder())
                     || !Objects.equals(x.getRoundType(), y.getRoundType())
                     || !Objects.equals(StringUtils.blankToNullAndTrim(x.getName()), StringUtils.blankToNullAndTrim(y.getName()))
-                    || !Objects.equals(StringUtils.blankToNullAndTrim(x.getDescription()), StringUtils.blankToNullAndTrim(y.getDescription()))) {
+                    || !Objects.equals(StringUtils.blankToNullAndTrim(x.getDescription()), StringUtils.blankToNullAndTrim(y.getDescription()))
+                ) {
                 return false;
             }
         }

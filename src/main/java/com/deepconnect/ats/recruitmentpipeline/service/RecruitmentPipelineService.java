@@ -12,15 +12,19 @@ import com.deepconnect.ats.recruitmentpipeline.repo.RecruitmentPipelineRepositor
 import com.deepconnect.ats.recruitmentpipeline.repo.RecruitmentPipelineShareRepository;
 import com.deepconnect.ats.dto.AtsPageQuery;
 import com.deepconnect.ats.dto.AtsPageRsp;
+import com.deepconnect.ats.job.model.JobPosition;
+import com.deepconnect.ats.job.model.JobRecruitmentPipelineRound;
 import com.deepconnect.ats.recruitmentpipeline.dto.RecruitmentPipelineRes;
 import com.deepconnect.ats.recruitmentpipeline.dto.RecruitmentPipelineDetailsRes;
 import com.deepconnect.ats.recruitmentpipeline.model.RecruitmentPipelineRound;
+import com.deepconnect.ats.recruitmentpipeline.model.RecruitmentPipelineRoundBase;
 import com.deepconnect.ats.recruitmentpipeline.enums.RecruitmentPipelineRoundType;
 import com.deepconnect.ats.recruitmentpipeline.repo.RecruitmentPipelineRoundRepository;
 import com.deepconnect.ats.user.model.User;
 import com.deepconnect.ats.user.service.UserServiceV2;
 import com.deepconnect.ats.common.dto.TemplateFiltersRes;
 import com.deepconnect.ats.common.enums.AccessType;
+import com.deepconnect.ats.common.utils.HashMapUtils;
 import com.deepconnect.ats.common.utils.StringUtils;
 import com.deepconnect.ats.common.utils.Validation;
 import com.deepconnect.ats.recruitmentpipeline.model.RecruitmentPipelineShare;
@@ -35,7 +39,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -72,16 +78,14 @@ public class RecruitmentPipelineService {
             if (req.getRounds().size() > maxRounds) {
                 throw new InternalServerException(String.format("Too many rounds. User: %s. Plan: %s. Rounds: %d", loggedInUser.getPublicId(), plan.getPublicId(), req.getRounds().size()));
             }
-            RecruitmentPipelineRoundHelper.assertMandatoryRoundsPresent(req.getRounds(), loggedInUser.getPublicId(), plan.getPublicId());
-            RecruitmentPipelineRoundHelper.assertRoundTypeOrder(req.getRounds(), loggedInUser.getPublicId(), plan.getPublicId());
-            for (RecruitmentPipelineRound roundTemplate : req.getRounds()) {
-                roundTemplate.setRecruitmentPipeline(plan);
-                roundTemplate.setRecruitmentPipelineId(plan.getId());
-                if(!StringUtils.hasText(roundTemplate.getName())) {
-                    roundTemplate.setName(enumsResService.from(roundTemplate.getRoundType()).getName());
+            List<RecruitmentPipelineRound> rounds = RecruitmentPipelineRound.from(req.getRounds(), plan.getId());
+            RecruitmentPipelineRoundHelper.validate(rounds, loggedInUser.getPublicId(), plan.getPublicId());
+            for (RecruitmentPipelineRound round : rounds) {
+                if(!StringUtils.hasText(round.getName())) {
+                    round.setName(enumsResService.from(round.getRoundType()).getName());
                 }
             }
-            recruitmentPipelineRoundRepository.saveAll(req.getRounds());
+            recruitmentPipelineRoundRepository.saveAll(rounds);
         }
 
         if(sharedWithUsersChanged) {
@@ -117,6 +121,7 @@ public class RecruitmentPipelineService {
         if(req.getOwnerId() == null || req.getOwnerId().equals(loggedInUser.getPublicId())) {
             plan.setOwnerId(loggedInUser.getUserId());
             plan.setOwnerPublicId(loggedInUser.getPublicId());
+            plan.setOwnerName(loggedInUser.getUsername());
         }
         else {
             setAnotherUserAsOwner(plan, recruitmentPipelineAccessService.getAccessType(loggedInUser, plan), req.getOwnerId());
@@ -140,7 +145,8 @@ public class RecruitmentPipelineService {
             setAnotherUserAsOwner(plan, recruitmentPipelineAccessService.getAccessType(loggedInUser, plan), req.getOwnerId());
         }
 
-        boolean roundsChanged = !RecruitmentPipelineRoundHelper.roundsEqual(plan.getRounds(), req.getRounds());
+        List<RecruitmentPipelineRound> rounds = RecruitmentPipelineRound.from(req.getRounds(), plan.getId());
+        boolean roundsChanged = !RecruitmentPipelineRoundHelper.roundsEqual(plan.getRounds(), rounds);
         if (roundsChanged) {
             recruitmentPipelineRoundRepository.deleteByRecruitmentPipelineId(plan.getId());
         }
@@ -177,6 +183,7 @@ public class RecruitmentPipelineService {
         plan.setTenantId(loggedInUser.getTenantId());
         plan.setOwnerId(loggedInUser.getUserId());
         plan.setOwnerPublicId(loggedInUser.getPublicId());
+        plan.setOwnerName(loggedInUser.getUsername());
         return this.save(plan, req, true, false, false, true);
     }
 
@@ -200,7 +207,8 @@ public class RecruitmentPipelineService {
         LoggedInUserDetails loggedInUser = AuthService.getLoggedInUser();
         this.assertUniqueWithinAllForUpdate(req.getName(), plan.getId());
         recruitmentPipelineAccessService.assertWriteAccess(loggedInUser, plan);
-        boolean roundsChanged = !RecruitmentPipelineRoundHelper.roundsEqual(plan.getRounds(), req.getRounds());
+        List<RecruitmentPipelineRound> rounds = RecruitmentPipelineRound.from(req.getRounds(), plan.getId());
+        boolean roundsChanged = !RecruitmentPipelineRoundHelper.roundsEqual(plan.getRounds(), rounds);
         if (roundsChanged) {
             recruitmentPipelineRoundRepository.deleteByRecruitmentPipelineId(plan.getId());
         }
@@ -301,6 +309,7 @@ public class RecruitmentPipelineService {
         }
         recruitmentPipeline.setOwnerId(user.getId());
         recruitmentPipeline.setOwnerPublicId(user.getPublicId());
+        recruitmentPipeline.setOwnerName(user.getName());
     }
 
     /**

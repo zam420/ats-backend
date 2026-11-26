@@ -8,17 +8,17 @@ import com.deepconnect.ats.recruitmentpipeline.enums.RecruitmentPipelineRoundTyp
 import com.deepconnect.ats.recruitmentpipeline.model.RecruitmentPipelineRoundBase;
 
 @Data
-public class RecruitmentPipelineRoundRes {
+public class RecruitmentPipelineRoundReqRes {
     private String id;
     private String name;
     private String description;
     private RecruitmentPipelineRoundType roundType;
     private Integer order;
 
-    public static RecruitmentPipelineRoundRes from(RecruitmentPipelineRoundBase entity) {
+    public static RecruitmentPipelineRoundReqRes from(RecruitmentPipelineRoundBase entity) {
         if(entity == null)
             return null;
-        RecruitmentPipelineRoundRes res = new RecruitmentPipelineRoundRes();
+        RecruitmentPipelineRoundReqRes res = new RecruitmentPipelineRoundReqRes();
         res.setId(entity.getPublicId());
         res.setName(entity.getName());
         res.setDescription(entity.getDescription());
@@ -27,7 +27,7 @@ public class RecruitmentPipelineRoundRes {
         return res;
     }
 
-    public static List<RecruitmentPipelineRoundRes> fromList(List<RecruitmentPipelineRoundBase> entities) {
-        return entities.stream().map(RecruitmentPipelineRoundRes::from).toList();
+    public static List<RecruitmentPipelineRoundReqRes> from(List<? extends RecruitmentPipelineRoundBase> entities) {
+        return entities.stream().map(RecruitmentPipelineRoundReqRes::from).toList();
     }
 }

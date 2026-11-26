@@ -19,7 +19,7 @@ class ScreeningQuestionsFormAccessServiceTest {
     private final ScreeningQuestionsFormAccessService service = new ScreeningQuestionsFormAccessService();
 
     private LoggedInUserDetails user(long tenantId, long userId, String publicId, String... permissions) {
-        return new LoggedInUserDetails(tenantId, userId, publicId, "user@example.test", false, false,
+        return new LoggedInUserDetails(tenantId, userId, publicId, "user@example.test", "user name", false, false,
                 java.util.Arrays.stream(permissions).map(SimpleGrantedAuthority::new).toList());
     }
 

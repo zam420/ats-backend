@@ -33,6 +33,8 @@ public enum CustomExceptionType {
     JOB_PIPELINE_OCCUPIED_STAGE("jobPipelineOccupiedStage"),
     JOB_PIPELINE_INVALID("jobPipelineInvalid"),
     JOB_PIPELINE_STALE("jobPipelineStale"),
+    JOB_EVALUATION_PASS_REQUIRED("jobEvaluationPassRequired"),
+    JOB_EVALUATION_FAIL_REQUIRED("jobEvaluationFailRequired"),
 
     VALIDATION_RANGE("validation.range"),
     VALIDATION_MUST_ADD("validation.mustAdd"),

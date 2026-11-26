@@ -8,7 +8,8 @@ import com.deepconnect.ats.evaluationplan.model.EvaluationPlanRoundBase;
 import com.deepconnect.ats.evaluationplan.enums.EvaluationPlanRoundType;
 
 @Data
-public class EvaluationPlanRoundRes {
+public class EvaluationPlanRoundReqRes {
+
     private String id;
     private String name;
     private String description;
@@ -16,10 +17,10 @@ public class EvaluationPlanRoundRes {
     private List<String> interviewers;
     private Integer order;
 
-    public static EvaluationPlanRoundRes from(EvaluationPlanRoundBase entity) {
+    public static EvaluationPlanRoundReqRes from(EvaluationPlanRoundBase entity) {
         if(entity == null)
             return null;
-        EvaluationPlanRoundRes res = new EvaluationPlanRoundRes();
+        EvaluationPlanRoundReqRes res = new EvaluationPlanRoundReqRes();
         res.setId(entity.getPublicId());
         res.setName(entity.getName());
         res.setDescription(entity.getDescription());
@@ -29,7 +30,8 @@ public class EvaluationPlanRoundRes {
         return res;
     }
 
-    public static List<EvaluationPlanRoundRes> fromList(List<EvaluationPlanRoundBase> entities) {
-        return entities.stream().map(EvaluationPlanRoundRes::from).toList();
+    public static List<EvaluationPlanRoundReqRes> from(List<EvaluationPlanRoundBase> entities) {
+        return entities.stream().map(EvaluationPlanRoundReqRes::from).toList();
     }
+
 }

@@ -197,6 +197,13 @@ public class JobApplicationService {
         return jobApplicationRepository.existsByRecruitmentPipelineStageAndClosedFalse(stageId);
     }
 
+    /**
+     * Clears the closed stages for the given list of stage IDs.
+     * If a job position owner deletes the recruitment pipeline stage, 
+     * when some of the job applications in closed (rejected/offer cancelled/not joined) state are associated with the deleted stages, 
+     * this method will set recruitmentPipelineStage to null for such stages from the job applications. This will not impact the display of the application's closed stage
+     * since the closed stage information is maintained separately in closedAtStageName and closedAtStageType fields.
+     */
     public void clearClosedStages(List<Long> stageIds) {
         jobApplicationRepository.clearClosedStages(stageIds);
     }

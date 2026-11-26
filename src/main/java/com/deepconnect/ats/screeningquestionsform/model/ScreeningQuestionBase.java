@@ -4,8 +4,6 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.Max;
 
 import java.util.List;
 
@@ -14,6 +12,9 @@ import org.hibernate.type.SqlTypes;
 import org.hibernate.validator.constraints.Length;
 
 import com.deepconnect.ats.common.model.BaseEntity;
+import com.deepconnect.ats.evaluationplan.dto.EvaluationPlanRoundReqRes;
+import com.deepconnect.ats.evaluationplan.model.EvaluationPlanRoundBase;
+import com.deepconnect.ats.screeningquestionsform.dto.ScreeningQuestionReqRes;
 import com.deepconnect.ats.screeningquestionsform.enums.ScreeningQuestionType;
 
 import lombok.*;
@@ -25,7 +26,7 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 @SuperBuilder
 @MappedSuperclass
-public abstract class ScreeningQuestionBase extends BaseEntity {
+public class ScreeningQuestionBase extends BaseEntity {
 
     @Column(nullable = false, length = 1000)
     @Length(max = 1000, message = "{field.screeningQuestion.label}{validation.lengthMax}")
@@ -66,5 +67,24 @@ public abstract class ScreeningQuestionBase extends BaseEntity {
     @Column(name = "`order`", nullable = false)
     @NotNull(message = "{field.screeningQuestion.order}{validation.notBlank}")
     private Integer order;
+
+    protected ScreeningQuestionBase(ScreeningQuestionReqRes dto) {
+        this.setPublicId(dto.getId());
+        this.setLabel(dto.getLabel());
+        this.setDescription(dto.getDescription());
+        this.setOptions(dto.getOptions());
+        this.setDefaultOption(dto.getDefaultOption());
+        this.setIsMandatory(dto.getIsMandatory());
+        this.setIsDropDownMultiSelect(dto.getIsDropDownMultiSelect());
+        this.setMaxChars(dto.getMaxChars());
+        this.setScreeningQuestionType(dto.getScreeningQuestionType());
+        this.setOrder(dto.getOrder());
+    }
+
+    public static ScreeningQuestionBase from(ScreeningQuestionReqRes dto) {
+        if(dto == null)
+            return null;
+        return new ScreeningQuestionBase(dto);
+    }
 
 }

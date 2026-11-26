@@ -5,7 +5,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import com.deepconnect.ats.jobapplication.service.JobApplicationService;
@@ -13,6 +12,7 @@ import com.deepconnect.ats.auth.dto.LoggedInUserDetails;
 import com.deepconnect.ats.common.exception.CustomException;
 import com.deepconnect.ats.common.exception.ValidationException;
 import com.deepconnect.ats.common.service.EnumsResService;
+import com.deepconnect.ats.evaluationplan.dto.EvaluationPlanRoundReqRes;
 import com.deepconnect.ats.evaluationplan.service.EvaluationPlanService;
 import com.deepconnect.ats.job.dto.JobPositionReq;
 import com.deepconnect.ats.job.enums.JobStatus;
@@ -25,6 +25,7 @@ import com.deepconnect.ats.job.repo.JobPositionRepository;
 import com.deepconnect.ats.job.repo.JobRecruitmentPipelineRoundRepository;
 import com.deepconnect.ats.job.repo.JobScreeningQuestionRepository;
 import com.deepconnect.ats.jobapplication.repo.JobApplicationRepository;
+import com.deepconnect.ats.recruitmentpipeline.dto.RecruitmentPipelineRoundReqRes;
 import com.deepconnect.ats.recruitmentpipeline.service.RecruitmentPipelineService;
 import com.deepconnect.ats.screeningquestionsform.service.ScreeningQuestionsFormService;
 import com.deepconnect.ats.user.service.UserServiceV2;
@@ -43,18 +44,20 @@ class JobPositionStatusTest {
             mock(ScreeningQuestionsFormService.class), mock(JobApplicationService.class),
             mock(UserServiceV2.class), enumResService, positions,
             mock(JobEvaluationPlanRoundRepository.class), mock(JobRecruitmentPipelineRoundRepository.class),
-            mock(JobScreeningQuestionRepository.class), mock(JobApplicationRepository.class));
+            mock(JobScreeningQuestionRepository.class), mock(JobApplicationRepository.class),
+            mock(com.deepconnect.ats.candidatepipeline.service.CandidateEvaluationPlanImpact.class));
     private final JobPosition position = new JobPosition();
     private final JobPositionReq req = new JobPositionReq();
 
     @BeforeEach
     void setUp() {
-        LoggedInUserDetails user = new LoggedInUserDetails(2L, 1L, "user", "user@example.com", false, false, List.of());
+        LoggedInUserDetails user = new LoggedInUserDetails(2L, 1L, "user", "user@example.com", "user name", false, false, List.of());
         SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(user, null, List.of()));
-        var evaluation = List.of(new JobEvaluationPlanRound());
-        var recruitment = List.of(new JobRecruitmentPipelineRound());
-        position.setEvaluationPlanRounds(evaluation);
-        position.setRecruitmentPipelineRounds(recruitment);
+        var evaluation = List.of(new EvaluationPlanRoundReqRes());
+        var recruitment = List.of(new RecruitmentPipelineRoundReqRes());
+        var recruitmentRounds = JobRecruitmentPipelineRound.from(recruitment, position.getId());
+        position.setEvaluationPlanRounds(JobEvaluationPlanRound.from(evaluation, position.getId(), true));
+        position.setRecruitmentPipelineRounds(recruitmentRounds);
         req.setId("job");
         req.setTitle("Edited title");
         req.setEvaluationPlanRounds(evaluation);

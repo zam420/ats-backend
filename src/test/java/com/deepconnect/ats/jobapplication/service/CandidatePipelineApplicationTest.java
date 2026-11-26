@@ -2,6 +2,7 @@ package com.deepconnect.ats.jobapplication.service;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.*;
 
 import java.nio.file.Path;
@@ -43,7 +44,7 @@ class CandidatePipelineApplicationTest {
     void setUp(@TempDir Path temp) {
         ReflectionTestUtils.setField(service, "storageRoot", temp.toString());
         ReflectionTestUtils.setField(service, "maxResumeSizeBytes", 5L * 1024 * 1024);
-        var user = new LoggedInUserDetails(2L, 1L, "user", "user@example.com", false, false, List.of());
+        var user = new LoggedInUserDetails(2L, 1L, "user", "user@example.com", "user name", false, false, List.of());
         SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(user, null, List.of()));
         TransactionSynchronizationManager.initSynchronization();
         JobPosition job = new JobPosition();

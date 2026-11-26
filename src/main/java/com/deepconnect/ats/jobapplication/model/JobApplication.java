@@ -8,6 +8,7 @@ import org.hibernate.validator.constraints.Length;
 import com.deepconnect.ats.common.model.BaseEntity;
 import com.deepconnect.ats.job.model.JobPosition;
 import com.deepconnect.ats.jobapplication.enums.JobApplicationCloseType;
+import com.deepconnect.ats.candidatepipeline.enums.CandidateEvaluationDecision;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -45,6 +46,13 @@ public class JobApplication extends BaseEntity {
     */
     @Column(name = "recruitment_pipeline_stage")
     private Long recruitmentPipelineStage;
+
+    @Column(name = "evaluations_initialized", nullable = false)
+    private boolean evaluationsInitialized;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "evaluation_decision", length = 30)
+    private CandidateEvaluationDecision evaluationDecision;
 
     @Column(nullable = false)
     private boolean closed;

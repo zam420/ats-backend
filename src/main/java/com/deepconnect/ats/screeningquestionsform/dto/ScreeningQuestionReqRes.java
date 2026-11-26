@@ -7,7 +7,7 @@ import java.util.List;
 import com.deepconnect.ats.screeningquestionsform.model.ScreeningQuestionBase;
 
 @Data
-public class ScreeningQuestionRes {
+public class ScreeningQuestionReqRes {
     private String id;
     private String description;
     private ScreeningQuestionType screeningQuestionType;
@@ -20,10 +20,10 @@ public class ScreeningQuestionRes {
     private Boolean isDropDownMultiSelect;
     private Integer maxChars;
 
-    public static ScreeningQuestionRes from(ScreeningQuestionBase entity) {
+    public static ScreeningQuestionReqRes from(ScreeningQuestionBase entity) {
         if(entity == null)
             return null;
-        ScreeningQuestionRes res = new ScreeningQuestionRes();
+        ScreeningQuestionReqRes res = new ScreeningQuestionReqRes();
         res.setId(entity.getPublicId());
         res.setDescription(entity.getDescription());
         res.setScreeningQuestionType(entity.getScreeningQuestionType());
@@ -37,7 +37,7 @@ public class ScreeningQuestionRes {
         return res;
     }
 
-    public static List<ScreeningQuestionRes> fromList(List<ScreeningQuestionBase> entities) {
-        return entities.stream().map(ScreeningQuestionRes::from).toList();
+    public static List<ScreeningQuestionReqRes> from(List<ScreeningQuestionBase> entities) {
+        return entities.stream().map(ScreeningQuestionReqRes::from).toList();
     }
 }

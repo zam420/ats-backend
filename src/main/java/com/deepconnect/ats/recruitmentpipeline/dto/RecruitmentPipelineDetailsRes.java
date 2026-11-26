@@ -14,7 +14,7 @@ import com.deepconnect.ats.recruitmentpipeline.model.RecruitmentPipeline;
 @Setter
 public class RecruitmentPipelineDetailsRes extends RecruitmentPipelineResBase {
     
-    private List<RecruitmentPipelineRoundRes> rounds;
+    private List<RecruitmentPipelineRoundReqRes> rounds;
     private Set<String> sharedWithUserIds;
     private String ownerId;
 
@@ -29,7 +29,7 @@ public class RecruitmentPipelineDetailsRes extends RecruitmentPipelineResBase {
         res.setRounds(
             entity.getRounds() == null
                 ? List.of()
-                : entity.getRounds().stream().map(RecruitmentPipelineRoundRes::from).toList()
+                : entity.getRounds().stream().map(RecruitmentPipelineRoundReqRes::from).toList()
         );
         if(!CollectionUtils.isEmpty(entity.getSharedWithUsers())){
             res.setIsPublic(false);

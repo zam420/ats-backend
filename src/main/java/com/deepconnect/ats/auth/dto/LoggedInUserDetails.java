@@ -47,12 +47,12 @@ public class LoggedInUserDetails implements UserDetails {
         this.credentialsExpired = user.getCredentialsExpired(); 
     }
 
-    public LoggedInUserDetails(Long tenantId, Long userId, String publicId, String email, 
+    public LoggedInUserDetails(Long tenantId, Long userId, String publicId, String email, String userName,
             boolean deactivated, boolean locked, Collection<? extends GrantedAuthority> authorities) {
         this.tenantId = tenantId;
         this.userId = userId;
         this.publicId = publicId;
-        this.username = null;
+        this.username = userName;
         this.email = email;
         this.password = null;
         this.authorities = authorities;//this includes both roles and permissions`

@@ -36,7 +36,7 @@ class ScreeningQuestionsFormServiceAccessTest {
             mock(ScreeningQuestionRepository.class), 
             mock(ScreeningQuestionsFormShareRepository.class));
     private final LoggedInUserDetails user = new LoggedInUserDetails(
-            1000L, 2000L, "user", "user@example.test", false, false, List.of());
+            1000L, 2000L, "user", "user@example.test", "user name", false, false, List.of());
 
     @Test
     void sharedAndAllQueriesUseCurrentTenantAndUser() {

@@ -6,11 +6,11 @@ import lombok.Setter;
 import java.util.List;
 import org.springframework.util.CollectionUtils;
 
-import com.deepconnect.ats.evaluationplan.dto.EvaluationPlanRoundRes;
+import com.deepconnect.ats.evaluationplan.dto.EvaluationPlanRoundReqRes;
 
 import com.deepconnect.ats.job.model.JobPosition;
-import com.deepconnect.ats.recruitmentpipeline.dto.RecruitmentPipelineRoundRes;
-import com.deepconnect.ats.screeningquestionsform.dto.ScreeningQuestionRes;
+import com.deepconnect.ats.recruitmentpipeline.dto.RecruitmentPipelineRoundReqRes;
+import com.deepconnect.ats.screeningquestionsform.dto.ScreeningQuestionReqRes;
 import com.deepconnect.ats.job.enums.JobQuestionsDisplayMode;
 import com.deepconnect.ats.job.enums.JobStatus;
 
@@ -21,9 +21,9 @@ public class JobPositionDetailsRes extends JobPositionResBase {
     private List<String> recruiters;
     private List<String> hiringManagers;
     private JobQuestionsDisplayMode applicationQuestionsDisplayMode;
-    private List<ScreeningQuestionRes> screeningQuestions;
-    private List<RecruitmentPipelineRoundRes> recruitmentPipelineRounds;
-    private List<EvaluationPlanRoundRes> evaluationPlanRounds;
+    private List<ScreeningQuestionReqRes> screeningQuestions;
+    private List<RecruitmentPipelineRoundReqRes> recruitmentPipelineRounds;
+    private List<EvaluationPlanRoundReqRes> evaluationPlanRounds;
     private JobStatus status;
     private String ownerId;
     private String ownerName;
@@ -39,13 +39,13 @@ public class JobPositionDetailsRes extends JobPositionResBase {
         res.setHiringManagers(entity.getHiringManagers());
         res.setApplicationQuestionsDisplayMode(entity.getApplicationQuestionsDisplayMode());
         if(!CollectionUtils.isEmpty(entity.getScreeningQuestions())) {
-            res.setScreeningQuestions(entity.getScreeningQuestions().stream().map(ScreeningQuestionRes::from).toList());
+            res.setScreeningQuestions(entity.getScreeningQuestions().stream().map(ScreeningQuestionReqRes::from).toList());
         }
         if(!CollectionUtils.isEmpty(entity.getEvaluationPlanRounds())) {
-            res.setEvaluationPlanRounds(entity.getEvaluationPlanRounds().stream().map(EvaluationPlanRoundRes::from).toList());
+            res.setEvaluationPlanRounds(entity.getEvaluationPlanRounds().stream().map(EvaluationPlanRoundReqRes::from).toList());
         }
         if(!CollectionUtils.isEmpty(entity.getRecruitmentPipelineRounds())) {
-            res.setRecruitmentPipelineRounds(entity.getRecruitmentPipelineRounds().stream().map(RecruitmentPipelineRoundRes::from).toList());
+            res.setRecruitmentPipelineRounds(entity.getRecruitmentPipelineRounds().stream().map(RecruitmentPipelineRoundReqRes::from).toList());
         }
         res.setStatus(entity.getStatus());
         res.setOwnerId(entity.getOwnerPublicId());

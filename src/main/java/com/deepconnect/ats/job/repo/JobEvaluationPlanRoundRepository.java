@@ -12,10 +12,10 @@ import java.util.List;
 @Repository
 public interface JobEvaluationPlanRoundRepository extends EvaluationPlanRoundBaseRepository<JobEvaluationPlanRound> {
     
-    List<JobEvaluationPlanRound> findByJobPositionIdOrderByOrderAsc(Long jobPositionId);
+    List<JobEvaluationPlanRound> findByJobPositionIdAndActiveTrueOrderByOrderAsc(Long jobPositionId);
 
     @Modifying
-    @Query(value = "delete from job_evaluation_plan_round where job_position=?1", nativeQuery = true)
-    void deleteByJobPositionId(Long jobPositionId);
+    @Query(value = "update job_evaluation_plan_round set active = false where job_position=?1 and active = true", nativeQuery = true)
+    void archiveByJobPositionId(Long jobPositionId);
 
 }

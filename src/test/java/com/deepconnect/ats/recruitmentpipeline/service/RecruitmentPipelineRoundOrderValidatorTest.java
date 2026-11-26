@@ -30,19 +30,50 @@ class RecruitmentPipelineRoundOrderValidatorTest {
     @ParameterizedTest
     @MethodSource("roundTypes")
     void acceptsSortedCoreStagesAndRepeatedCustomStages(Supplier<? extends RecruitmentPipelineRoundBase> factory) {
-        var rounds = List.of(round(factory, RecruitmentPipelineRoundType.EVALUATING, null), round(factory, RecruitmentPipelineRoundType.CUSTOM, 1),
-            round(factory, RecruitmentPipelineRoundType.SCREENING, 0), round(factory, RecruitmentPipelineRoundType.CUSTOM, 2));
+        var rounds = List.of(
+            round(factory, RecruitmentPipelineRoundType.APPLIED, 0),
+            round(factory, RecruitmentPipelineRoundType.CUSTOM, 1),
+            round(factory, RecruitmentPipelineRoundType.SCREENING, 2),
+            round(factory, RecruitmentPipelineRoundType.CUSTOM, 3),
+            round(factory, RecruitmentPipelineRoundType.EVALUATING, 4),
+            round(factory, RecruitmentPipelineRoundType.OFFERED, 5),
+            round(factory, RecruitmentPipelineRoundType.HIRED, 6),
+            round(factory, RecruitmentPipelineRoundType.ONBOARDED, 7));
         assertDoesNotThrow(() -> RecruitmentPipelineRoundHelper.assertRoundTypeOrder(rounds, "user", "plan"));
     }
 
     @ParameterizedTest
     @MethodSource("roundTypes")
     void rejectsDuplicateOrOutOfOrderCoreStages(Supplier<? extends RecruitmentPipelineRoundBase> factory) {
-        var duplicate = List.of(round(factory, RecruitmentPipelineRoundType.SCREENING, 0), round(factory, RecruitmentPipelineRoundType.SCREENING, 1));
-        var reversed = List.of(round(factory, RecruitmentPipelineRoundType.EVALUATING, 0), round(factory, RecruitmentPipelineRoundType.SCREENING, 1));
+        var duplicate = List.of(
+            round(factory, RecruitmentPipelineRoundType.APPLIED, 0),
+            round(factory, RecruitmentPipelineRoundType.SCREENING, 1),
+            round(factory, RecruitmentPipelineRoundType.SCREENING, 2));
+        var reversed = List.of(
+            round(factory, RecruitmentPipelineRoundType.APPLIED, 0),
+            round(factory, RecruitmentPipelineRoundType.EVALUATING, 1),
+            round(factory, RecruitmentPipelineRoundType.SCREENING, 2));
         assertThrows(InternalServerException.class,
             () -> RecruitmentPipelineRoundHelper.assertRoundTypeOrder(duplicate, "user", "plan"));
         assertThrows(InternalServerException.class,
             () -> RecruitmentPipelineRoundHelper.assertRoundTypeOrder(reversed, "user", "plan"));
+    }
+
+    @ParameterizedTest
+    @MethodSource("roundTypes")
+    void requiresOfferApprovalBeforeOffered(Supplier<? extends RecruitmentPipelineRoundBase> factory) {
+        var offerApprovalBeforeOffered = List.of(
+            round(factory, RecruitmentPipelineRoundType.APPLIED, 0),
+            round(factory, RecruitmentPipelineRoundType.OFFERED, 1),
+            round(factory, RecruitmentPipelineRoundType.OFFER_APPROVAL, 2));
+        var offerApprovalAfterOffered = List.of(
+            round(factory, RecruitmentPipelineRoundType.APPLIED, 0),
+            round(factory, RecruitmentPipelineRoundType.OFFER_APPROVAL, 1),
+            round(factory, RecruitmentPipelineRoundType.OFFERED, 2));
+
+        assertThrows(InternalServerException.class, () ->
+            RecruitmentPipelineRoundHelper.assertRoundTypeOrder(offerApprovalBeforeOffered, "user", "plan"));
+        assertDoesNotThrow(() ->
+            RecruitmentPipelineRoundHelper.assertRoundTypeOrder(offerApprovalAfterOffered, "user", "plan"));
     }
 }

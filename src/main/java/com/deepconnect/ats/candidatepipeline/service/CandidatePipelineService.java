@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,8 +16,12 @@ import com.deepconnect.ats.candidate.dto.CandidateClosureRes;
 import com.deepconnect.ats.candidate.dto.CandidateResBase;
 import com.deepconnect.ats.candidatepipeline.dto.CandidatePipelineRes;
 import com.deepconnect.ats.candidatepipeline.dto.CandidatePipelineStageRes;
+import com.deepconnect.ats.candidatepipeline.dto.CandidateEvaluationSummary;
 import com.deepconnect.ats.candidatepipeline.dto.MoveCandidateReq;
 import com.deepconnect.ats.candidatepipeline.dto.RejectCandidateReq;
+import com.deepconnect.ats.candidatepipeline.enums.CandidateEvaluationDecision;
+import com.deepconnect.ats.candidatepipeline.repo.CandidateEvaluationRoundRepository;
+import com.deepconnect.ats.candidatepipeline.model.CandidateEvaluationRound;
 import com.deepconnect.ats.common.enums.CustomExceptionType;
 import com.deepconnect.ats.common.exception.CustomException;
 import com.deepconnect.ats.common.exception.InternalServerException;
@@ -28,6 +34,7 @@ import com.deepconnect.ats.job.service.JobPositionAccessService;
 import com.deepconnect.ats.jobapplication.model.JobApplication;
 import com.deepconnect.ats.jobapplication.enums.JobApplicationCloseType;
 import com.deepconnect.ats.jobapplication.repo.JobApplicationRepository;
+import com.deepconnect.ats.recruitmentpipeline.enums.RecruitmentPipelineRoundType;
 
 import lombok.RequiredArgsConstructor;
 
@@ -38,6 +45,8 @@ public class CandidatePipelineService {
     private final JobRecruitmentPipelineRoundRepository stages;
     private final JobApplicationRepository applications;
     private final JobPositionAccessService access;
+    private final CandidateEvaluationService evaluations;
+    private final CandidateEvaluationRoundRepository evaluationRounds;
 
     @Transactional(readOnly = true)
     public List<JobPositionCandidatePipelineRes> jobs() {
@@ -55,6 +64,16 @@ public class CandidatePipelineService {
         access.assertReadAccess(AuthService.getLoggedInUser(), job);
         List<JobRecruitmentPipelineRound> rounds = stages.findByJobPositionIdOrderByOrderAsc(job.getId());
         List<JobApplication> candidates = applications.findByJobPositionIdOrderByCreatedAtDesc(job.getId());
+        Set<Long> evaluationStageIds = rounds.stream()
+                .filter(round -> round.getRoundType() == RecruitmentPipelineRoundType.EVALUATING)
+                .map(JobRecruitmentPipelineRound::getId).collect(Collectors.toSet());
+        List<Long> evaluatingIds = candidates.stream()
+                .filter(candidate -> !candidate.isClosed() && candidate.isEvaluationsInitialized()
+                        && evaluationStageIds.contains(candidate.getRecruitmentPipelineStage()))
+                .map(JobApplication::getId).toList();
+        Map<Long, List<CandidateEvaluationRound>> evaluationsByCandidate = evaluatingIds.isEmpty() ? Map.of()
+                : evaluationRounds.findByJobApplicationIdInOrderByOrderAsc(evaluatingIds).stream()
+                    .collect(Collectors.groupingBy(CandidateEvaluationRound::getJobApplicationId));
         Map<Long, List<CandidateResBase>> candidatesByRecruitmentPipelineStage = new HashMap<>();
         List<CandidateClosureRes> rejected = new ArrayList<>();
 
@@ -80,6 +99,10 @@ public class CandidatePipelineService {
             if (stageCandidates == null) 
                 throw new InternalServerException("Application references a missing pipeline stage");
 
+            if (application.isEvaluationsInitialized() && evaluationStageIds.contains(application.getRecruitmentPipelineStage())) {
+                candidate.setEvaluation(CandidateEvaluationSummary.from(application,
+                        evaluationsByCandidate.getOrDefault(application.getId(), List.of())));
+            }
             stageCandidates.add(candidate);
         }
 
@@ -101,6 +124,12 @@ public class CandidatePipelineService {
             JobRecruitmentPipelineRound to = rounds.get(i + 1);
             if (from.getPublicId().equals(request.fromStageId()) && to.getPublicId().equals(request.toStageId())
                     && from.getId().equals(application.getRecruitmentPipelineStage())) {
+                if (from.getRoundType() == RecruitmentPipelineRoundType.EVALUATING) {
+                    requireDecision(application, CandidateEvaluationDecision.PASSED);
+                }
+                if (to.getRoundType() == RecruitmentPipelineRoundType.EVALUATING) {
+                    evaluations.initializeLocked(application, job.getEvaluationPlanRounds());
+                }
                 application.setRecruitmentPipelineStage(to.getId());
                 applications.save(application);
                 return;
@@ -121,6 +150,9 @@ public class CandidatePipelineService {
                 .filter(round -> round.getPublicId().equals(request.stageId())
                         && round.getId().equals(application.getRecruitmentPipelineStage()))
                 .findFirst().orElseThrow(() -> new CustomException(CustomExceptionType.JOB_PIPELINE_STALE));
+        if (stage.getRoundType() == RecruitmentPipelineRoundType.EVALUATING) {
+            requireDecision(application, CandidateEvaluationDecision.FAILED);
+        }
         String reason = request.reason() == null ? null : request.reason().trim();
         application.setClosed(true);
         application.setApplicationCloseType(JobApplicationCloseType.REJECTED);
@@ -130,5 +162,14 @@ public class CandidatePipelineService {
         application.setClosedAtStageName(stage.getName());
         application.setClosedAtStageType(stage.getRoundType().name());
         applications.save(application);
+    }
+
+    private void requireDecision(JobApplication application, CandidateEvaluationDecision required) {
+        if (!application.isEvaluationsInitialized() || application.getEvaluationDecision() != required
+                || CandidateEvaluationWorkflow.currentRound(application,
+                        evaluationRounds.findByJobApplicationIdOrderByOrderAsc(application.getId())) != null) {
+            throw new CustomException(required == CandidateEvaluationDecision.PASSED
+                    ? CustomExceptionType.JOB_EVALUATION_PASS_REQUIRED : CustomExceptionType.JOB_EVALUATION_FAIL_REQUIRED);
+        }
     }
 }

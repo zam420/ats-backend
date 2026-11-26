@@ -9,6 +9,7 @@ import com.deepconnect.ats.job.service.JobPositionService;
 import com.deepconnect.ats.job.dto.JobPositionReq;
 import com.deepconnect.ats.job.dto.JobPositionSearchQuery;
 import com.deepconnect.ats.job.dto.JobPositionRes;
+import com.deepconnect.ats.candidatepipeline.service.CandidateEvaluationPlanImpact;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -46,6 +47,12 @@ public class JobPositionController {
     public ApiResult<Map<String, String>> update(@RequestBody @Valid JobPositionReq req) {
         String id = jobPositionService.update(req);
         return ApiResult.success(Collections.singletonMap("id", id));
+    }
+
+    @PreAuthorize("hasAuthority('jpe')")
+    @PostMapping("/evaluation-impact")
+    public ApiResult<CandidateEvaluationPlanImpact.Preview> evaluationImpact(@RequestBody JobPositionReq req) {
+        return ApiResult.success(jobPositionService.previewEvaluationImpact(req));
     }
 
     @PreAuthorize("hasAuthority('jpe')")

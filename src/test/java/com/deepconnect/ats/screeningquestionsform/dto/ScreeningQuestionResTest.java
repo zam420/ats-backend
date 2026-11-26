@@ -16,7 +16,7 @@ class ScreeningQuestionResTest {
         ScreeningQuestion question = new ScreeningQuestion();
         question.setDefaultOption("Choice A");
 
-        ScreeningQuestionRes response = ScreeningQuestionRes.from(question);
+        ScreeningQuestionReqRes response = ScreeningQuestionReqRes.from(question);
         assertEquals("Choice A", response.getDefaultOption());
         ObjectMapper mapper = new ObjectMapper().setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE);
         assertEquals("Choice A", mapper.valueToTree(response).get("default_option").asText());

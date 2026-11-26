@@ -10,9 +10,9 @@ import jakarta.validation.constraints.NotEmpty;
 import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.Range;
 
-import com.deepconnect.ats.job.model.JobEvaluationPlanRound;
-import com.deepconnect.ats.job.model.JobRecruitmentPipelineRound;
-import com.deepconnect.ats.job.model.JobScreeningQuestion;
+import com.deepconnect.ats.evaluationplan.dto.EvaluationPlanRoundReqRes;
+import com.deepconnect.ats.recruitmentpipeline.dto.RecruitmentPipelineRoundReqRes;
+import com.deepconnect.ats.screeningquestionsform.dto.ScreeningQuestionReqRes;
 
 @Data
 public class JobPositionReq {
@@ -64,14 +64,17 @@ public class JobPositionReq {
     @NotNull(message = "{field.job.applicationQuestionsDisplayMode}{validation.notBlank}")
     private Integer applicationQuestionsDisplayMode;
 
-    private List<JobScreeningQuestion> screeningQuestions;
+    private List<ScreeningQuestionReqRes> screeningQuestions;
 
     @NotNull(message = "{field.job.recruitmentPipeline}{validation.notBlank}")
-    private List<JobRecruitmentPipelineRound> recruitmentPipelineRounds;
+    private List<RecruitmentPipelineRoundReqRes> recruitmentPipelineRounds;
 
     @NotNull(message = "{field.job.evaluationPlan}{validation.notBlank}")
-    private List<JobEvaluationPlanRound> evaluationPlanRounds;
+    private List<EvaluationPlanRoundReqRes> evaluationPlanRounds;
 
     private String ownerId;
+
+    private String evaluationImpactToken;
+    private boolean confirmIgnoredEvaluationChanges;
 
 }

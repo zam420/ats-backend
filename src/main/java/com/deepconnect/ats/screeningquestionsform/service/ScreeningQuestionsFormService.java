@@ -34,8 +34,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -86,13 +84,12 @@ public class ScreeningQuestionsFormService {
             if (req.getQuestions().size() > maxQuestions) {
                 throw new InternalServerException(String.format("Too many questions. User: %s. Plan: %s. Questions: %d", loggedInUser.getPublicId(), template.getPublicId(), req.getQuestions().size()));
             }
-            ScreeningQuestionHelper.sanitizeLabels(req.getQuestions());
-            for (ScreeningQuestion question : req.getQuestions()) {
+            List<ScreeningQuestion> questions = ScreeningQuestion.from(req.getQuestions(), template.getId());
+            ScreeningQuestionHelper.sanitizeLabels(questions);
+            for (ScreeningQuestion question : questions) {
                 ScreeningQuestionHelper.assertMaxLength(question, rtLabelMaxLength, nonRTLabelMaxLength);
-                question.setScreeningQuestionsForm(template);
-                question.setScreeningQuestionsFormId(template.getId());
             }
-            screeningQuestionRepository.saveAll(req.getQuestions());
+            screeningQuestionRepository.saveAll(questions);
         }
         
         if(sharedWithUsersChanged) {
@@ -128,6 +125,7 @@ public class ScreeningQuestionsFormService {
         if(req.getOwnerId() == null || req.getOwnerId().equals(loggedInUser.getPublicId())) {
             template.setOwnerId(loggedInUser.getUserId());
             template.setOwnerPublicId(loggedInUser.getPublicId());
+            template.setOwnerName(loggedInUser.getUsername());
         }
         else {
             setAnotherUserAsOwner(template, screeningQuestionTemplateAccessService.getAccessType(loggedInUser, template), req.getOwnerId());
@@ -151,7 +149,8 @@ public class ScreeningQuestionsFormService {
             setAnotherUserAsOwner(template, screeningQuestionTemplateAccessService.getAccessType(loggedInUser, template), req.getOwnerId());
         }
 
-        boolean roundsChanged = !ScreeningQuestionHelper.questionsEqual(template.getQuestions(), req.getQuestions());
+        List<ScreeningQuestion> questions = ScreeningQuestion.from(req.getQuestions(), template.getId());
+        boolean roundsChanged = !ScreeningQuestionHelper.questionsEqual(template.getQuestions(), questions);
         if (roundsChanged) {
             screeningQuestionRepository.deleteByScreeningQuestionsFormId(template.getId());
         }
@@ -188,6 +187,7 @@ public class ScreeningQuestionsFormService {
         template.setTenantId(loggedInUser.getTenantId());
         template.setOwnerId(loggedInUser.getUserId());
         template.setOwnerPublicId(loggedInUser.getPublicId());
+        template.setOwnerName(loggedInUser.getUsername());
         return this.save(template, req, true, false, false, true);
     }
 
@@ -211,7 +211,8 @@ public class ScreeningQuestionsFormService {
         LoggedInUserDetails loggedInUser = AuthService.getLoggedInUser();
         this.assertUniqueWithinAllForUpdate(req.getName(), template.getId());
         screeningQuestionTemplateAccessService.assertWriteAccess(loggedInUser, template);
-        boolean roundsChanged = !ScreeningQuestionHelper.questionsEqual(template.getQuestions(), req.getQuestions());
+        List<ScreeningQuestion> questions = ScreeningQuestion.from(req.getQuestions(), template.getId());
+        boolean roundsChanged = !ScreeningQuestionHelper.questionsEqual(template.getQuestions(), questions);
         if (roundsChanged) {
             screeningQuestionRepository.deleteByScreeningQuestionsFormId(template.getId());
         }
@@ -312,6 +313,7 @@ public class ScreeningQuestionsFormService {
         }
         template.setOwnerId(user.getId());
         template.setOwnerPublicId(user.getPublicId());
+        template.setOwnerName(user.getName());
     }
 
     /**

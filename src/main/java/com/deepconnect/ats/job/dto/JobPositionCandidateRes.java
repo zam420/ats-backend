@@ -6,7 +6,7 @@ import lombok.Setter;
 import java.util.List;
 import org.springframework.util.CollectionUtils;
 import com.deepconnect.ats.job.model.JobPosition;
-import com.deepconnect.ats.screeningquestionsform.dto.ScreeningQuestionRes;
+import com.deepconnect.ats.screeningquestionsform.dto.ScreeningQuestionReqRes;
 import com.deepconnect.ats.job.enums.JobQuestionsDisplayMode;
 
 @Getter
@@ -18,7 +18,7 @@ public class JobPositionCandidateRes extends JobPositionResBase {
     private boolean companyHasLogo;
     private String companyLogoUrl;
     private JobQuestionsDisplayMode applicationQuestionsDisplayMode;
-    private List<ScreeningQuestionRes> screeningQuestions;
+    private List<ScreeningQuestionReqRes> screeningQuestions;
 
     protected JobPositionCandidateRes(JobPosition entity) {
         super(entity);
@@ -32,7 +32,7 @@ public class JobPositionCandidateRes extends JobPositionResBase {
         res.setCompanyLogoUrl(entity.getTenant().getLogoPath());
         res.setApplicationQuestionsDisplayMode(entity.getApplicationQuestionsDisplayMode());
         if(!CollectionUtils.isEmpty(entity.getScreeningQuestions())) {
-            res.setScreeningQuestions(entity.getScreeningQuestions().stream().map(ScreeningQuestionRes::from).toList());
+            res.setScreeningQuestions(entity.getScreeningQuestions().stream().map(ScreeningQuestionReqRes::from).toList());
         }
         return res;
     }

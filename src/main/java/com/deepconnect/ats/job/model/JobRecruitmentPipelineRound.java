@@ -6,6 +6,9 @@ import lombok.experimental.SuperBuilder;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
+import java.util.List;
+
+import com.deepconnect.ats.recruitmentpipeline.dto.RecruitmentPipelineRoundReqRes;
 import com.deepconnect.ats.recruitmentpipeline.model.RecruitmentPipelineRoundBase;
 
 @Entity
@@ -26,5 +29,20 @@ public class JobRecruitmentPipelineRound extends RecruitmentPipelineRoundBase {
 
     @Column(name = "jobPosition", nullable = false)
     private Long jobPositionId;
+
+    protected JobRecruitmentPipelineRound(RecruitmentPipelineRoundReqRes dto, Long jobPositionId) {
+        super(dto);
+        this.jobPositionId = jobPositionId;
+    }
+
+    public static JobRecruitmentPipelineRound from(RecruitmentPipelineRoundReqRes dto, Long jobPositionId) {
+        if(dto == null)
+            return null;
+        return new JobRecruitmentPipelineRound(dto, jobPositionId);
+    }
+
+    public static List<JobRecruitmentPipelineRound> from(List<RecruitmentPipelineRoundReqRes> entities, Long jobPositionId) {
+        return entities.stream().map(dto -> JobRecruitmentPipelineRound.from(dto, jobPositionId)).toList();
+    }
 
 }

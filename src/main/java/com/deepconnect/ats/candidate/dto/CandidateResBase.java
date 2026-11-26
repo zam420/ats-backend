@@ -4,7 +4,7 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 import com.deepconnect.ats.jobapplication.model.JobApplication;
-import com.deepconnect.ats.jobapplication.enums.JobApplicationCloseType;
+import com.deepconnect.ats.candidatepipeline.dto.CandidateEvaluationSummary;
 
 @Data
 public class CandidateResBase {
@@ -16,6 +16,7 @@ public class CandidateResBase {
     protected String email;
     protected String currentLocation;
     protected LocalDateTime createdAt;
+    protected CandidateEvaluationSummary evaluation;
 
     protected CandidateResBase(JobApplication application) {
         this.id = application.getPublicId();

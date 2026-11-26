@@ -26,7 +26,7 @@ class TenantServiceLogoTest {
     private final TenantLogoStorage logos = mock(TenantLogoStorage.class);
     private final TenantService service = new TenantService(repository, new TenantAccessService(), logos);
     private final LoggedInUserDetails user = new LoggedInUserDetails(
-            1L, 2L, "user-id", "user@example.test", false, false, List.of());
+            1L, 2L, "user-id", "user@example.test", "user name", false, false, List.of());
 
     @Test
     void logoReadRequiresTenantAccess() {

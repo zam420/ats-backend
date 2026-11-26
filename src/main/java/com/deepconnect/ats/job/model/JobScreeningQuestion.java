@@ -7,6 +7,9 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
+import java.util.List;
+
+import com.deepconnect.ats.screeningquestionsform.dto.ScreeningQuestionReqRes;
 import com.deepconnect.ats.screeningquestionsform.model.ScreeningQuestionBase;
 
 
@@ -30,4 +33,25 @@ public class JobScreeningQuestion extends ScreeningQuestionBase {
     @Column(nullable = false)
     @Builder.Default
     private Boolean active = true;
+
+    @Column(name = "question_set_version")
+    private Integer questionSetVersion;
+
+    protected JobScreeningQuestion(ScreeningQuestionReqRes dto, Long jobPositionId) {
+        super(dto);
+        this.jobPositionId = jobPositionId;
+    }
+
+    public static JobScreeningQuestion from(ScreeningQuestionReqRes dto, Long jobPositionId) {
+        if(dto == null)
+            return null;
+        JobScreeningQuestion question = new JobScreeningQuestion(dto, jobPositionId);
+        question.setActive(true);
+        return question;
+    }
+
+    public static List<JobScreeningQuestion> from(List<ScreeningQuestionReqRes> entities, Long jobPositionId) {
+        return entities.stream().map(dto -> JobScreeningQuestion.from(dto, jobPositionId)).toList();
+    }
+
 }
