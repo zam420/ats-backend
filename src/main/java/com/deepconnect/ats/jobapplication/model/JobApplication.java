@@ -50,6 +50,9 @@ public class JobApplication extends BaseEntity {
     @Column(name = "evaluations_initialized", nullable = false)
     private boolean evaluationsInitialized;
 
+    @Column(name = "evaluation_plan_version")
+    private Integer evaluationPlanVersion;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "evaluation_decision", length = 30)
     private CandidateEvaluationDecision evaluationDecision;

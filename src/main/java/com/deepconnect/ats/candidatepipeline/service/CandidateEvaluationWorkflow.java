@@ -34,22 +34,20 @@ public final class CandidateEvaluationWorkflow {
         List<JobEvaluationPlanRound> ordered = new ArrayList<>(plan);
         if (ordered.stream().anyMatch(round -> round == null || round.getOrder() == null || round.getOrder() < 0
                 || round.getId() == null || !Objects.equals(round.getJobPositionId(), application.getJobPositionId())
-                || round.getLineageId() == null || !Boolean.TRUE.equals(round.getActive())
                 || round.getRoundType() == null || round.getName() == null || round.getName().isBlank())) {
             throw new InternalServerException("Invalid evaluation plan round");
         }
         ordered.sort(Comparator.comparing(JobEvaluationPlanRound::getOrder));
         Set<Integer> orders = new HashSet<>();
-        Set<String> lineages = new HashSet<>();
+        Set<Long> planRoundIds = new HashSet<>();
         List<CandidateEvaluationRound> result = new ArrayList<>();
         for (JobEvaluationPlanRound template : ordered) {
-            if (!orders.add(template.getOrder()) || !lineages.add(template.getLineageId())) {
+            if (!orders.add(template.getOrder()) || !planRoundIds.add(template.getId())) {
                 throw new InternalServerException("Duplicate evaluation plan round");
             }
             CandidateEvaluationRound round = new CandidateEvaluationRound();
             round.setJobApplicationId(application.getId());
             round.setPlanRoundId(template.getId());
-            round.setPlanLineageId(template.getLineageId());
             round.setOrder(result.size());
             round.setName(template.getName());
             round.setDescription(template.getDescription());

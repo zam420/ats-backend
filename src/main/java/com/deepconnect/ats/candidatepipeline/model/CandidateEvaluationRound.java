@@ -37,9 +37,6 @@ public class CandidateEvaluationRound extends BaseEntity {
     @Column(name = "plan_round_id")
     private Long planRoundId;
 
-    @Column(name = "plan_lineage_id", length = 12)
-    private String planLineageId;
-
     @NotNull
     @Column(name = "round_order", nullable = false)
     private Integer order;

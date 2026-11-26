@@ -18,7 +18,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.deepconnect.ats.auth.dto.LoggedInUserDetails;
-import com.deepconnect.ats.candidatepipeline.service.CandidateEvaluationPlanImpact;
 import com.deepconnect.ats.common.enums.CustomExceptionType;
 import com.deepconnect.ats.common.exception.CustomException;
 import com.deepconnect.ats.common.service.EnumsResService;
@@ -50,13 +49,12 @@ class CandidatePipelineEditingTest {
     private final JobApplicationRepository applications = mock(JobApplicationRepository.class);
     private final JobEvaluationPlanRoundRepository evaluationRounds = mock(JobEvaluationPlanRoundRepository.class);
     private final JobApplicationService applicationService = mock(JobApplicationService.class);
-    private final CandidateEvaluationPlanImpact evaluationImpact = mock(CandidateEvaluationPlanImpact.class);
     private final JobPositionService service = new JobPositionService(mock(EvaluationPlanService.class),
             mock(RecruitmentPipelineService.class), mock(JobPositionAccessService.class),
             mock(ScreeningQuestionsFormService.class), applicationService,
             mock(UserServiceV2.class), mock(EnumsResService.class),
             positions, evaluationRounds, stages,
-            mock(JobScreeningQuestionRepository.class), applications, evaluationImpact);
+            mock(JobScreeningQuestionRepository.class), applications);
     private final JobPosition job = new JobPosition();
     private final JobPositionReq request = new JobPositionReq();
     private final JobRecruitmentPipelineRound applied = stage(10L, "applied", RecruitmentPipelineRoundType.APPLIED, 0, "Applied");
@@ -103,7 +101,6 @@ class CandidatePipelineEditingTest {
         when(positions.findForUpdate("job", 2L)).thenReturn(Optional.of(job));
         when(positions.save(any(JobPosition.class))).thenAnswer(invocation -> invocation.getArgument(0));
         when(stages.findByJobPositionIdOrderByOrderAsc(5L)).thenReturn(existing);
-        when(evaluationImpact.preview(any(), any())).thenReturn(new CandidateEvaluationPlanImpact.Preview("token", 0, 0));
     }
 
     @AfterEach
@@ -149,11 +146,33 @@ class CandidatePipelineEditingTest {
     }
 
     @Test
+    void assignsFirstVersionToEveryNewEvaluationRound() {
+        var first = new EvaluationPlanRoundReqRes();
+        first.setName("First");
+        first.setRoundType(EvaluationPlanRoundType.HR);
+        first.setOrder(0);
+        var second = new EvaluationPlanRoundReqRes();
+        second.setName("Second");
+        second.setRoundType(EvaluationPlanRoundType.HR);
+        second.setOrder(1);
+        request.setEvaluationPlanRounds(List.of(first, second));
+        request.setRecruitmentPipelineRounds(requestStages(true, "Screening"));
+
+        service.update(request);
+
+        verify(evaluationRounds).saveAll(argThat(saved -> {
+            var iterator = saved.iterator();
+            if (!iterator.hasNext() || !Integer.valueOf(1).equals(iterator.next().getPlanVersion())) return false;
+            if (!iterator.hasNext() || !Integer.valueOf(1).equals(iterator.next().getPlanVersion())) return false;
+            return !iterator.hasNext();
+        }));
+    }
+
+    @Test
     void archivesOldEvaluationRoundsWhenPlanChanges() {
         var oldRound = new JobEvaluationPlanRound();
         oldRound.setName("Old round");
         oldRound.setPublicId("round-old");
-        oldRound.setLineageId("lineage-old");
         oldRound.setRoundType(EvaluationPlanRoundType.HR);
         oldRound.setOrder(0);
         var newRound = new JobEvaluationPlanRound();
@@ -164,6 +183,7 @@ class CandidatePipelineEditingTest {
         job.setEvaluationPlanRounds(List.of(oldRound));
         request.setEvaluationPlanRounds(List.of(EvaluationPlanRoundReqRes.from(newRound)));
         request.setRecruitmentPipelineRounds(requestStages(true, "Screening"));
+        when(evaluationRounds.findLatestPlanVersion(5L)).thenReturn(2);
 
         service.update(request);
 
@@ -174,7 +194,8 @@ class CandidatePipelineEditingTest {
             if (!iterator.hasNext()) return false;
             var savedRound = iterator.next();
             return !iterator.hasNext() && Boolean.TRUE.equals(savedRound.getActive())
-                    && "lineage-old".equals(savedRound.getLineageId());
+                    && savedRound.getPublicId() == null
+                    && Integer.valueOf(3).equals(savedRound.getPlanVersion());
         }));
     }
 
@@ -182,7 +203,6 @@ class CandidatePipelineEditingTest {
     void rejectsStaleEvaluationRoundIdentityBeforeArchiving() {
         var oldRound = new JobEvaluationPlanRound();
         oldRound.setPublicId("round-old");
-        oldRound.setLineageId("lineage-old");
         oldRound.setName("Old round");
         oldRound.setRoundType(EvaluationPlanRoundType.HR);
         oldRound.setOrder(0);
@@ -203,7 +223,6 @@ class CandidatePipelineEditingTest {
     void rejectsDuplicateEvaluationRoundIdentity() {
         var oldRound = new JobEvaluationPlanRound();
         oldRound.setPublicId("round-old");
-        oldRound.setLineageId("lineage-old");
         oldRound.setName("Old round");
         oldRound.setRoundType(EvaluationPlanRoundType.HR);
         oldRound.setOrder(0);
@@ -220,38 +239,19 @@ class CandidatePipelineEditingTest {
     }
 
     @Test
-    void requiresFreshConfirmationBeforeChangingAnImpactedPlan() {
+    void unchangedEvaluationPlanDoesNotCreateAnotherVersion() {
         var old = new JobEvaluationPlanRound();
         old.setPublicId("old");
-        old.setLineageId("lineage");
         old.setName("Old");
         old.setOrder(0);
         old.setRoundType(EvaluationPlanRoundType.HR);
-        var updated = new JobEvaluationPlanRound();
-        updated.setPublicId("old");
-        updated.setName("New");
-        updated.setOrder(0);
-        updated.setRoundType(EvaluationPlanRoundType.HR);
         job.setEvaluationPlanRounds(List.of(old));
-        request.setEvaluationPlanRounds(List.of(EvaluationPlanRoundReqRes.from(updated)));
+        request.setEvaluationPlanRounds(List.of(EvaluationPlanRoundReqRes.from(old)));
         request.setRecruitmentPipelineRounds(requestStages(true, "Screening"));
-        when(evaluationImpact.preview(any(), any())).thenReturn(new CandidateEvaluationPlanImpact.Preview("fresh", 1, 1));
 
-        assertThrows(CustomException.class, () -> service.update(request));
-        request.setEvaluationImpactToken("old");
-        request.setConfirmIgnoredEvaluationChanges(true);
-        assertThrows(CustomException.class, () -> service.update(request));
-        request.setEvaluationImpactToken("fresh");
-        request.setConfirmIgnoredEvaluationChanges(false);
-        assertThrows(CustomException.class, () -> service.update(request));
-        verify(evaluationRounds, never()).archiveByJobPositionId(anyLong());
-        verify(evaluationImpact, never()).apply(any(), any(), any());
-
-        request.setConfirmIgnoredEvaluationChanges(true);
         service.update(request);
-        verify(evaluationRounds).archiveByJobPositionId(5L);
-        verify(evaluationImpact).apply(eq(job), eq(List.of(old)), argThat(updatedRounds ->
-                updatedRounds.size() == 1 && "lineage".equals(updatedRounds.get(0).getLineageId())));
+        verify(evaluationRounds, never()).archiveByJobPositionId(anyLong());
+        verify(evaluationRounds, never()).saveAll(any());
     }
 
     @Test
@@ -275,7 +275,7 @@ class CandidatePipelineEditingTest {
     }
 
     @Test
-    void readsSourceIdentityFromJobRequest() throws Exception {
+    void readsRoundIdFromJobRequest() throws Exception {
         var mapper = new ObjectMapper().setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE);
         var req = mapper.readValue("{\"evaluation_plan_rounds\":[{\"id\":\"round-old\"}]}", JobPositionReq.class);
         assertEquals("round-old", req.getEvaluationPlanRounds().get(0).getId());

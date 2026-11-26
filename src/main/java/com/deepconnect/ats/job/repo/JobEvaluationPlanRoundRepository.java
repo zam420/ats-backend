@@ -14,6 +14,11 @@ public interface JobEvaluationPlanRoundRepository extends EvaluationPlanRoundBas
     
     List<JobEvaluationPlanRound> findByJobPositionIdAndActiveTrueOrderByOrderAsc(Long jobPositionId);
 
+    List<JobEvaluationPlanRound> findByJobPositionIdAndPlanVersionOrderByOrderAsc(Long jobPositionId, Integer planVersion);
+
+    @Query("select coalesce(max(r.planVersion), 0) from JobEvaluationPlanRound r where r.jobPositionId = ?1")
+    int findLatestPlanVersion(Long jobPositionId);
+
     @Modifying
     @Query(value = "update job_evaluation_plan_round set active = false where job_position=?1 and active = true", nativeQuery = true)
     void archiveByJobPositionId(Long jobPositionId);

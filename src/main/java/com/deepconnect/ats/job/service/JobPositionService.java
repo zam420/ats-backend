@@ -2,11 +2,9 @@ package com.deepconnect.ats.job.service;
 
 import com.deepconnect.ats.auth.dto.LoggedInUserDetails;
 import com.deepconnect.ats.auth.service.AuthService;
-import com.deepconnect.ats.candidatepipeline.service.CandidateEvaluationPlanImpact;
 import com.deepconnect.ats.common.enums.CustomExceptionType;
 import com.deepconnect.ats.common.exception.InternalServerException;
 import com.deepconnect.ats.common.exception.CustomException;
-import com.deepconnect.ats.common.security.PublicIdGenerator;
 import com.deepconnect.ats.common.service.EnumsResService;
 import com.deepconnect.ats.dto.AtsPageRsp;
 import com.deepconnect.ats.job.dto.JobFiltersRes;
@@ -22,6 +20,7 @@ import com.deepconnect.ats.job.repo.JobPositionRepository;
 import com.deepconnect.ats.job.repo.JobPositionSearchSpecification;
 import com.deepconnect.ats.job.repo.JobEvaluationPlanRoundRepository;
 import com.deepconnect.ats.evaluationplan.enums.EvaluationPlanRoundType;
+import com.deepconnect.ats.evaluationplan.dto.EvaluationPlanRoundReqRes;
 import com.deepconnect.ats.evaluationplan.service.EvaluationPlanRoundHelper;
 import com.deepconnect.ats.evaluationplan.service.EvaluationPlanService;
 import com.deepconnect.ats.recruitmentpipeline.service.RecruitmentPipelineService;
@@ -103,7 +102,6 @@ public class JobPositionService {
     private final JobRecruitmentPipelineRoundRepository jobRecruitmentPipelineRoundRepository;
     private final JobScreeningQuestionRepository jobScreeningQuestionRepository;
     private final JobApplicationRepository jobApplicationRepository;
-    private final CandidateEvaluationPlanImpact evaluationImpact;
 
     private String save(JobPosition position, JobPositionReq req, boolean evaluationPlanRoundsChanged, boolean recruitmentPipelineRoundsChanged, boolean screeningQuestionsChanged, List<JobEvaluationPlanRound> evaluationPlanRounds){
         LoggedInUserDetails loggedInUser = AuthService.getLoggedInUser();
@@ -132,12 +130,11 @@ public class JobPositionService {
                 throw new InternalServerException(String.format("Too many rounds. User: %s. Plan: %s. Rounds: %d", loggedInUser.getPublicId(), position.getPublicId(), req.getEvaluationPlanRounds().size()));
             }
             List<JobEvaluationPlanRound> addedRounds = evaluationPlanRounds == null
-                    ? evaluationPlanRoundsFromRequest(req, position.getId(), false)
+                    ? evaluationPlanRoundsFromRequest(req, position.getId())
                     : evaluationPlanRounds;
+            int planVersion = Math.addExact(jobEvaluationPlanRoundRepository.findLatestPlanVersion(position.getId()), 1);
             for (JobEvaluationPlanRound roundTemplate : addedRounds) {
-                if (roundTemplate.getLineageId() == null) {
-                    roundTemplate.setLineageId(PublicIdGenerator.generate());
-                }
+                roundTemplate.setPlanVersion(planVersion);
                 if(!StringUtils.hasText(roundTemplate.getName())) {
                     roundTemplate.setName(enumsResService.from(roundTemplate.getRoundType()).getName());
                 }
@@ -213,19 +210,11 @@ public class JobPositionService {
         //     setAnotherUserAsOwner(plan, evaluationPlanAccessService.getAccessType(loggedInUser, plan), req.getOwnerId());
         // }
 
-        List<JobEvaluationPlanRound> addedRounds = evaluationPlanRoundsFromRequest(req, position.getId(), true);
+        List<JobEvaluationPlanRound> addedRounds = evaluationPlanRoundsFromRequest(req, position.getId());
         boolean evaluationPlanRoundsChanged = !EvaluationPlanRoundHelper.roundsEqual(position.getEvaluationPlanRounds(), addedRounds)
-            || !sameEvaluationIdentities(position.getEvaluationPlanRounds(), addedRounds);
-        List<JobEvaluationPlanRound> previousEvaluationPlan = position.getEvaluationPlanRounds() == null
-                ? List.of() : new ArrayList<>(position.getEvaluationPlanRounds());
+            || !sameEvaluationIdentities(position.getEvaluationPlanRounds(), req.getEvaluationPlanRounds());
         if (evaluationPlanRoundsChanged) {
-           var impact = evaluationImpact.preview(position, addedRounds);
-           if ((req.getEvaluationImpactToken() != null && !req.getEvaluationImpactToken().equals(impact.token()))
-                   || (impact.candidates() > 0 && req.getEvaluationImpactToken() == null)
-                   || (impact.ignoredCandidates() > 0 && !req.isConfirmIgnoredEvaluationChanges())) {
-               throw new CustomException(CustomExceptionType.JOB_PIPELINE_STALE);
-           }
-           assignEvaluationIdentities(position.getEvaluationPlanRounds(), addedRounds);
+           assertValidEvaluationRoundIds(position.getEvaluationPlanRounds(), req.getEvaluationPlanRounds());
            jobEvaluationPlanRoundRepository.archiveByJobPositionId(position.getId());
         }
 
@@ -242,65 +231,38 @@ public class JobPositionService {
            jobScreeningQuestionRepository.archiveByJobPositionId(position.getId());
         }
 
-        String id = this.save(position, req, evaluationPlanRoundsChanged, false, screeningQuestionsChanged, addedRounds);
-        if (evaluationPlanRoundsChanged) {
-            jobEvaluationPlanRoundRepository.flush();
-            evaluationImpact.apply(position, previousEvaluationPlan, addedRounds);
-        }
-        return id;
+        return this.save(position, req, evaluationPlanRoundsChanged, false, screeningQuestionsChanged, addedRounds);
     }
 
-    @Transactional
-    public CandidateEvaluationPlanImpact.Preview previewEvaluationImpact(JobPositionReq req) {
-        var user = AuthService.getLoggedInUser();
-        if (req.getId() == null) throw new CustomException(CustomExceptionType.JOB_PIPELINE_STALE);
-        JobPosition job = jobPositionRepository.findForUpdate(req.getId(), user.getTenantId())
-                .orElseThrow(() -> new CustomException(CustomExceptionType.JOB_PIPELINE_STALE));
-        jobPositionAccessService.assertWriteAccess(user, job);
-        List<JobEvaluationPlanRound> addedRounds = evaluationPlanRoundsFromRequest(req, job.getId(), true);
-        return evaluationImpact.preview(job, addedRounds);
-    }
-
-    private List<JobEvaluationPlanRound> evaluationPlanRoundsFromRequest(JobPositionReq req, Long jobId,
-            boolean preserveSourceIds) {
+    private List<JobEvaluationPlanRound> evaluationPlanRoundsFromRequest(JobPositionReq req, Long jobId) {
         List<JobEvaluationPlanRound> rounds = JobEvaluationPlanRound.from(req.getEvaluationPlanRounds(), jobId, true);
         for (JobEvaluationPlanRound round : rounds) {
-            String publicId = round.getPublicId();
-            round.setSourcePublicId(preserveSourceIds ? publicId : null);
             round.setPublicId(null);
         }
         return rounds;
     }
 
-    private boolean sameEvaluationIdentities(List<JobEvaluationPlanRound> existing, List<JobEvaluationPlanRound> incoming) {
-        if (existing == null || incoming == null || incoming.stream().noneMatch(round -> round.getSourcePublicId() != null)) return true;
+    private boolean sameEvaluationIdentities(List<JobEvaluationPlanRound> existing, List<EvaluationPlanRoundReqRes> incoming) {
+        if (existing == null || incoming == null || incoming.stream().noneMatch(round -> round.getId() != null)) return true;
         if (existing.size() != incoming.size()) return false;
         for (int i = 0; i < existing.size(); i++) {
-            if (!java.util.Objects.equals(existing.get(i).getPublicId(), incoming.get(i).getSourcePublicId())) return false;
+            if (!java.util.Objects.equals(existing.get(i).getPublicId(), incoming.get(i).getId())) return false;
         }
         return true;
     }
 
-    private void assignEvaluationIdentities(List<JobEvaluationPlanRound> existing, List<JobEvaluationPlanRound> incoming) {
-        Map<String, JobEvaluationPlanRound> byPublicId = new HashMap<>();
+    private void assertValidEvaluationRoundIds(List<JobEvaluationPlanRound> existing, List<EvaluationPlanRoundReqRes> incoming) {
+        Set<String> existingIds = new HashSet<>();
         if (existing != null) {
-            existing.forEach(round -> byPublicId.put(round.getPublicId(), round));
+            existing.forEach(round -> existingIds.add(round.getPublicId()));
         }
         Set<String> used = new HashSet<>();
         if (incoming == null) return;
-        for (JobEvaluationPlanRound round : incoming) {
-            String source = round.getSourcePublicId();
-            if (source != null) {
-                JobEvaluationPlanRound previous = byPublicId.get(source);
-                if (previous == null || !used.add(source) || previous.getLineageId() == null) {
-                    throw new CustomException(CustomExceptionType.JOB_PIPELINE_STALE);
-                }
-                round.setLineageId(previous.getLineageId());
-            } else {
-                round.setLineageId(PublicIdGenerator.generate());
+        for (EvaluationPlanRoundReqRes round : incoming) {
+            String id = round.getId();
+            if (id != null && (!existingIds.contains(id) || !used.add(id))) {
+                throw new CustomException(CustomExceptionType.JOB_PIPELINE_STALE);
             }
-            round.setId(null);
-            round.setPublicId(null);
         }
     }
 

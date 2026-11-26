@@ -74,7 +74,4 @@ public class JobPositionReq {
 
     private String ownerId;
 
-    private String evaluationImpactToken;
-    private boolean confirmIgnoredEvaluationChanges;
-
 }

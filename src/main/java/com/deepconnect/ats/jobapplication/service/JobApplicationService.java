@@ -84,6 +84,12 @@ public class JobApplicationService {
         if (rounds.isEmpty() || rounds.get(0).getRoundType() != RecruitmentPipelineRoundType.APPLIED) {
             throw new CustomException(CustomExceptionType.JOB_PIPELINE_INVALID);
         }
+        var plan = job.getEvaluationPlanRounds();
+        if (plan == null || plan.isEmpty() || plan.get(0) == null || plan.get(0).getPlanVersion() == null
+                || plan.get(0).getPlanVersion() < 1
+                || plan.stream().anyMatch(round -> round == null || !plan.get(0).getPlanVersion().equals(round.getPlanVersion()))) {
+            throw new InternalServerException("Cannot apply to a job without a valid versioned evaluation plan");
+        }
         List<JobApplicationScreeningQuestionAnswer> validated = validateAnswers(job, request.getAnswers());
         String originalName = resume == null ? "" : resume.getOriginalFilename();
         if (originalName == null) originalName = "";
@@ -128,6 +134,7 @@ public class JobApplicationService {
         });
         JobApplication application = new JobApplication();
         application.setJobPositionId(job.getId());
+        application.setEvaluationPlanVersion(plan.get(0).getPlanVersion());
         application.setRecruitmentPipelineStage(rounds.get(0).getId());
         application.setCandidateUserId(AuthService.getLoggedInUser().getUserId());
         application.setFirstName(request.getFirstName().trim());

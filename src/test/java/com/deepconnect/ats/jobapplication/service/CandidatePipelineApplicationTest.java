@@ -21,8 +21,10 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 
 import com.deepconnect.ats.auth.dto.LoggedInUserDetails;
 import com.deepconnect.ats.common.exception.CustomException;
+import com.deepconnect.ats.common.exception.InternalServerException;
 import com.deepconnect.ats.job.enums.JobStatus;
 import com.deepconnect.ats.job.model.JobPosition;
+import com.deepconnect.ats.job.model.JobEvaluationPlanRound;
 import com.deepconnect.ats.job.model.JobRecruitmentPipelineRound;
 import com.deepconnect.ats.job.repo.JobPositionRepository;
 import com.deepconnect.ats.job.repo.JobRecruitmentPipelineRoundRepository;
@@ -51,6 +53,9 @@ class CandidatePipelineApplicationTest {
         job.setId(5L);
         job.setStatus(JobStatus.OPEN);
         job.setScreeningQuestions(List.of());
+        var planRound = new JobEvaluationPlanRound();
+        planRound.setPlanVersion(2);
+        job.setEvaluationPlanRounds(List.of(planRound));
         when(positions.findForApplication("job")).thenReturn(Optional.of(job));
         request.setFirstName("Ada");
         request.setLastName("Lovelace");
@@ -79,7 +84,21 @@ class CandidatePipelineApplicationTest {
         stage.setRoundType(RecruitmentPipelineRoundType.APPLIED);
         when(stages.findByJobPositionIdOrderByOrderAsc(5L)).thenReturn(List.of(stage));
         service.submit("job", request, new MockMultipartFile("resume", "resume.pdf", "application/pdf", new byte[] {1}));
-        verify(applications).saveAndFlush(argThat(application -> application.getRecruitmentPipelineStage().equals(10L)));
+        verify(applications).saveAndFlush(argThat(application -> application.getRecruitmentPipelineStage().equals(10L)
+                && Integer.valueOf(2).equals(application.getEvaluationPlanVersion())));
+    }
+
+    @Test
+    void rejectsApplicationWhenEvaluationPlanHasNoVersion() {
+        var stage = new JobRecruitmentPipelineRound();
+        stage.setId(10L);
+        stage.setRoundType(RecruitmentPipelineRoundType.APPLIED);
+        when(stages.findByJobPositionIdOrderByOrderAsc(5L)).thenReturn(List.of(stage));
+        positions.findForApplication("job").orElseThrow().getEvaluationPlanRounds().get(0).setPlanVersion(null);
+
+        assertThrows(InternalServerException.class,
+                () -> service.submit("job", request, new MockMultipartFile("resume", "resume.pdf", "application/pdf", new byte[] {1})));
+        verify(applications, never()).saveAndFlush(any());
     }
 
     @Test
@@ -93,15 +112,15 @@ class CandidatePipelineApplicationTest {
 
     @Test
     void enforcesConfiguredResumeSizeLimit() {
-        ReflectionTestUtils.setField(service, "maxResumeSizeBytes", 2L);
         var stage = new JobRecruitmentPipelineRound();
         stage.setRoundType(RecruitmentPipelineRoundType.APPLIED);
         when(stages.findByJobPositionIdOrderByOrderAsc(5L)).thenReturn(List.of(stage));
-        var tooLarge = new MockMultipartFile("resume", "resume.pdf", "application/pdf", new byte[] {1, 2, 3});
+        int limit = 5 * 1024 * 1024;
+        var tooLarge = new MockMultipartFile("resume", "resume.pdf", "application/pdf", new byte[limit + 1]);
         assertThrows(CustomException.class, () -> service.submit("job", request, tooLarge));
         verify(applications, never()).saveAndFlush(any());
 
-        var atLimit = new MockMultipartFile("resume", "resume.pdf", "application/pdf", new byte[] {1, 2});
+        var atLimit = new MockMultipartFile("resume", "resume.pdf", "application/pdf", new byte[limit]);
         service.submit("job", request, atLimit);
         verify(applications).saveAndFlush(any(JobApplication.class));
     }

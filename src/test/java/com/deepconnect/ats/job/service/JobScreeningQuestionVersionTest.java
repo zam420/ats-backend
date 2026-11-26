@@ -17,7 +17,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.deepconnect.ats.auth.dto.LoggedInUserDetails;
-import com.deepconnect.ats.candidatepipeline.service.CandidateEvaluationPlanImpact;
 import com.deepconnect.ats.common.service.EnumsResService;
 import com.deepconnect.ats.evaluationplan.dto.EvaluationPlanRoundReqRes;
 import com.deepconnect.ats.evaluationplan.enums.EvaluationPlanRoundType;
@@ -47,7 +46,7 @@ class JobScreeningQuestionVersionTest {
             mock(JobPositionAccessService.class), mock(ScreeningQuestionsFormService.class),
             mock(JobApplicationService.class), mock(UserServiceV2.class), mock(EnumsResService.class),
             positions, mock(JobEvaluationPlanRoundRepository.class), mock(JobRecruitmentPipelineRoundRepository.class),
-            questions, mock(JobApplicationRepository.class), mock(CandidateEvaluationPlanImpact.class));
+            questions, mock(JobApplicationRepository.class));
     private final JobPosition job = new JobPosition();
     private final JobPositionReq request = new JobPositionReq();
     private final List<JobScreeningQuestion> savedQuestions = new ArrayList<>();

@@ -14,6 +14,7 @@ import com.deepconnect.ats.candidatepipeline.enums.CandidateEvaluationStatus;
 import com.deepconnect.ats.candidatepipeline.model.CandidateEvaluationRound;
 import com.deepconnect.ats.candidatepipeline.service.CandidateEvaluationWorkflow;
 import com.deepconnect.ats.common.exception.CustomException;
+import com.deepconnect.ats.common.exception.InternalServerException;
 import com.deepconnect.ats.evaluationplan.enums.EvaluationPlanRoundType;
 import com.deepconnect.ats.job.model.JobEvaluationPlanRound;
 import com.deepconnect.ats.jobapplication.model.JobApplication;
@@ -30,12 +31,31 @@ class CandidateEvaluationWorkflowTest {
         JobEvaluationPlanRound round = new JobEvaluationPlanRound();
         round.setId(id);
         round.setJobPositionId(5L);
-        round.setLineageId("lineage" + id);
         round.setOrder(order);
         round.setName("Round " + id);
         round.setRoundType(EvaluationPlanRoundType.HR);
         round.setInterviewers(new ArrayList<>(List.of("interviewer")));
         return round;
+    }
+
+    @Test
+    void initializesFromArchivedPlanRounds() {
+        JobApplication application = application();
+        JobEvaluationPlanRound archived = template(10, 0);
+        archived.setActive(false);
+
+        List<CandidateEvaluationRound> rounds = CandidateEvaluationWorkflow.initialize(application, List.of(archived), List.of());
+
+        assertTrue(application.isEvaluationsInitialized());
+        assertEquals(10L, rounds.get(0).getPlanRoundId());
+        assertEquals("Round 10", rounds.get(0).getName());
+        assertEquals(CandidateEvaluationStatus.PENDING, rounds.get(0).getStatus());
+    }
+
+    @Test
+    void rejectsDuplicatePlanRoundIds() {
+        assertThrows(InternalServerException.class, () -> CandidateEvaluationWorkflow.initialize(application(),
+                List.of(template(10, 0), template(10, 1)), List.of()));
     }
 
     @Test

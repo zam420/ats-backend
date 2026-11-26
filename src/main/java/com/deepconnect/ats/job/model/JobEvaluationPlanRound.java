@@ -5,8 +5,6 @@ import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.List;
 
@@ -34,13 +32,8 @@ public class JobEvaluationPlanRound extends EvaluationPlanRoundBase {
     @Builder.Default
     private Boolean active = true;
 
-    @JsonIgnore
-    @Column(name = "lineage_id", nullable = false, length = 12)
-    private String lineageId;
-
-    @Transient
-    @JsonProperty("source_id")
-    private String sourcePublicId;
+    @Column(name = "plan_version")
+    private Integer planVersion;
 
     protected JobEvaluationPlanRound(EvaluationPlanRoundReqRes dto, Long jobPositionId, Boolean active) {
         super(dto);

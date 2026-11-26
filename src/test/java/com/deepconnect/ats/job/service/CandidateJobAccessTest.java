@@ -36,8 +36,7 @@ class CandidateJobAccessTest {
         mock(ScreeningQuestionsFormService.class), mock(JobApplicationService.class),
         mock(UserServiceV2.class), mock(EnumsResService.class),
         positions, mock(JobEvaluationPlanRoundRepository.class), mock(JobRecruitmentPipelineRoundRepository.class), 
-        mock(JobScreeningQuestionRepository.class), mock(JobApplicationRepository.class),
-        mock(com.deepconnect.ats.candidatepipeline.service.CandidateEvaluationPlanImpact.class)
+        mock(JobScreeningQuestionRepository.class), mock(JobApplicationRepository.class)
         );
 
     @AfterEach

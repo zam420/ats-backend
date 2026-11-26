@@ -29,6 +29,7 @@ import com.deepconnect.ats.common.exception.InternalServerException;
 import com.deepconnect.ats.job.model.JobPosition;
 import com.deepconnect.ats.job.model.JobRecruitmentPipelineRound;
 import com.deepconnect.ats.job.repo.JobPositionRepository;
+import com.deepconnect.ats.job.repo.JobEvaluationPlanRoundRepository;
 import com.deepconnect.ats.job.repo.JobRecruitmentPipelineRoundRepository;
 import com.deepconnect.ats.job.service.JobPositionAccessService;
 import com.deepconnect.ats.jobapplication.model.JobApplication;
@@ -46,7 +47,8 @@ class CandidatePipelineServiceTest {
     private final JobPositionAccessService access = mock(JobPositionAccessService.class);
     private final CandidateEvaluationService evaluations = mock(CandidateEvaluationService.class);
     private final CandidateEvaluationRoundRepository evaluationRounds = mock(CandidateEvaluationRoundRepository.class);
-    private final CandidatePipelineService service = new CandidatePipelineService(positions, stages, applications, access, evaluations, evaluationRounds);
+    private final JobEvaluationPlanRoundRepository evaluationPlans = mock(JobEvaluationPlanRoundRepository.class);
+    private final CandidatePipelineService service = new CandidatePipelineService(positions, stages, applications, access,         evaluations, evaluationRounds, evaluationPlans);
     private final JobApplication application = new JobApplication();
 
     @BeforeEach
@@ -99,12 +101,30 @@ class CandidatePipelineServiceTest {
         var evaluating = stage(11L, "evaluating");
         evaluating.setRoundType(RecruitmentPipelineRoundType.EVALUATING);
         when(stages.findByJobPositionIdOrderByOrderAsc(5L)).thenReturn(List.of(a, evaluating));
-        var job = positions.findForUpdate("job", 2L).orElseThrow();
-        var plan = List.of(new com.deepconnect.ats.job.model.JobEvaluationPlanRound());
-        job.setEvaluationPlanRounds(plan);
+        application.setEvaluationPlanVersion(1);
+        var oldRound = new com.deepconnect.ats.job.model.JobEvaluationPlanRound();
+        oldRound.setActive(false);
+        var plan = List.of(oldRound);
+        var currentRound = new com.deepconnect.ats.job.model.JobEvaluationPlanRound();
+        currentRound.setPlanVersion(2);
+        positions.findForUpdate("job", 2L).orElseThrow().setEvaluationPlanRounds(List.of(currentRound));
+        when(evaluationPlans.findByJobPositionIdAndPlanVersionOrderByOrderAsc(5L, 1)).thenReturn(plan);
         service.move("job", "candidate", new MoveCandidateReq("a", "evaluating"));
         verify(evaluations).initializeLocked(application, plan);
         assertEquals(11L, application.getRecruitmentPipelineStage());
+    }
+
+    @Test
+    void rejectsMovingIntoEvaluationsWhenApplicationVersionIsUnknown() {
+        var a = stage(10L, "a");
+        var evaluating = stage(11L, "evaluating");
+        evaluating.setRoundType(RecruitmentPipelineRoundType.EVALUATING);
+        when(stages.findByJobPositionIdOrderByOrderAsc(5L)).thenReturn(List.of(a, evaluating));
+
+        assertThrows(InternalServerException.class,
+                () -> service.move("job", "candidate", new MoveCandidateReq("a", "evaluating")));
+        verify(evaluations, never()).initializeLocked(any(), any());
+        assertEquals(10L, application.getRecruitmentPipelineStage());
     }
 
     @Test

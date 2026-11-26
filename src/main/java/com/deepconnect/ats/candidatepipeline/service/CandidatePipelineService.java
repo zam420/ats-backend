@@ -29,6 +29,7 @@ import com.deepconnect.ats.job.dto.JobPositionCandidatePipelineRes;
 import com.deepconnect.ats.job.model.JobPosition;
 import com.deepconnect.ats.job.model.JobRecruitmentPipelineRound;
 import com.deepconnect.ats.job.repo.JobPositionRepository;
+import com.deepconnect.ats.job.repo.JobEvaluationPlanRoundRepository;
 import com.deepconnect.ats.job.repo.JobRecruitmentPipelineRoundRepository;
 import com.deepconnect.ats.job.service.JobPositionAccessService;
 import com.deepconnect.ats.jobapplication.model.JobApplication;
@@ -47,6 +48,7 @@ public class CandidatePipelineService {
     private final JobPositionAccessService access;
     private final CandidateEvaluationService evaluations;
     private final CandidateEvaluationRoundRepository evaluationRounds;
+    private final JobEvaluationPlanRoundRepository evaluationPlans;
 
     @Transactional(readOnly = true)
     public List<JobPositionCandidatePipelineRes> jobs() {
@@ -128,7 +130,11 @@ public class CandidatePipelineService {
                     requireDecision(application, CandidateEvaluationDecision.PASSED);
                 }
                 if (to.getRoundType() == RecruitmentPipelineRoundType.EVALUATING) {
-                    evaluations.initializeLocked(application, job.getEvaluationPlanRounds());
+                    if (application.getEvaluationPlanVersion() == null) {
+                        throw new InternalServerException("Application has no evaluation plan version");
+                    }
+                    evaluations.initializeLocked(application, evaluationPlans.findByJobPositionIdAndPlanVersionOrderByOrderAsc(
+                            job.getId(), application.getEvaluationPlanVersion()));
                 }
                 application.setRecruitmentPipelineStage(to.getId());
                 applications.save(application);
