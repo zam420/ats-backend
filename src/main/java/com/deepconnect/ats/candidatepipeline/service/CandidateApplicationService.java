@@ -21,9 +21,9 @@ import com.deepconnect.ats.common.exception.CustomException;
 import com.deepconnect.ats.common.exception.InternalServerException;
 import com.deepconnect.ats.job.model.JobPosition;
 import com.deepconnect.ats.job.model.JobScreeningQuestion;
-import com.deepconnect.ats.job.repo.JobPositionRepository;
 import com.deepconnect.ats.job.repo.JobScreeningQuestionRepository;
 import com.deepconnect.ats.job.service.JobPositionAccessService;
+import com.deepconnect.ats.job.service.JobPositionService;
 import com.deepconnect.ats.jobapplication.model.JobApplication;
 import com.deepconnect.ats.jobapplication.model.JobApplicationScreeningQuestionAnswer;
 import com.deepconnect.ats.jobapplication.repo.JobApplicationAnswerRepository;
@@ -36,18 +36,18 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 @Slf4j
 public class CandidateApplicationService {
-    private final JobPositionRepository positions;
     private final JobApplicationRepository applications;
     private final JobApplicationAnswerRepository answers;
     private final JobScreeningQuestionRepository questions;
-    private final JobPositionAccessService access;
+    
+    private final JobPositionAccessService jobPositionAccessService;
 
     @Value("${ats.storage.root:./uploads}")
     private String storageRoot;
 
     @Transactional(readOnly = true)
-    public CandidateApplicationRes get(String jobId, String candidateId) {
-        Context context = authorizedContext(jobId, candidateId);
+    public CandidateApplicationRes get(String candidateId) {
+        Context context = authorizedContext(candidateId);
         List<JobApplicationScreeningQuestionAnswer> records = answers.findByJobApplicationId(context.application().getId());
         Map<Long, JobScreeningQuestion> byId = questions.findByJobPositionIdOrderByIdAsc(context.job().getId()).stream()
                 .collect(Collectors.toMap(JobScreeningQuestion::getId, Function.identity()));
@@ -63,12 +63,12 @@ public class CandidateApplicationService {
                 .map(answer -> new CandidateApplicationRes.Answer(
                         byId.get(answer.getJobScreeningQuestionId()).getLabel(), List.copyOf(answer.getAnswer())))
                 .toList();
-        return CandidateApplicationRes.from(context.application(), context.job().getTitle(), result);
+        return CandidateApplicationRes.from(context.application(), context.job().getPublicId(), context.job().getTitle(), result);
     }
 
     @Transactional(readOnly = true)
-    public Resume resume(String jobId, String candidateId) {
-        JobApplication application = authorizedContext(jobId, candidateId).application();
+    public Resume resume(String candidateId) {
+        JobApplication application = authorizedContext(candidateId).application();
         String stored = application.getResumePath();
         String filename = application.getResumeName();
         if (stored == null || !stored.matches("job-jobApplicationRepository/[0-9a-fA-F-]{36}\\.(pdf|doc|docx)")
@@ -89,13 +89,12 @@ public class CandidateApplicationService {
         }
     }
 
-    private Context authorizedContext(String jobId, String candidateId) {
+    private Context authorizedContext(String candidateId) {
         var user = AuthService.getLoggedInUser();
-        JobPosition job = positions.findByPublicIdAndTenantIdAndDeactivatedFalse(jobId, user.getTenantId())
-                .orElseThrow(() -> new InternalServerException("Job position not found"));
-        access.assertReadAccess(user, job);
-        JobApplication application = applications.findByPublicIdAndJobPositionId(candidateId, job.getId())
+        JobApplication application = applications.findForCandidateDetail(candidateId, user.getTenantId())
                 .orElseThrow(() -> new CustomException(CustomExceptionType.JOB_PIPELINE_STALE));
+        JobPosition job = application.getJobPosition();
+        jobPositionAccessService.assertReadAccess(AuthService.getLoggedInUser(), job);
         return new Context(job, application);
     }
 

@@ -22,7 +22,6 @@ import com.deepconnect.ats.common.exception.CustomException;
 import com.deepconnect.ats.common.exception.InternalServerException;
 import com.deepconnect.ats.job.model.JobPosition;
 import com.deepconnect.ats.job.model.JobScreeningQuestion;
-import com.deepconnect.ats.job.repo.JobPositionRepository;
 import com.deepconnect.ats.job.repo.JobScreeningQuestionRepository;
 import com.deepconnect.ats.job.service.JobPositionAccessService;
 import com.deepconnect.ats.jobapplication.model.JobApplication;
@@ -34,12 +33,12 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 
 class CandidateApplicationServiceTest {
     @TempDir Path root;
-    private final JobPositionRepository positions = mock(JobPositionRepository.class);
+    private final JobPositionAccessService jobPositionAccessService = mock(JobPositionAccessService.class);
     private final JobApplicationRepository applications = mock(JobApplicationRepository.class);
     private final JobApplicationAnswerRepository answers = mock(JobApplicationAnswerRepository.class);
     private final JobScreeningQuestionRepository questions = mock(JobScreeningQuestionRepository.class);
     private final CandidateApplicationService service = new CandidateApplicationService(
-            positions, applications, answers, questions, new JobPositionAccessService());
+            applications, answers, questions, jobPositionAccessService);
     private final JobApplication application = new JobApplication();
 
     @BeforeEach
@@ -48,17 +47,18 @@ class CandidateApplicationServiceTest {
         ReflectionTestUtils.setField(service, "storageRoot", root.toString());
         var job = new JobPosition();
         job.setId(5L);
+        job.setPublicId("job");
         job.setTenantId(2L);
         job.setTitle("Engineer");
         job.setRecruiters(List.of("recruiter"));
         job.setHiringManagers(List.of("manager"));
         application.setId(7L);
+        application.setJobPosition(job);
         application.setPublicId("candidate");
         application.setEmail("candidate@example.com");
         application.setResumePath("job-jobApplicationRepository/12345678-1234-1234-1234-123456789abc.pdf");
         application.setResumeName("CV.pdf");
-        when(positions.findByPublicIdAndTenantIdAndDeactivatedFalse("job", 2L)).thenReturn(Optional.of(job));
-        when(applications.findByPublicIdAndJobPositionId("candidate", 5L)).thenReturn(Optional.of(application));
+        when(applications.findForCandidateDetail("candidate", 2L)).thenReturn(Optional.of(application));
     }
 
     private void login(String id) {
@@ -84,8 +84,10 @@ class CandidateApplicationServiceTest {
         answer.setAnswer(List.of("Answer"));
         when(questions.findByJobPositionIdOrderByIdAsc(5L)).thenReturn(List.of(question));
         when(answers.findByJobApplicationId(7L)).thenReturn(List.of(answer));
-        var result = service.get("job", "candidate");
+        var result = service.get("candidate");
         assertEquals("Engineer", result.jobTitle());
+        assertEquals("job", result.jobId());
+        verify(jobPositionAccessService).assertReadAccess(any(LoggedInUserDetails.class), eq(application.getJobPosition()));
         assertEquals("Previous question", result.answers().get(0).question());
         assertEquals(List.of("Answer"), result.answers().get(0).values());
         assertEquals("CV.pdf", result.resumeName());
@@ -94,17 +96,23 @@ class CandidateApplicationServiceTest {
         assertFalse(json.has("resume_path"));
         assertFalse(json.has("candidate_user_id"));
         when(questions.findByJobPositionIdOrderByIdAsc(5L)).thenReturn(List.of());
-        assertThrows(InternalServerException.class, () -> service.get("job", "candidate"));
+        assertThrows(InternalServerException.class, () -> service.get("candidate"));
     }
 
     @Test
-    void checksJobAccessAndCandidateMembershipBeforeReadingPrivateData() {
-        login("stranger");
-        assertThrows(InternalServerException.class, () -> service.get("job", "candidate"));
-        assertThrows(InternalServerException.class, () -> service.resume("job", "candidate"));
+    void checksTenantAndJobAccessBeforeReadingPrivateData() {
+        doThrow(new InternalServerException("Access denied")).when(jobPositionAccessService)
+                .assertReadAccess(any(LoggedInUserDetails.class), eq(application.getJobPosition()));
+        assertThrows(InternalServerException.class, () -> service.get("candidate"));
+        assertThrows(InternalServerException.class, () -> service.resume("candidate"));
         verifyNoInteractions(answers, questions);
-        login("recruiter");
-        assertThrows(CustomException.class, () -> service.get("job", "other"));
+        assertThrows(CustomException.class, () -> service.get("other"));
+        var otherTenant = new LoggedInUserDetails(3L, 1L, "recruiter", "user@example.com", "user name", false, false, List.of());
+        SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(otherTenant, null, List.of()));
+        assertThrows(CustomException.class, () -> service.get("candidate"));
+        verify(applications).findForCandidateDetail("candidate", 3L);
+        verify(jobPositionAccessService, times(2))
+                .assertReadAccess(any(LoggedInUserDetails.class), eq(application.getJobPosition()));
         verifyNoInteractions(answers, questions);
     }
 
@@ -112,11 +120,11 @@ class CandidateApplicationServiceTest {
     void servesOnlyTheStoredResumeWithinTheConfiguredDirectory() throws Exception {
         var folder = Files.createDirectory(root.resolve("job-jobApplicationRepository"));
         var file = Files.write(folder.resolve("12345678-1234-1234-1234-123456789abc.pdf"), new byte[] {1, 2});
-        assertEquals(file.toRealPath(), service.resume("job", "candidate").path());
+        assertEquals(file.toRealPath(), service.resume("candidate").path());
         application.setResumePath("job-jobApplicationRepository/../../secret.pdf");
-        assertThrows(InternalServerException.class, () -> service.resume("job", "candidate"));
+        assertThrows(InternalServerException.class, () -> service.resume("candidate"));
         application.setResumePath("job-jobApplicationRepository/12345678-1234-1234-1234-123456789abc.pdf");
         application.setResumeName("bad\r\nname.pdf");
-        assertThrows(InternalServerException.class, () -> service.resume("job", "candidate"));
+        assertThrows(InternalServerException.class, () -> service.resume("candidate"));
     }
 }

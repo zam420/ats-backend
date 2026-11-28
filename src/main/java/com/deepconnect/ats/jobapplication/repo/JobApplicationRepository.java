@@ -32,6 +32,14 @@ public interface JobApplicationRepository extends JpaRepository<JobApplication, 
 
     Optional<JobApplication> findByPublicIdAndJobPositionId(String publicId, Long jobPositionId);
 
+    @Query("select a from JobApplication a join fetch a.jobPosition j "
+            + "where a.publicId = :publicId and j.tenantId = :tenantId and j.deactivated = false")
+    Optional<JobApplication> findForCandidateDetail(@Param("publicId") String publicId, @Param("tenantId") Long tenantId);
+
+    @Query("select j.publicId from JobApplication a join a.jobPosition j "
+            + "where a.publicId = :publicId and j.tenantId = :tenantId and j.deactivated = false")
+    Optional<String> findJobPublicIdForCandidate(@Param("publicId") String publicId, @Param("tenantId") Long tenantId);
+
     @Modifying
     @Query("update JobApplication a set a.recruitmentPipelineStage = null "
             + "where a.closed = true and a.recruitmentPipelineStage in :stageIds")

@@ -35,12 +35,12 @@ class CandidateApplicationControllerTest {
     void resumeIsAnUncacheableAttachment() throws Exception {
         var service = mock(CandidateApplicationService.class);
         Path file = Files.write(root.resolve("resume.pdf"), new byte[] {1, 2, 3});
-        when(service.resume("job", "candidate")).thenReturn(new CandidateApplicationService.Resume(file, "CV.pdf"));
+        when(service.resume("candidate")).thenReturn(new CandidateApplicationService.Resume(file, "CV.pdf"));
         var mvc = MockMvcBuilders.standaloneSetup(new CandidateApplicationController(service)).build();
-        mvc.perform(get("/api/pipeline/job/candidate/candidate"))
+        mvc.perform(get("/api/candidate/candidate"))
                 .andExpect(status().isOk());
-        verify(service).get("job", "candidate");
-        mvc.perform(get("/api/pipeline/job/candidate/candidate/resume"))
+        verify(service).get("candidate");
+        mvc.perform(get("/api/candidate/candidate/resume"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType("application/octet-stream"))
                 .andExpect(content().bytes(new byte[] {1, 2, 3}))

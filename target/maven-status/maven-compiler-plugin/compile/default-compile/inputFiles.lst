@@ -17,8 +17,11 @@ C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\auth\servi
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\auth\service\GoogleAuthService.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\auth\service\LoggedInUserDetailsService.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\auth\service\RefreshTokenService.java
+C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\candidate\controller\CandidateController.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\candidate\dto\CandidateClosureRes.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\candidate\dto\CandidateResBase.java
+C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\candidate\dto\CandidateResMin.java
+C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\candidate\service\CandidateService.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\candidatepipeline\controller\CandidateApplicationController.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\candidatepipeline\controller\CandidateEvaluationController.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\candidatepipeline\controller\CandidatePipelineController.java

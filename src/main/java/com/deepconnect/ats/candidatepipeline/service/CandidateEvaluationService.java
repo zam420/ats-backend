@@ -53,13 +53,11 @@ public class CandidateEvaluationService {
     private final CandidateEvaluationFeedbackRepository feedbacks;
 
     @Transactional
-    public CandidateEvaluationDto.Response get(String jobId, String candidateId) {
+    public CandidateEvaluationDto.Response get(String candidateId) {
         LoggedInUserDetails user = AuthService.getLoggedInUser();
-        JobPosition job = positions.findForUpdate(jobId, user.getTenantId())
-                .orElseThrow(() -> new InternalServerException("Job position not found"));
-        access.assertReadAccess(user, job);
-        JobApplication application = applications.findByPublicIdAndJobPositionId(candidateId, job.getId())
-                .orElseThrow(() -> new CustomException(CustomExceptionType.JOB_PIPELINE_STALE));
+        LockedCandidate candidate = lockCandidate(candidateId);
+        JobPosition job = candidate.job();
+        JobApplication application = candidate.application();
         List<CandidateEvaluationRound> candidateRounds = rounds.findByJobApplicationIdOrderByOrderAsc(application.getId());
         boolean canManage = !application.isClosed() && application.isEvaluationsInitialized() && isEvaluating(job, application);
         if (canManage) advanceScheduledRound(application, candidateRounds);
@@ -90,8 +88,8 @@ public class CandidateEvaluationService {
     }
 
     @Transactional
-    public CandidateEvaluationDto.FeedbackResponse getFeedback(String jobId, String candidateId, String roundId) {
-        Context context = lockContext(jobId, candidateId);
+    public CandidateEvaluationDto.FeedbackResponse getFeedback(String candidateId, String roundId) {
+        Context context = lockContext(candidateId);
         advanceScheduledRound(context.application(), context.rounds());
         CandidateEvaluationRound round = CandidateEvaluationWorkflow.requireFeedbackRound(context.application(),
                 context.rounds(), roundId, AuthService.getLoggedInUser().getPublicId());
@@ -101,14 +99,11 @@ public class CandidateEvaluationService {
     }
 
     @Transactional
-    public CandidateEvaluationDto.FeedbackResponse getSubmittedFeedback(String jobId, String candidateId,
+    public CandidateEvaluationDto.FeedbackResponse getSubmittedFeedback(String candidateId,
             String roundId, String interviewerId) {
-        LoggedInUserDetails user = AuthService.getLoggedInUser();
-        JobPosition job = positions.findForUpdate(jobId, user.getTenantId())
-                .orElseThrow(() -> new InternalServerException("Job position not found"));
-        access.assertReadAccess(user, job);
-        JobApplication application = applications.findByPublicIdAndJobPositionId(candidateId, job.getId())
-                .orElseThrow(() -> new CustomException(CustomExceptionType.JOB_PIPELINE_STALE));
+        LockedCandidate candidate = lockCandidate(candidateId);
+        JobPosition job = candidate.job();
+        JobApplication application = candidate.application();
         if (!application.isClosed() && application.isEvaluationsInitialized() && isEvaluating(job, application)) {
             advanceScheduledRound(application, rounds.findByJobApplicationIdOrderByOrderAsc(application.getId()));
         }
@@ -124,9 +119,9 @@ public class CandidateEvaluationService {
     }
 
     @Transactional
-    public void saveFeedback(String jobId, String candidateId, String roundId,
+    public void saveFeedback(String candidateId, String roundId,
             CandidateEvaluationDto.FeedbackRequest request, boolean submit) {
-        Context context = lockContext(jobId, candidateId);
+        Context context = lockContext(candidateId);
         advanceScheduledRound(context.application(), context.rounds());
         String interviewerId = AuthService.getLoggedInUser().getPublicId();
         CandidateEvaluationRound round = CandidateEvaluationWorkflow.requireFeedbackRound(context.application(),
@@ -178,8 +173,8 @@ public class CandidateEvaluationService {
     }
 
     @Transactional
-    public void recordResult(String jobId, String candidateId, String roundId, CandidateEvaluationResult result) {
-        Context context = lockContext(jobId, candidateId);
+    public void recordResult(String candidateId, String roundId, CandidateEvaluationResult result) {
+        Context context = lockContext(candidateId);
         CandidateEvaluationRound current = CandidateEvaluationWorkflow.currentRound(context.application(), context.rounds());
         if (current != null && current.getStatus() == CandidateEvaluationStatus.CONFLICTING_FEEDBACK
                 && !canResolveConflict(AuthService.getLoggedInUser(), context.job())) {
@@ -189,14 +184,14 @@ public class CandidateEvaluationService {
     }
 
     @Transactional
-    public void changeStatus(String jobId, String candidateId, String roundId, CandidateEvaluationStatus status) {
-        Context context = lockContext(jobId, candidateId);
+    public void changeStatus(String candidateId, String roundId, CandidateEvaluationStatus status) {
+        Context context = lockContext(candidateId);
         rounds.save(CandidateEvaluationWorkflow.changeStatus(context.application(), context.rounds(), roundId, status));
     }
 
     @Transactional
-    public void schedule(String jobId, String candidateId, String roundId, Instant scheduledAt, Integer durationMinutes) {
-        Context context = lockContext(jobId, candidateId);
+    public void schedule(String candidateId, String roundId, Instant scheduledAt, Integer durationMinutes) {
+        Context context = lockContext(candidateId);
         if (durationMinutes == null || durationMinutes <= 0) throw new CustomException(CustomExceptionType.JOB_PIPELINE_STALE);
         CandidateEvaluationRound round = CandidateEvaluationWorkflow.schedule(context.application(), context.rounds(), roundId, scheduledAt);
         round.setDurationMinutes(durationMinutes);
@@ -204,24 +199,24 @@ public class CandidateEvaluationService {
     }
 
     @Transactional
-    public void addRound(String jobId, String candidateId, String name, String description,
+    public void addRound(String candidateId, String name, String description,
             EvaluationPlanRoundType type, List<String> interviewers) {
-        Context context = lockContext(jobId, candidateId);
+        Context context = lockContext(candidateId);
         validateInterviewers(interviewers, context.job().getTenantId());
         rounds.save(CandidateEvaluationWorkflow.addRound(context.application(), context.rounds(), name, description,
                 type, interviewers));
     }
 
     @Transactional
-    public void changeInterviewers(String jobId, String candidateId, String roundId, List<String> interviewers) {
-        Context context = lockContext(jobId, candidateId);
+    public void changeInterviewers(String candidateId, String roundId, List<String> interviewers) {
+        Context context = lockContext(candidateId);
         validateInterviewers(interviewers, context.job().getTenantId());
         rounds.save(CandidateEvaluationWorkflow.changeInterviewers(context.application(), context.rounds(), roundId, interviewers));
     }
 
     @Transactional
-    public void decide(String jobId, String candidateId, CandidateEvaluationDecision decision) {
-        Context context = lockContext(jobId, candidateId);
+    public void decide(String candidateId, CandidateEvaluationDecision decision) {
+        Context context = lockContext(candidateId);
         LoggedInUserDetails user = AuthService.getLoggedInUser();
         if (!canDecide(user, context.job())) {
             throw new InternalServerException("Not sufficient access to decide candidate evaluations");
@@ -239,13 +234,22 @@ public class CandidateEvaluationService {
                 || (job.getHiringManagers() != null && job.getHiringManagers().contains(user.getPublicId()));
     }
 
-    private Context lockContext(String jobId, String candidateId) {
+    private LockedCandidate lockCandidate(String candidateId) {
         LoggedInUserDetails user = AuthService.getLoggedInUser();
+        String jobId = applications.findJobPublicIdForCandidate(candidateId, user.getTenantId())
+                .orElseThrow(() -> new CustomException(CustomExceptionType.JOB_PIPELINE_STALE));
         JobPosition job = positions.findForUpdate(jobId, user.getTenantId())
                 .orElseThrow(() -> new InternalServerException("Job position not found"));
         access.assertReadAccess(user, job);
         JobApplication application = applications.findByPublicIdAndJobPositionId(candidateId, job.getId())
                 .orElseThrow(() -> new CustomException(CustomExceptionType.JOB_PIPELINE_STALE));
+        return new LockedCandidate(job, application);
+    }
+
+    private Context lockContext(String candidateId) {
+        LockedCandidate candidate = lockCandidate(candidateId);
+        JobPosition job = candidate.job();
+        JobApplication application = candidate.application();
         if (application.isClosed() || !isEvaluating(job, application) || !application.isEvaluationsInitialized()) {
             throw new CustomException(CustomExceptionType.JOB_PIPELINE_STALE);
         }
@@ -271,5 +275,6 @@ public class CandidateEvaluationService {
         }
     }
 
+    private record LockedCandidate(JobPosition job, JobApplication application) {}
     private record Context(JobPosition job, JobApplication application, List<CandidateEvaluationRound> rounds) {}
 }

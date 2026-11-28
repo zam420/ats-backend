@@ -23,7 +23,7 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/api/pipeline/{jobId}/candidate/{candidateId}")
+@RequestMapping("/api/candidate/{candidateId}")
 @RequiredArgsConstructor
 @Validated
 @PreAuthorize("hasAuthority('jps')")
@@ -31,15 +31,13 @@ public class CandidateApplicationController {
     private final CandidateApplicationService service;
 
     @GetMapping
-    public ApiResult<CandidateApplicationRes> get(@PathVariable @NotBlank String jobId,
-            @PathVariable @NotBlank String candidateId) {
-        return ApiResult.success(service.get(jobId, candidateId));
+    public ApiResult<CandidateApplicationRes> get(@PathVariable @NotBlank String candidateId) {
+        return ApiResult.success(service.get(candidateId));
     }
 
     @GetMapping("/resume")
-    public ResponseEntity<FileSystemResource> resume(@PathVariable @NotBlank String jobId,
-            @PathVariable @NotBlank String candidateId) {
-        var resume = service.resume(jobId, candidateId);
+    public ResponseEntity<FileSystemResource> resume(@PathVariable @NotBlank String candidateId) {
+        var resume = service.resume(candidateId);
         return ResponseEntity.ok()
                 .contentType(MediaType.APPLICATION_OCTET_STREAM)
                 .cacheControl(CacheControl.noStore())

@@ -27,7 +27,7 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 class CandidateEvaluationControllerTest {
     private final CandidateEvaluationService service = mock(CandidateEvaluationService.class);
     private MockMvc mvc;
-    private final String base = "/api/pipeline/job/candidate/candidate/evaluation";
+    private final String base = "/api/candidate/candidate/evaluation";
 
     @BeforeEach
     void setUp() {
@@ -43,7 +43,22 @@ class CandidateEvaluationControllerTest {
     @Test
     void readsEvaluationsAtSingularPath() throws Exception {
         mvc.perform(get(base)).andExpect(status().isOk());
-        verify(service).get("job", "candidate");
+        verify(service).get("candidate");
+        mvc.perform(get("/api/pipeline/job/candidate/candidate/evaluation")).andExpect(status().isNotFound());
+    }
+
+    @Test
+    void feedbackEndpointsUseCandidateId() throws Exception {
+        mvc.perform(get(base + "/rounds/round/feedback")).andExpect(status().isOk());
+        mvc.perform(get(base + "/rounds/round/feedback/interviewer")).andExpect(status().isOk());
+        mvc.perform(post(base + "/rounds/round/feedback/draft").contentType(MediaType.APPLICATION_JSON)
+                .content("{}")).andExpect(status().isOk());
+        mvc.perform(post(base + "/rounds/round/feedback/submit").contentType(MediaType.APPLICATION_JSON)
+                .content("{\"result\":3}")).andExpect(status().isOk());
+        verify(service).getFeedback("candidate", "round");
+        verify(service).getSubmittedFeedback("candidate", "round", "interviewer");
+        verify(service).saveFeedback(eq("candidate"), eq("round"), any(), eq(false));
+        verify(service).saveFeedback(eq("candidate"), eq("round"), any(), eq(true));
     }
 
     @Test
@@ -51,16 +66,16 @@ class CandidateEvaluationControllerTest {
         mvc.perform(post(base + "/rounds/round/schedule").contentType(MediaType.APPLICATION_JSON)
                 .content("{\"scheduled_at\":\"2026-11-25T10:00:00Z\",\"duration_minutes\":45}"))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.success").value(true));
-        verify(service).schedule("job", "candidate", "round", Instant.parse("2026-11-25T10:00:00Z"), 45);
+        verify(service).schedule("candidate", "round", Instant.parse("2026-11-25T10:00:00Z"), 45);
         mvc.perform(post(base + "/rounds/round/result").contentType(MediaType.APPLICATION_JSON)
                 .content("{\"result\":1}")).andExpect(status().isOk());
-        verify(service).recordResult("job", "candidate", "round", CandidateEvaluationResult.STRONG_NO);
+        verify(service).recordResult("candidate", "round", CandidateEvaluationResult.STRONG_NO);
         mvc.perform(post(base + "/rounds/round/result").contentType(MediaType.APPLICATION_JSON)
                 .content("{\"result\":3}")).andExpect(status().isOk());
-        verify(service).recordResult("job", "candidate", "round", CandidateEvaluationResult.YES);
+        verify(service).recordResult("candidate", "round", CandidateEvaluationResult.YES);
         mvc.perform(post(base + "/rounds/round/result").contentType(MediaType.APPLICATION_JSON)
                 .content("{\"result\":4}")).andExpect(status().isOk());
-        verify(service).recordResult("job", "candidate", "round", CandidateEvaluationResult.NO);
+        verify(service).recordResult("candidate", "round", CandidateEvaluationResult.NO);
     }
 
     @Test
@@ -77,20 +92,20 @@ class CandidateEvaluationControllerTest {
         mvc.perform(post(base + "/rounds").contentType(MediaType.APPLICATION_JSON)
                 .content("{\"name\":\"Extra\", \"round_type\":3, \"interviewers\":[\"user\"]}"))
                 .andExpect(status().isOk());
-        verify(service).addRound("job", "candidate", "Extra", null, EvaluationPlanRoundType.CUSTOM, List.of("user"));
+        verify(service).addRound("candidate", "Extra", null, EvaluationPlanRoundType.CUSTOM, List.of("user"));
     }
 
     @Test
     void statusIdsUseConflictFourAndCompletedFive() throws Exception {
         mvc.perform(post(base + "/rounds/round/status").contentType(MediaType.APPLICATION_JSON)
                 .content("{\"status\":3}")).andExpect(status().isOk());
-        verify(service).changeStatus("job", "candidate", "round", CandidateEvaluationStatus.AWAITING_FEEDBACK);
+        verify(service).changeStatus("candidate", "round", CandidateEvaluationStatus.AWAITING_FEEDBACK);
         mvc.perform(post(base + "/rounds/round/status").contentType(MediaType.APPLICATION_JSON)
                 .content("{\"status\":4}")).andExpect(status().isOk());
-        verify(service).changeStatus("job", "candidate", "round", CandidateEvaluationStatus.CONFLICTING_FEEDBACK);
+        verify(service).changeStatus("candidate", "round", CandidateEvaluationStatus.CONFLICTING_FEEDBACK);
         mvc.perform(post(base + "/rounds/round/status").contentType(MediaType.APPLICATION_JSON)
                 .content("{\"status\":5}")).andExpect(status().isOk());
-        verify(service).changeStatus("job", "candidate", "round", CandidateEvaluationStatus.COMPLETED);
+        verify(service).changeStatus("candidate", "round", CandidateEvaluationStatus.COMPLETED);
         mvc.perform(post(base + "/rounds/round/status").contentType(MediaType.APPLICATION_JSON)
                 .content("{\"status\":2}")).andExpect(status().isBadRequest());
         ObjectMapper mapper = new ObjectMapper();
