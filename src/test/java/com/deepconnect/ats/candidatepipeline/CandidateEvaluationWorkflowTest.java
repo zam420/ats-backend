@@ -98,7 +98,14 @@ class CandidateEvaluationWorkflowTest {
         CandidateEvaluationWorkflow.schedule(application, rounds, "first", time);
         assertEquals(CandidateEvaluationStatus.SCHEDULED, rounds.get(0).getStatus());
         assertEquals(time, rounds.get(0).getScheduledAt());
+        assertNotNull(rounds.get(0).getStatusChangedAt());
         CandidateEvaluationWorkflow.changeStatus(application, rounds, "first", CandidateEvaluationStatus.AWAITING_FEEDBACK);
+        Instant changedAt = rounds.get(0).getStatusChangedAt();
+        assertNotNull(changedAt);
+        CandidateEvaluationWorkflow.changeStatus(application, rounds, "first", CandidateEvaluationStatus.AWAITING_FEEDBACK);
+        assertEquals(changedAt, rounds.get(0).getStatusChangedAt());
+        assertThrows(CustomException.class, () -> CandidateEvaluationWorkflow.changeInterviewers(application, rounds,
+                "first", List.of("new-user")));
         assertThrows(CustomException.class, () -> CandidateEvaluationWorkflow.changeStatus(application, rounds,
                 "second", CandidateEvaluationStatus.IN_PROGRESS));
         assertThrows(CustomException.class, () -> CandidateEvaluationWorkflow.changeStatus(application, rounds,
@@ -139,10 +146,12 @@ class CandidateEvaluationWorkflowTest {
         assertNull(extra.getPlanRoundId());
         assertEquals(1, extra.getOrder());
         assertEquals(CandidateEvaluationStatus.PENDING, extra.getStatus());
-        CandidateEvaluationWorkflow.changeInterviewers(application, rounds, "extra", List.of("new-user"));
-        assertEquals(List.of("new-user"), extra.getInterviewers());
+        assertThrows(CustomException.class, () -> CandidateEvaluationWorkflow.changeInterviewers(application, rounds,
+                "extra", List.of("new-user")));
         CandidateEvaluationWorkflow.recordResult(application, rounds, "first", CandidateEvaluationResult.STRONG_YES);
         assertEquals("extra", CandidateEvaluationWorkflow.currentRound(application, rounds).getPublicId());
+        CandidateEvaluationWorkflow.changeInterviewers(application, rounds, "extra", List.of("new-user"));
+        assertEquals(List.of("new-user"), extra.getInterviewers());
         assertThrows(CustomException.class, () -> CandidateEvaluationWorkflow.changeInterviewers(application, rounds,
                 "first", List.of("new-user")));
         assertThrows(CustomException.class, () -> CandidateEvaluationWorkflow.changeInterviewers(application, rounds,

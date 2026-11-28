@@ -45,6 +45,33 @@ public class CandidateEvaluationController {
         return ApiResult.success(true);
     }
 
+    @GetMapping("/rounds/{roundId}/feedback")
+    public ApiResult<CandidateEvaluationDto.FeedbackResponse> feedback(@PathVariable @NotBlank String jobId,
+            @PathVariable @NotBlank String candidateId, @PathVariable @NotBlank String roundId) {
+        return ApiResult.success(service.getFeedback(jobId, candidateId, roundId));
+    }
+
+    @GetMapping("/rounds/{roundId}/feedback/{interviewerId}")
+    public ApiResult<CandidateEvaluationDto.FeedbackResponse> submittedFeedback(@PathVariable @NotBlank String jobId,
+            @PathVariable @NotBlank String candidateId, @PathVariable @NotBlank String roundId,
+            @PathVariable @NotBlank String interviewerId) {
+        return ApiResult.success(service.getSubmittedFeedback(jobId, candidateId, roundId, interviewerId));
+    }
+
+    @PostMapping("/rounds/{roundId}/feedback/draft")
+    public ApiResult<Boolean> saveFeedbackDraft(@PathVariable @NotBlank String jobId, @PathVariable @NotBlank String candidateId,
+            @PathVariable @NotBlank String roundId, @RequestBody @Valid CandidateEvaluationDto.FeedbackRequest request) {
+        service.saveFeedback(jobId, candidateId, roundId, request, false);
+        return ApiResult.success(true);
+    }
+
+    @PostMapping("/rounds/{roundId}/feedback/submit")
+    public ApiResult<Boolean> submitFeedback(@PathVariable @NotBlank String jobId, @PathVariable @NotBlank String candidateId,
+            @PathVariable @NotBlank String roundId, @RequestBody @Valid CandidateEvaluationDto.FeedbackRequest request) {
+        service.saveFeedback(jobId, candidateId, roundId, request, true);
+        return ApiResult.success(true);
+    }
+
     @PostMapping("/rounds/{roundId}/status")
     public ApiResult<Boolean> status(@PathVariable @NotBlank String jobId, @PathVariable @NotBlank String candidateId,
             @PathVariable @NotBlank String roundId, @RequestBody @Valid CandidateEvaluationDto.StatusRequest request) {
@@ -55,7 +82,7 @@ public class CandidateEvaluationController {
     @PostMapping("/rounds/{roundId}/schedule")
     public ApiResult<Boolean> schedule(@PathVariable @NotBlank String jobId, @PathVariable @NotBlank String candidateId,
             @PathVariable @NotBlank String roundId, @RequestBody @Valid CandidateEvaluationDto.ScheduleRequest request) {
-        service.schedule(jobId, candidateId, roundId, request.scheduledAt(), request.interviewers());
+        service.schedule(jobId, candidateId, roundId, request.scheduledAt(), request.durationMinutes());
         return ApiResult.success(true);
     }
 

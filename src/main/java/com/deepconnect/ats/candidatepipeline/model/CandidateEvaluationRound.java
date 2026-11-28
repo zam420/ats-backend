@@ -71,6 +71,12 @@ public class CandidateEvaluationRound extends BaseEntity {
     @Column(name = "scheduled_at")
     private Instant scheduledAt;
 
+    @Column(name = "duration_minutes")
+    private Integer durationMinutes;
+
+    @Column(name = "status_changed_at")
+    private Instant statusChangedAt;
+
     @AssertTrue
     public boolean isResultConsistent() {
         return (status == CandidateEvaluationStatus.COMPLETED) == (result != null);

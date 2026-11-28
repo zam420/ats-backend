@@ -32,7 +32,9 @@ C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\candidatep
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\candidatepipeline\enums\CandidateEvaluationDecision.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\candidatepipeline\enums\CandidateEvaluationResult.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\candidatepipeline\enums\CandidateEvaluationStatus.java
+C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\candidatepipeline\model\CandidateEvaluationFeedback.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\candidatepipeline\model\CandidateEvaluationRound.java
+C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\candidatepipeline\repo\CandidateEvaluationFeedbackRepository.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\candidatepipeline\repo\CandidateEvaluationRoundRepository.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\candidatepipeline\service\CandidateApplicationService.java
 C:\Work\Espressif\Code\java_backend\src\main\java\com\deepconnect\ats\candidatepipeline\service\CandidateEvaluationService.java

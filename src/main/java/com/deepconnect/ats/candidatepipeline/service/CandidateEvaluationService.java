@@ -1,10 +1,13 @@
 package com.deepconnect.ats.candidatepipeline.service;
 
 import java.time.Instant;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -16,7 +19,9 @@ import com.deepconnect.ats.candidatepipeline.dto.CandidateEvaluationDto;
 import com.deepconnect.ats.candidatepipeline.enums.CandidateEvaluationDecision;
 import com.deepconnect.ats.candidatepipeline.enums.CandidateEvaluationResult;
 import com.deepconnect.ats.candidatepipeline.enums.CandidateEvaluationStatus;
+import com.deepconnect.ats.candidatepipeline.model.CandidateEvaluationFeedback;
 import com.deepconnect.ats.candidatepipeline.model.CandidateEvaluationRound;
+import com.deepconnect.ats.candidatepipeline.repo.CandidateEvaluationFeedbackRepository;
 import com.deepconnect.ats.candidatepipeline.repo.CandidateEvaluationRoundRepository;
 import com.deepconnect.ats.common.enums.CustomExceptionType;
 import com.deepconnect.ats.common.exception.CustomException;
@@ -45,6 +50,7 @@ public class CandidateEvaluationService {
     private final CandidateEvaluationRoundRepository rounds;
     private final JobPositionAccessService access;
     private final UserRepository users;
+    private final CandidateEvaluationFeedbackRepository feedbacks;
 
     @Transactional(readOnly = true)
     public CandidateEvaluationDto.Response get(String jobId, String candidateId) {
@@ -58,9 +64,101 @@ public class CandidateEvaluationService {
         boolean canManage = !application.isClosed() && application.isEvaluationsInitialized() && isEvaluating(job, application);
         List<UserSummary> interviewers = users.findByTenantIdAndDeactivatedFalseAndLockedFalse(job.getTenantId())
                 .stream().map(UserSummary::from).toList();
+        CandidateEvaluationRound current = canManage && application.getEvaluationDecision() == null
+                ? candidateRounds.stream().filter(round -> round.getStatus() != CandidateEvaluationStatus.COMPLETED)
+                        .min(Comparator.comparing(CandidateEvaluationRound::getOrder)).orElse(null)
+                : null;
+        boolean canEnterFeedback = current != null && canGiveFeedback(current, user.getPublicId());
+        List<Long> roundIds = candidateRounds.stream().map(CandidateEvaluationRound::getId).filter(Objects::nonNull).toList();
+        Map<Long, List<CandidateEvaluationDto.SubmittedFeedback>> submitted = roundIds.isEmpty() ? Map.of()
+                : feedbacks.findByCandidateEvaluationRoundIdInAndSubmittedTrue(roundIds).stream()
+                    .collect(Collectors.groupingBy(CandidateEvaluationFeedback::getCandidateEvaluationRoundId,
+                            Collectors.mapping(CandidateEvaluationDto.SubmittedFeedback::from, Collectors.toList())));
         return new CandidateEvaluationDto.Response(application.isEvaluationsInitialized(), application.getEvaluationDecision(),
-                canManage, canDecide(user, job), candidateRounds.stream().map(CandidateEvaluationDto.Round::from).toList(),
-                interviewers);
+                canManage, canDecide(user, job), candidateRounds.stream()
+                        .map(round -> CandidateEvaluationDto.Round.from(round, canEnterFeedback && round == current,
+                                round.getId() == null ? List.of() : submitted.getOrDefault(round.getId(), List.of()))).toList(),
+                interviewers, user.getPublicId());
+    }
+
+    private boolean canGiveFeedback(CandidateEvaluationRound round, String userPublicId) {
+        return userPublicId != null && CandidateEvaluationWorkflow.isFeedbackStatus(round.getStatus())
+                && round.getInterviewers() != null && round.getInterviewers().contains(userPublicId)
+                && feedbacks.findByCandidateEvaluationRoundIdAndInterviewerId(round.getId(), userPublicId)
+                        .map(feedback -> !feedback.isSubmitted()).orElse(true);
+    }
+
+    @Transactional(readOnly = true)
+    public CandidateEvaluationDto.FeedbackResponse getFeedback(String jobId, String candidateId, String roundId) {
+        LoggedInUserDetails user = AuthService.getLoggedInUser();
+        JobPosition job = positions.findByPublicIdAndTenantIdAndDeactivatedFalse(jobId, user.getTenantId())
+                .orElseThrow(() -> new InternalServerException("Job position not found"));
+        access.assertReadAccess(user, job);
+        JobApplication application = applications.findByPublicIdAndJobPositionId(candidateId, job.getId())
+                .orElseThrow(() -> new CustomException(CustomExceptionType.JOB_PIPELINE_STALE));
+        if (!isEvaluating(job, application)) throw new CustomException(CustomExceptionType.JOB_PIPELINE_STALE);
+        CandidateEvaluationRound round = CandidateEvaluationWorkflow.requireFeedbackRound(application,
+                rounds.findByJobApplicationIdOrderByOrderAsc(application.getId()), roundId, user.getPublicId());
+        return CandidateEvaluationDto.FeedbackResponse.from(feedbacks
+                .findByCandidateEvaluationRoundIdAndInterviewerId(round.getId(), user.getPublicId()).orElse(null));
+    }
+
+    @Transactional(readOnly = true)
+    public CandidateEvaluationDto.FeedbackResponse getSubmittedFeedback(String jobId, String candidateId,
+            String roundId, String interviewerId) {
+        LoggedInUserDetails user = AuthService.getLoggedInUser();
+        JobPosition job = positions.findByPublicIdAndTenantIdAndDeactivatedFalse(jobId, user.getTenantId())
+                .orElseThrow(() -> new InternalServerException("Job position not found"));
+        access.assertReadAccess(user, job);
+        JobApplication application = applications.findByPublicIdAndJobPositionId(candidateId, job.getId())
+                .orElseThrow(() -> new CustomException(CustomExceptionType.JOB_PIPELINE_STALE));
+        CandidateEvaluationRound round = rounds.findByPublicIdAndJobApplicationId(roundId, application.getId())
+                .orElseThrow(() -> new CustomException(CustomExceptionType.JOB_PIPELINE_STALE));
+        if (round.getInterviewers() == null || !round.getInterviewers().contains(interviewerId)) {
+            throw new CustomException(CustomExceptionType.JOB_PIPELINE_STALE);
+        }
+        CandidateEvaluationFeedback feedback = feedbacks.findByCandidateEvaluationRoundIdAndInterviewerId(round.getId(), interviewerId)
+                .filter(CandidateEvaluationFeedback::isSubmitted)
+                .orElseThrow(() -> new CustomException(CustomExceptionType.JOB_PIPELINE_STALE));
+        return CandidateEvaluationDto.FeedbackResponse.from(feedback);
+    }
+
+    @Transactional
+    public void saveFeedback(String jobId, String candidateId, String roundId,
+            CandidateEvaluationDto.FeedbackRequest request, boolean submit) {
+        Context context = lockContext(jobId, candidateId);
+        String interviewerId = AuthService.getLoggedInUser().getPublicId();
+        CandidateEvaluationRound round = CandidateEvaluationWorkflow.requireFeedbackRound(context.application(),
+                context.rounds(), roundId, interviewerId);
+        if (request.result() == CandidateEvaluationResult.CANCELLED || (submit && request.result() == null)) {
+            throw new CustomException(CustomExceptionType.JOB_PIPELINE_STALE);
+        }
+        CandidateEvaluationFeedback feedback = feedbacks
+                .findByCandidateEvaluationRoundIdAndInterviewerId(round.getId(), interviewerId)
+                .orElseGet(() -> {
+                    CandidateEvaluationFeedback created = new CandidateEvaluationFeedback();
+                    created.setCandidateEvaluationRoundId(round.getId());
+                    created.setInterviewerId(interviewerId);
+                    return created;
+                });
+        if (feedback.isSubmitted()) throw new CustomException(CustomExceptionType.JOB_PIPELINE_STALE);
+        feedback.setResult(request.result());
+        feedback.setOverallFeedback(blankToNull(request.overallFeedback()));
+        feedback.setStrengths(blankToNull(request.strengths()));
+        feedback.setAreasForImprovement(blankToNull(request.areasForImprovement()));
+        if (submit) {
+            feedback.setSubmitted(true);
+            feedback.setSubmittedAt(Instant.now());
+        }
+        feedbacks.save(feedback);
+        if (submit && CandidateEvaluationWorkflow.completeIfAllSubmitted(round,
+                feedbacks.findByCandidateEvaluationRoundId(round.getId()))) {
+            rounds.save(round);
+        }
+    }
+
+    private static String blankToNull(String value) {
+        return value == null || value.isBlank() ? null : value.trim();
     }
 
     /** Caller must check access and hold the job's write lock. */
@@ -86,11 +184,11 @@ public class CandidateEvaluationService {
     }
 
     @Transactional
-    public void schedule(String jobId, String candidateId, String roundId, Instant scheduledAt, List<String> interviewers) {
+    public void schedule(String jobId, String candidateId, String roundId, Instant scheduledAt, Integer durationMinutes) {
         Context context = lockContext(jobId, candidateId);
-        validateInterviewers(interviewers, context.job().getTenantId());
+        if (durationMinutes == null || durationMinutes <= 0) throw new CustomException(CustomExceptionType.JOB_PIPELINE_STALE);
         CandidateEvaluationRound round = CandidateEvaluationWorkflow.schedule(context.application(), context.rounds(), roundId, scheduledAt);
-        CandidateEvaluationWorkflow.changeInterviewers(context.application(), context.rounds(), roundId, interviewers);
+        round.setDurationMinutes(durationMinutes);
         rounds.save(round);
     }
 

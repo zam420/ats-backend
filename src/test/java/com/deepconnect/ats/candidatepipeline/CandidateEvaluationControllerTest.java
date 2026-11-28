@@ -41,9 +41,9 @@ class CandidateEvaluationControllerTest {
     @Test
     void acceptsSnakeCaseScheduleAndNumericResult() throws Exception {
         mvc.perform(post(base + "/rounds/round/schedule").contentType(MediaType.APPLICATION_JSON)
-                .content("{\"scheduled_at\":\"2026-11-25T10:00:00Z\",\"interviewers\":[\"user\"]}"))
+                .content("{\"scheduled_at\":\"2026-11-25T10:00:00Z\",\"duration_minutes\":45}"))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.success").value(true));
-        verify(service).schedule("job", "candidate", "round", Instant.parse("2026-11-25T10:00:00Z"), List.of("user"));
+        verify(service).schedule("job", "candidate", "round", Instant.parse("2026-11-25T10:00:00Z"), 45);
         mvc.perform(post(base + "/rounds/round/result").contentType(MediaType.APPLICATION_JSON)
                 .content("{\"result\":1}")).andExpect(status().isOk());
         verify(service).recordResult("job", "candidate", "round", CandidateEvaluationResult.STRONG_NO);
@@ -63,7 +63,7 @@ class CandidateEvaluationControllerTest {
         mvc.perform(post(base + "/rounds/round/schedule").contentType(MediaType.APPLICATION_JSON)
                 .content("{}")).andExpect(status().isBadRequest());
         mvc.perform(post(base + "/rounds/round/schedule").contentType(MediaType.APPLICATION_JSON)
-                .content("{\"scheduled_at\":\"2026-11-25T10:00:00Z\",\"interviewers\":[\"\"]}"))
+                .content("{\"scheduled_at\":\"2026-11-25T10:00:00Z\",\"duration_minutes\":0}"))
                 .andExpect(status().isBadRequest());
         verifyNoInteractions(service);
         mvc.perform(post(base + "/rounds").contentType(MediaType.APPLICATION_JSON)

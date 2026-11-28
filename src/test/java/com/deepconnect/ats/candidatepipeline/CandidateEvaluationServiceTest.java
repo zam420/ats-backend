@@ -21,7 +21,9 @@ import com.deepconnect.ats.auth.dto.LoggedInUserDetails;
 import com.deepconnect.ats.candidatepipeline.enums.CandidateEvaluationDecision;
 import com.deepconnect.ats.candidatepipeline.enums.CandidateEvaluationResult;
 import com.deepconnect.ats.candidatepipeline.enums.CandidateEvaluationStatus;
+import com.deepconnect.ats.candidatepipeline.model.CandidateEvaluationFeedback;
 import com.deepconnect.ats.candidatepipeline.model.CandidateEvaluationRound;
+import com.deepconnect.ats.candidatepipeline.repo.CandidateEvaluationFeedbackRepository;
 import com.deepconnect.ats.candidatepipeline.repo.CandidateEvaluationRoundRepository;
 import com.deepconnect.ats.candidatepipeline.service.CandidateEvaluationService;
 import com.deepconnect.ats.common.exception.CustomException;
@@ -46,8 +48,9 @@ class CandidateEvaluationServiceTest {
     private final JobApplicationRepository applications = mock(JobApplicationRepository.class);
     private final CandidateEvaluationRoundRepository rounds = mock(CandidateEvaluationRoundRepository.class);
     private final UserRepository users = mock(UserRepository.class);
+    private final CandidateEvaluationFeedbackRepository feedbacks = mock(CandidateEvaluationFeedbackRepository.class);
     private final CandidateEvaluationService service = new CandidateEvaluationService(positions, stages, applications,
-            rounds, new JobPositionAccessService(), users);
+            rounds, new JobPositionAccessService(), users, feedbacks);
     private final JobPosition job = new JobPosition();
     private final JobApplication application = new JobApplication();
     private final CandidateEvaluationRound round = new CandidateEvaluationRound();
@@ -59,7 +62,7 @@ class CandidateEvaluationServiceTest {
         job.setId(5L);
         job.setTenantId(2L);
         job.setOwnerId(9L);
-        job.setRecruiters(List.of("recruiter"));
+        job.setRecruiters(List.of("recruiter", "outsider", "first", "second"));
         job.setHiringManagers(List.of("manager"));
         application.setId(7L);
         application.setJobPositionId(5L);
@@ -90,7 +93,7 @@ class CandidateEvaluationServiceTest {
 
     @Test
     void recruiterCanScheduleButCannotDecide() {
-        service.schedule("job", "candidate", "round", Instant.parse("2026-11-25T10:00:00Z"), List.of());
+        service.schedule("job", "candidate", "round", Instant.parse("2026-11-25T10:00:00Z"), 45);
         assertEquals(CandidateEvaluationStatus.SCHEDULED, round.getStatus());
         verify(rounds).save(round);
         round.setStatus(CandidateEvaluationStatus.COMPLETED);
@@ -116,6 +119,110 @@ class CandidateEvaluationServiceTest {
         login(3L, "admin", true);
         service.decide("job", "candidate", CandidateEvaluationDecision.PASSED);
         assertEquals(CandidateEvaluationDecision.PASSED, application.getEvaluationDecision());
+    }
+
+    @Test
+    void roundCompletesOnlyAfterEveryInterviewerSubmitsFeedback() {
+        round.setStatus(CandidateEvaluationStatus.AWAITING_FEEDBACK);
+        round.setInterviewers(List.of("first", "second"));
+        List<CandidateEvaluationFeedback> stored = new java.util.ArrayList<>();
+        when(feedbacks.findByCandidateEvaluationRoundIdAndInterviewerId(any(), any())).thenAnswer(call ->
+                stored.stream().filter(item -> item.getInterviewerId().equals(call.getArgument(1))).findFirst());
+        when(feedbacks.findByCandidateEvaluationRoundId(any())).thenReturn(stored);
+        when(feedbacks.save(any())).thenAnswer(call -> {
+            CandidateEvaluationFeedback saved = call.getArgument(0);
+            if (stored.stream().noneMatch(item -> item == saved)) stored.add(saved);
+            return saved;
+        });
+
+        login(1L, "outsider", false);
+        var request = new com.deepconnect.ats.candidatepipeline.dto.CandidateEvaluationDto.FeedbackRequest(
+                CandidateEvaluationResult.STRONG_YES, " good ", null, null);
+        assertThrows(CustomException.class, () -> service.saveFeedback("job", "candidate", "round", request, true));
+
+        login(1L, "first", false);
+        service.saveFeedback("job", "candidate", "round", request, false);
+        assertFalse(stored.get(0).isSubmitted());
+        assertEquals("good", stored.get(0).getOverallFeedback());
+        service.saveFeedback("job", "candidate", "round", request, true);
+        assertEquals(CandidateEvaluationStatus.AWAITING_FEEDBACK, round.getStatus());
+        assertThrows(CustomException.class, () -> service.saveFeedback("job", "candidate", "round", request, true));
+
+        login(2L, "second", false);
+        service.saveFeedback("job", "candidate", "round", new com.deepconnect.ats.candidatepipeline.dto.CandidateEvaluationDto
+                .FeedbackRequest(CandidateEvaluationResult.NO, null, null, null), true);
+        assertEquals(CandidateEvaluationStatus.COMPLETED, round.getStatus());
+        assertEquals(CandidateEvaluationResult.YES, round.getResult());
+        verify(rounds).save(round);
+    }
+
+    @Test
+    void rejectsSubmitWithoutResultAndPendingRounds() {
+        round.setInterviewers(List.of("first"));
+        login(1L, "first", false);
+        var request = new com.deepconnect.ats.candidatepipeline.dto.CandidateEvaluationDto.FeedbackRequest(
+                CandidateEvaluationResult.YES, null, null, null);
+        assertThrows(CustomException.class, () -> service.saveFeedback("job", "candidate", "round", request, true));
+        round.setStatus(CandidateEvaluationStatus.IN_PROGRESS);
+        assertThrows(CustomException.class, () -> service.saveFeedback("job", "candidate", "round", request, true));
+        round.setStatus(CandidateEvaluationStatus.AWAITING_FEEDBACK);
+        assertThrows(CustomException.class, () -> service.saveFeedback("job", "candidate", "round",
+                new com.deepconnect.ats.candidatepipeline.dto.CandidateEvaluationDto.FeedbackRequest(null, null, null, null), true));
+        verify(feedbacks, never()).save(any());
+    }
+
+    @Test
+    void submittedFeedbackIsReadableByJobUsersButDraftsArePrivate() {
+        round.setId(17L);
+        round.setInterviewers(List.of("first", "second"));
+        round.setStatus(CandidateEvaluationStatus.COMPLETED);
+        round.setResult(CandidateEvaluationResult.YES);
+        when(rounds.findByPublicIdAndJobApplicationId("round", 7L)).thenReturn(Optional.of(round));
+        CandidateEvaluationFeedback submitted = new CandidateEvaluationFeedback();
+        submitted.setInterviewerId("first");
+        submitted.setSubmitted(true);
+        submitted.setOverallFeedback("Feedback");
+        CandidateEvaluationFeedback draft = new CandidateEvaluationFeedback();
+        draft.setInterviewerId("second");
+        when(feedbacks.findByCandidateEvaluationRoundIdAndInterviewerId(17L, "first")).thenReturn(Optional.of(submitted));
+        when(feedbacks.findByCandidateEvaluationRoundIdAndInterviewerId(17L, "second")).thenReturn(Optional.of(draft));
+
+        assertEquals("Feedback", service.getSubmittedFeedback("job", "candidate", "round", "first").overallFeedback());
+        assertThrows(CustomException.class, () -> service.getSubmittedFeedback("job", "candidate", "round", "second"));
+        login(3L, "stranger", false);
+        assertThrows(InternalServerException.class,
+                () -> service.getSubmittedFeedback("job", "candidate", "round", "first"));
+    }
+
+    @Test
+    void evaluationResponseIdentifiesSubmittedInterviewersAndOwnFeedbackAction() {
+        round.setId(17L);
+        round.setStatus(CandidateEvaluationStatus.AWAITING_FEEDBACK);
+        round.setInterviewers(List.of("recruiter", "first"));
+        CandidateEvaluationFeedback submitted = new CandidateEvaluationFeedback();
+        submitted.setCandidateEvaluationRoundId(17L);
+        submitted.setInterviewerId("first");
+        submitted.setSubmitted(true);
+        submitted.setResult(CandidateEvaluationResult.STRONG_YES);
+        submitted.setSubmittedAt(Instant.parse("2026-11-25T10:00:00Z"));
+        when(feedbacks.findByCandidateEvaluationRoundIdInAndSubmittedTrue(List.of(17L))).thenReturn(List.of(submitted));
+
+        var response = service.get("job", "candidate");
+        assertEquals("recruiter", response.currentUserId());
+        assertTrue(response.rounds().get(0).canEnterFeedback());
+        assertEquals(List.of("first"), response.rounds().get(0).submittedInterviewers());
+        var feedbackSummary = response.rounds().get(0).submittedFeedback().get(0);
+        assertEquals("first", feedbackSummary.interviewerId());
+        assertEquals(CandidateEvaluationResult.STRONG_YES, feedbackSummary.result());
+        assertEquals(Instant.parse("2026-11-25T10:00:00Z"), feedbackSummary.submittedAt());
+        var json = new ObjectMapper().findAndRegisterModules()
+                .setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE).valueToTree(response);
+        var summaryJson = json.path("rounds").get(0).path("submitted_feedback").get(0);
+        assertEquals("first", summaryJson.path("interviewer_id").asText());
+        assertEquals(0, summaryJson.path("result").asInt());
+        assertTrue(summaryJson.hasNonNull("submitted_at"));
+        round.setStatus(CandidateEvaluationStatus.IN_PROGRESS);
+        assertFalse(service.get("job", "candidate").rounds().get(0).canEnterFeedback());
     }
 
     @Test
@@ -161,18 +268,17 @@ class CandidateEvaluationServiceTest {
     }
 
     @Test
-    void scheduleUpdatesTimeAndInterviewerTogetherAndRejectsForeignUsersBeforeMutation() {
-        User interviewer = new User();
-        interviewer.setPublicId("interviewer");
-        interviewer.setTenantId(2L);
-        when(users.findByPublicIdInAndDeactivatedFalseAndLockedFalse(Set.of("interviewer"))).thenReturn(Set.of(interviewer));
+    void scheduleUpdatesTimeAndDurationWithoutChangingInterviewers() {
+        round.setInterviewers(List.of("interviewer"));
         var time = Instant.parse("2026-11-25T10:00:00Z");
-        service.schedule("job", "candidate", "round", time, List.of("interviewer"));
+        service.schedule("job", "candidate", "round", time, 45);
         assertEquals(time, round.getScheduledAt());
+        assertEquals(45, round.getDurationMinutes());
+        assertNotNull(round.getStatusChangedAt());
         assertEquals(List.of("interviewer"), round.getInterviewers());
         clearInvocations(rounds);
         assertThrows(CustomException.class, () -> service.schedule("job", "candidate", "round",
-                time.plusSeconds(60), List.of("unknown")));
+                time.plusSeconds(60), 0));
         assertEquals(time, round.getScheduledAt());
         assertEquals(List.of("interviewer"), round.getInterviewers());
         verify(rounds, never()).save(any());
