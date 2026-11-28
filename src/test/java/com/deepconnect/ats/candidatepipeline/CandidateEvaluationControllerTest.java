@@ -17,6 +17,7 @@ import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
 import com.deepconnect.ats.candidatepipeline.controller.CandidateEvaluationController;
 import com.deepconnect.ats.candidatepipeline.enums.CandidateEvaluationResult;
+import com.deepconnect.ats.candidatepipeline.enums.CandidateEvaluationStatus;
 import com.deepconnect.ats.candidatepipeline.service.CandidateEvaluationService;
 import com.deepconnect.ats.evaluationplan.enums.EvaluationPlanRoundType;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -70,5 +71,23 @@ class CandidateEvaluationControllerTest {
                 .content("{\"name\":\"Extra\", \"round_type\":3, \"interviewers\":[\"user\"]}"))
                 .andExpect(status().isOk());
         verify(service).addRound("job", "candidate", "Extra", null, EvaluationPlanRoundType.CUSTOM, List.of("user"));
+    }
+
+    @Test
+    void statusIdsUseConflictFourAndCompletedFive() throws Exception {
+        mvc.perform(post(base + "/rounds/round/status").contentType(MediaType.APPLICATION_JSON)
+                .content("{\"status\":3}")).andExpect(status().isOk());
+        verify(service).changeStatus("job", "candidate", "round", CandidateEvaluationStatus.AWAITING_FEEDBACK);
+        mvc.perform(post(base + "/rounds/round/status").contentType(MediaType.APPLICATION_JSON)
+                .content("{\"status\":4}")).andExpect(status().isOk());
+        verify(service).changeStatus("job", "candidate", "round", CandidateEvaluationStatus.CONFLICTING_FEEDBACK);
+        mvc.perform(post(base + "/rounds/round/status").contentType(MediaType.APPLICATION_JSON)
+                .content("{\"status\":5}")).andExpect(status().isOk());
+        verify(service).changeStatus("job", "candidate", "round", CandidateEvaluationStatus.COMPLETED);
+        mvc.perform(post(base + "/rounds/round/status").contentType(MediaType.APPLICATION_JSON)
+                .content("{\"status\":2}")).andExpect(status().isBadRequest());
+        ObjectMapper mapper = new ObjectMapper();
+        org.junit.jupiter.api.Assertions.assertEquals("4", mapper.writeValueAsString(CandidateEvaluationStatus.CONFLICTING_FEEDBACK));
+        org.junit.jupiter.api.Assertions.assertEquals("5", mapper.writeValueAsString(CandidateEvaluationStatus.COMPLETED));
     }
 }

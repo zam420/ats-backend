@@ -52,16 +52,17 @@ public class CandidateEvaluationService {
     private final UserRepository users;
     private final CandidateEvaluationFeedbackRepository feedbacks;
 
-    @Transactional(readOnly = true)
+    @Transactional
     public CandidateEvaluationDto.Response get(String jobId, String candidateId) {
         LoggedInUserDetails user = AuthService.getLoggedInUser();
-        JobPosition job = positions.findByPublicIdAndTenantIdAndDeactivatedFalse(jobId, user.getTenantId())
+        JobPosition job = positions.findForUpdate(jobId, user.getTenantId())
                 .orElseThrow(() -> new InternalServerException("Job position not found"));
         access.assertReadAccess(user, job);
         JobApplication application = applications.findByPublicIdAndJobPositionId(candidateId, job.getId())
                 .orElseThrow(() -> new CustomException(CustomExceptionType.JOB_PIPELINE_STALE));
         List<CandidateEvaluationRound> candidateRounds = rounds.findByJobApplicationIdOrderByOrderAsc(application.getId());
         boolean canManage = !application.isClosed() && application.isEvaluationsInitialized() && isEvaluating(job, application);
+        if (canManage) advanceScheduledRound(application, candidateRounds);
         List<UserSummary> interviewers = users.findByTenantIdAndDeactivatedFalseAndLockedFalse(job.getTenantId())
                 .stream().map(UserSummary::from).toList();
         CandidateEvaluationRound current = canManage && application.getEvaluationDecision() == null
@@ -75,7 +76,7 @@ public class CandidateEvaluationService {
                     .collect(Collectors.groupingBy(CandidateEvaluationFeedback::getCandidateEvaluationRoundId,
                             Collectors.mapping(CandidateEvaluationDto.SubmittedFeedback::from, Collectors.toList())));
         return new CandidateEvaluationDto.Response(application.isEvaluationsInitialized(), application.getEvaluationDecision(),
-                canManage, canDecide(user, job), candidateRounds.stream()
+                canManage, canDecide(user, job), canResolveConflict(user, job), candidateRounds.stream()
                         .map(round -> CandidateEvaluationDto.Round.from(round, canEnterFeedback && round == current,
                                 round.getId() == null ? List.of() : submitted.getOrDefault(round.getId(), List.of()))).toList(),
                 interviewers, user.getPublicId());
@@ -88,30 +89,29 @@ public class CandidateEvaluationService {
                         .map(feedback -> !feedback.isSubmitted()).orElse(true);
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public CandidateEvaluationDto.FeedbackResponse getFeedback(String jobId, String candidateId, String roundId) {
-        LoggedInUserDetails user = AuthService.getLoggedInUser();
-        JobPosition job = positions.findByPublicIdAndTenantIdAndDeactivatedFalse(jobId, user.getTenantId())
-                .orElseThrow(() -> new InternalServerException("Job position not found"));
-        access.assertReadAccess(user, job);
-        JobApplication application = applications.findByPublicIdAndJobPositionId(candidateId, job.getId())
-                .orElseThrow(() -> new CustomException(CustomExceptionType.JOB_PIPELINE_STALE));
-        if (!isEvaluating(job, application)) throw new CustomException(CustomExceptionType.JOB_PIPELINE_STALE);
-        CandidateEvaluationRound round = CandidateEvaluationWorkflow.requireFeedbackRound(application,
-                rounds.findByJobApplicationIdOrderByOrderAsc(application.getId()), roundId, user.getPublicId());
+        Context context = lockContext(jobId, candidateId);
+        advanceScheduledRound(context.application(), context.rounds());
+        CandidateEvaluationRound round = CandidateEvaluationWorkflow.requireFeedbackRound(context.application(),
+                context.rounds(), roundId, AuthService.getLoggedInUser().getPublicId());
+        String interviewerId = AuthService.getLoggedInUser().getPublicId();
         return CandidateEvaluationDto.FeedbackResponse.from(feedbacks
-                .findByCandidateEvaluationRoundIdAndInterviewerId(round.getId(), user.getPublicId()).orElse(null));
+                .findByCandidateEvaluationRoundIdAndInterviewerId(round.getId(), interviewerId).orElse(null));
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public CandidateEvaluationDto.FeedbackResponse getSubmittedFeedback(String jobId, String candidateId,
             String roundId, String interviewerId) {
         LoggedInUserDetails user = AuthService.getLoggedInUser();
-        JobPosition job = positions.findByPublicIdAndTenantIdAndDeactivatedFalse(jobId, user.getTenantId())
+        JobPosition job = positions.findForUpdate(jobId, user.getTenantId())
                 .orElseThrow(() -> new InternalServerException("Job position not found"));
         access.assertReadAccess(user, job);
         JobApplication application = applications.findByPublicIdAndJobPositionId(candidateId, job.getId())
                 .orElseThrow(() -> new CustomException(CustomExceptionType.JOB_PIPELINE_STALE));
+        if (!application.isClosed() && application.isEvaluationsInitialized() && isEvaluating(job, application)) {
+            advanceScheduledRound(application, rounds.findByJobApplicationIdOrderByOrderAsc(application.getId()));
+        }
         CandidateEvaluationRound round = rounds.findByPublicIdAndJobApplicationId(roundId, application.getId())
                 .orElseThrow(() -> new CustomException(CustomExceptionType.JOB_PIPELINE_STALE));
         if (round.getInterviewers() == null || !round.getInterviewers().contains(interviewerId)) {
@@ -127,6 +127,7 @@ public class CandidateEvaluationService {
     public void saveFeedback(String jobId, String candidateId, String roundId,
             CandidateEvaluationDto.FeedbackRequest request, boolean submit) {
         Context context = lockContext(jobId, candidateId);
+        advanceScheduledRound(context.application(), context.rounds());
         String interviewerId = AuthService.getLoggedInUser().getPublicId();
         CandidateEvaluationRound round = CandidateEvaluationWorkflow.requireFeedbackRound(context.application(),
                 context.rounds(), roundId, interviewerId);
@@ -161,6 +162,11 @@ public class CandidateEvaluationService {
         return value == null || value.isBlank() ? null : value.trim();
     }
 
+    private void advanceScheduledRound(JobApplication application, List<CandidateEvaluationRound> candidateRounds) {
+        CandidateEvaluationRound advanced = CandidateEvaluationWorkflow.advanceScheduledRound(application, candidateRounds, Instant.now());
+        if (advanced != null) rounds.save(advanced);
+    }
+
     /** Caller must check access and hold the job's write lock. */
     @Transactional(propagation = Propagation.MANDATORY)
     public void initializeLocked(JobApplication application, List<JobEvaluationPlanRound> plan) {
@@ -174,6 +180,11 @@ public class CandidateEvaluationService {
     @Transactional
     public void recordResult(String jobId, String candidateId, String roundId, CandidateEvaluationResult result) {
         Context context = lockContext(jobId, candidateId);
+        CandidateEvaluationRound current = CandidateEvaluationWorkflow.currentRound(context.application(), context.rounds());
+        if (current != null && current.getStatus() == CandidateEvaluationStatus.CONFLICTING_FEEDBACK
+                && !canResolveConflict(AuthService.getLoggedInUser(), context.job())) {
+            throw new InternalServerException("Not sufficient access to resolve conflicting feedback");
+        }
         rounds.save(CandidateEvaluationWorkflow.recordResult(context.application(), context.rounds(), roundId, result));
     }
 
@@ -220,8 +231,11 @@ public class CandidateEvaluationService {
     }
 
     private boolean canDecide(LoggedInUserDetails user, JobPosition job) {
+        return canResolveConflict(user, job) || user.hasPermission(PermissionType.JOB_POSITION_ADMIN);
+    }
+
+    private boolean canResolveConflict(LoggedInUserDetails user, JobPosition job) {
         return (user.getUserId() != null && Objects.equals(user.getUserId(), job.getOwnerId()))
-                || user.hasPermission(PermissionType.JOB_POSITION_ADMIN)
                 || (job.getHiringManagers() != null && job.getHiringManagers().contains(user.getPublicId()));
     }
 

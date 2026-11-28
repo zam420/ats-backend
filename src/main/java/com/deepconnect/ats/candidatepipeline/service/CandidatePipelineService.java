@@ -1,6 +1,7 @@
 package com.deepconnect.ats.candidatepipeline.service;
 
 import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -62,9 +63,9 @@ public class CandidatePipelineService {
         return JobPositionCandidatePipelineRes.from(jobs);
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public CandidatePipelineRes board(String jobId) {
-        JobPosition job = positions.findByPublicIdAndTenantIdAndDeactivatedFalse(jobId, AuthService.getLoggedInTenantId())
+        JobPosition job = positions.findForUpdate(jobId, AuthService.getLoggedInTenantId())
                 .orElseThrow(() -> new InternalServerException("Job position not found"));
         access.assertReadAccess(AuthService.getLoggedInUser(), job);
         List<JobRecruitmentPipelineRound> rounds = stages.findByJobPositionIdOrderByOrderAsc(job.getId());
@@ -96,6 +97,7 @@ public class CandidatePipelineService {
                 candidatesByRecruitmentPipelineStage.put(round.getId(), new ArrayList<>());
 
         int closedApplicationCount = 0;
+        Instant now = Instant.now();
         for (JobApplication application : candidates) {
             CandidateResBase candidate = CandidateResBase.from(application);
             if (application.isClosed()) {
@@ -115,8 +117,10 @@ public class CandidatePipelineService {
                 throw new InternalServerException("Application references a missing pipeline stage");
 
             if (application.isEvaluationsInitialized() && evaluationStageIds.contains(application.getRecruitmentPipelineStage())) {
-                candidate.setEvaluation(CandidateEvaluationSummary.from(application,
-                        evaluationsByCandidate.getOrDefault(application.getId(), List.of()), jobOwner, interviewerNames));
+                List<CandidateEvaluationRound> candidateRounds = evaluationsByCandidate.getOrDefault(application.getId(), List.of());
+                CandidateEvaluationRound advanced = CandidateEvaluationWorkflow.advanceScheduledRound(application, candidateRounds, now);
+                if (advanced != null) evaluationRounds.save(advanced);
+                candidate.setEvaluation(CandidateEvaluationSummary.from(application, candidateRounds, jobOwner, interviewerNames));
             }
             stageCandidates.add(candidate);
         }

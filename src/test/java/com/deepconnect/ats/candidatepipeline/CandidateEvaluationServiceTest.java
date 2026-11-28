@@ -151,8 +151,8 @@ class CandidateEvaluationServiceTest {
         login(2L, "second", false);
         service.saveFeedback("job", "candidate", "round", new com.deepconnect.ats.candidatepipeline.dto.CandidateEvaluationDto
                 .FeedbackRequest(CandidateEvaluationResult.NO, null, null, null), true);
-        assertEquals(CandidateEvaluationStatus.COMPLETED, round.getStatus());
-        assertEquals(CandidateEvaluationResult.YES, round.getResult());
+        assertEquals(CandidateEvaluationStatus.CONFLICTING_FEEDBACK, round.getStatus());
+        assertNull(round.getResult());
         verify(rounds).save(round);
     }
 
@@ -163,7 +163,7 @@ class CandidateEvaluationServiceTest {
         var request = new com.deepconnect.ats.candidatepipeline.dto.CandidateEvaluationDto.FeedbackRequest(
                 CandidateEvaluationResult.YES, null, null, null);
         assertThrows(CustomException.class, () -> service.saveFeedback("job", "candidate", "round", request, true));
-        round.setStatus(CandidateEvaluationStatus.IN_PROGRESS);
+        round.setStatus(CandidateEvaluationStatus.SCHEDULED);
         assertThrows(CustomException.class, () -> service.saveFeedback("job", "candidate", "round", request, true));
         round.setStatus(CandidateEvaluationStatus.AWAITING_FEEDBACK);
         assertThrows(CustomException.class, () -> service.saveFeedback("job", "candidate", "round",
@@ -221,8 +221,70 @@ class CandidateEvaluationServiceTest {
         assertEquals("first", summaryJson.path("interviewer_id").asText());
         assertEquals(0, summaryJson.path("result").asInt());
         assertTrue(summaryJson.hasNonNull("submitted_at"));
-        round.setStatus(CandidateEvaluationStatus.IN_PROGRESS);
+        round.setStatus(CandidateEvaluationStatus.SCHEDULED);
         assertFalse(service.get("job", "candidate").rounds().get(0).canEnterFeedback());
+    }
+
+    @Test
+    void readingEvaluationsAdvancesAndPersistsAnOverdueCurrentRound() {
+        round.setId(17L);
+        round.setStatus(CandidateEvaluationStatus.SCHEDULED);
+        round.setScheduledAt(Instant.now().minusSeconds(3600));
+        round.setDurationMinutes(60);
+        round.setInterviewers(List.of("recruiter"));
+
+        var response = service.get("job", "candidate");
+        assertEquals(CandidateEvaluationStatus.AWAITING_FEEDBACK, response.rounds().get(0).status());
+        assertTrue(response.rounds().get(0).canEnterFeedback());
+        assertNotNull(round.getStatusChangedAt());
+        verify(rounds).save(round);
+        verify(positions).findForUpdate("job", 2L);
+    }
+
+    @Test
+    void accessingOwnFeedbackAdvancesAnOverdueScheduledRound() {
+        round.setId(17L);
+        round.setStatus(CandidateEvaluationStatus.SCHEDULED);
+        round.setScheduledAt(Instant.now().minusSeconds(1200));
+        round.setDurationMinutes(10);
+        round.setInterviewers(List.of("recruiter"));
+        assertFalse(service.getFeedback("job", "candidate", "round").submitted());
+        assertEquals(CandidateEvaluationStatus.AWAITING_FEEDBACK, round.getStatus());
+        verify(rounds).save(round);
+    }
+
+    @Test
+    void submittingFeedbackDirectlyAdvancesAnOverdueScheduledRound() {
+        round.setId(17L);
+        round.setStatus(CandidateEvaluationStatus.SCHEDULED);
+        round.setScheduledAt(Instant.now().minusSeconds(1200));
+        round.setDurationMinutes(10);
+        round.setInterviewers(List.of("recruiter"));
+        CandidateEvaluationFeedback submitted = new CandidateEvaluationFeedback();
+        submitted.setInterviewerId("recruiter");
+        submitted.setSubmitted(true);
+        submitted.setResult(CandidateEvaluationResult.YES);
+        when(feedbacks.findByCandidateEvaluationRoundId(17L)).thenReturn(List.of(submitted));
+        service.saveFeedback("job", "candidate", "round",
+                new com.deepconnect.ats.candidatepipeline.dto.CandidateEvaluationDto.FeedbackRequest(
+                        CandidateEvaluationResult.YES, null, null, null), true);
+        assertEquals(CandidateEvaluationStatus.COMPLETED, round.getStatus());
+        assertEquals(CandidateEvaluationResult.YES, round.getResult());
+        verify(rounds, times(2)).save(round);
+    }
+
+    @Test
+    void readingClosedOrNonEvaluatingApplicationDoesNotAdvanceRound() {
+        round.setStatus(CandidateEvaluationStatus.SCHEDULED);
+        round.setScheduledAt(Instant.now().minusSeconds(3600));
+        round.setDurationMinutes(30);
+        application.setClosed(true);
+        service.get("job", "candidate");
+        application.setClosed(false);
+        stage.setRoundType(RecruitmentPipelineRoundType.SCREENING);
+        service.get("job", "candidate");
+        assertEquals(CandidateEvaluationStatus.SCHEDULED, round.getStatus());
+        verify(rounds, never()).save(any());
     }
 
     @Test
@@ -242,6 +304,31 @@ class CandidateEvaluationServiceTest {
         assertThrows(CustomException.class,
                 () -> service.recordResult("job", "candidate", "round", CandidateEvaluationResult.STRONG_YES));
         verify(rounds, never()).save(any());
+    }
+
+    @Test
+    void onlyOwnerOrHiringManagerCanResolveConflictingFeedback() {
+        round.setStatus(CandidateEvaluationStatus.CONFLICTING_FEEDBACK);
+        assertFalse(service.get("job", "candidate").canResolveConflict());
+        assertThrows(InternalServerException.class,
+                () -> service.recordResult("job", "candidate", "round", CandidateEvaluationResult.YES));
+        login(3L, "admin", true);
+        assertTrue(service.get("job", "candidate").canDecide());
+        assertFalse(service.get("job", "candidate").canResolveConflict());
+        assertThrows(InternalServerException.class,
+                () -> service.recordResult("job", "candidate", "round", CandidateEvaluationResult.YES));
+        verify(rounds, never()).save(any());
+        login(2L, "manager", false);
+        assertTrue(service.get("job", "candidate").canResolveConflict());
+        service.recordResult("job", "candidate", "round", CandidateEvaluationResult.YES);
+        assertEquals(CandidateEvaluationStatus.COMPLETED, round.getStatus());
+        assertEquals(CandidateEvaluationResult.YES, round.getResult());
+        round.setResult(null);
+        round.setStatus(CandidateEvaluationStatus.CONFLICTING_FEEDBACK);
+        login(9L, "owner", false);
+        assertTrue(service.get("job", "candidate").canResolveConflict());
+        service.recordResult("job", "candidate", "round", CandidateEvaluationResult.NO);
+        assertEquals(CandidateEvaluationResult.NO, round.getResult());
     }
 
     @Test

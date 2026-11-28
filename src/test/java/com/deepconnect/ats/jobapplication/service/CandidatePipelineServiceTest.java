@@ -183,7 +183,7 @@ class CandidatePipelineServiceTest {
         owner.setFirstName("Job");
         owner.setLastName("Owner");
         when(users.findById(20L)).thenReturn(Optional.of(owner));
-        when(positions.findByPublicIdAndTenantIdAndDeactivatedFalse("job", 2L)).thenReturn(Optional.of(job));
+        when(positions.findForUpdate("job", 2L)).thenReturn(Optional.of(job));
         var stage = stage(10L, "a");
         stage.setRoundType(RecruitmentPipelineRoundType.EVALUATING);
         when(stages.findByJobPositionIdOrderByOrderAsc(5L)).thenReturn(List.of(stage));
@@ -229,6 +229,11 @@ class CandidatePipelineServiceTest {
         assertEquals(0, json.path("round_results").get(0).path("result").asInt());
         assertEquals("Final", json.path("round_results").get(1).path("name").asText());
         assertTrue(json.path("round_results").get(1).path("result").isNull());
+        last.setScheduledAt(java.time.Instant.now().minusSeconds(3600));
+        last.setDurationMinutes(60);
+        summary = service.board("job").getStages().get(0).getCandidates().get(0).getEvaluation();
+        assertEquals(CandidateEvaluationStatus.AWAITING_FEEDBACK, summary.currentStatus());
+        verify(evaluationRounds).save(last);
         last.setStatus(CandidateEvaluationStatus.PENDING);
         summary = service.board("job").getStages().get(0).getCandidates().get(0).getEvaluation();
         assertEquals(List.of("Job Owner"), summary.currentOwners());
@@ -270,7 +275,7 @@ class CandidatePipelineServiceTest {
         JobPosition job = new JobPosition();
         job.setId(5L);
         job.setPublicId("job");
-        when(positions.findByPublicIdAndTenantIdAndDeactivatedFalse("job", 2L)).thenReturn(Optional.of(job));
+        when(positions.findForUpdate("job", 2L)).thenReturn(Optional.of(job));
         JobApplication rejected = new JobApplication();
         rejected.setClosed(true);
         rejected.setApplicationCloseType(JobApplicationCloseType.REJECTED);
@@ -307,7 +312,7 @@ class CandidatePipelineServiceTest {
     void doesNotMisclassifyOtherClosureTypesAsRejections() {
         JobPosition job = new JobPosition();
         job.setId(5L);
-        when(positions.findByPublicIdAndTenantIdAndDeactivatedFalse("job", 2L)).thenReturn(Optional.of(job));
+        when(positions.findForUpdate("job", 2L)).thenReturn(Optional.of(job));
         application.setClosed(true);
         application.setApplicationCloseType(JobApplicationCloseType.OFFER_CANCELLED);
         when(applications.findByJobPositionIdOrderByCreatedAtDesc(5L)).thenReturn(List.of(application));
@@ -327,7 +332,7 @@ class CandidatePipelineServiceTest {
         JobPosition job = new JobPosition();
         job.setId(5L);
         job.setPublicId("job");
-        when(positions.findByPublicIdAndTenantIdAndDeactivatedFalse("job", 2L)).thenReturn(Optional.of(job));
+        when(positions.findForUpdate("job", 2L)).thenReturn(Optional.of(job));
         when(applications.findByJobPositionIdOrderByCreatedAtDesc(5L)).thenReturn(List.of(application));
         LocalDateTime createdAt = LocalDateTime.of(2026, 11, 18, 12, 0);
         application.setCreatedAt(createdAt);
@@ -346,7 +351,7 @@ class CandidatePipelineServiceTest {
     void distinguishesOptionalStageTypes() {
         JobPosition job = new JobPosition();
         job.setId(5L);
-        when(positions.findByPublicIdAndTenantIdAndDeactivatedFalse("job", 2L)).thenReturn(Optional.of(job));
+        when(positions.findForUpdate("job", 2L)).thenReturn(Optional.of(job));
         var approval = stage(10L, "approval");
         var background = stage(11L, "background");
         var custom = stage(12L, "custom");

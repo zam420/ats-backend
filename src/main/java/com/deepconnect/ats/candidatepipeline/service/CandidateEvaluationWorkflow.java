@@ -20,6 +20,9 @@ import com.deepconnect.ats.evaluationplan.enums.EvaluationPlanRoundType;
 import com.deepconnect.ats.job.model.JobEvaluationPlanRound;
 import com.deepconnect.ats.jobapplication.model.JobApplication;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 public final class CandidateEvaluationWorkflow {
     private CandidateEvaluationWorkflow() {}
 
@@ -69,10 +72,30 @@ public final class CandidateEvaluationWorkflow {
                 .orElse(null);
     }
 
+    public static CandidateEvaluationRound advanceScheduledRound(JobApplication application,
+            List<CandidateEvaluationRound> rounds, Instant now) {
+        if (application.getEvaluationDecision() != null) return null;
+        CandidateEvaluationRound current = currentRound(application, rounds);
+        if (current == null || current.getStatus() != CandidateEvaluationStatus.SCHEDULED) return null;
+        Integer duration = current.getDurationMinutes();
+        if (current.getScheduledAt() == null || duration == null || duration <= 0) {
+            log.warn("Cannot automatically advance scheduled evaluation round {}: missing or invalid schedule or duration",
+                    current.getPublicId());
+            return null;
+        }
+        Instant threshold = current.getScheduledAt().plusSeconds(Math.min(duration, 30) * 60L);
+        if (!now.isAfter(threshold)) return null;
+        current.setStatus(CandidateEvaluationStatus.AWAITING_FEEDBACK);
+        current.setStatusChangedAt(now);
+        return current;
+    }
+
     public static CandidateEvaluationRound recordResult(JobApplication application, List<CandidateEvaluationRound> rounds,
             String roundId, CandidateEvaluationResult result) {
         if (result == null || application.getEvaluationDecision() != null) throw stale();
         CandidateEvaluationRound current = requireCurrent(application, rounds, roundId);
+        if (current.getStatus() == CandidateEvaluationStatus.CONFLICTING_FEEDBACK
+                && result == CandidateEvaluationResult.CANCELLED) throw stale();
         current.setStatusChangedAt(Instant.now());
         current.setStatus(CandidateEvaluationStatus.COMPLETED);
         current.setResult(result);
@@ -81,11 +104,12 @@ public final class CandidateEvaluationWorkflow {
 
     public static CandidateEvaluationRound changeStatus(JobApplication application, List<CandidateEvaluationRound> rounds,
             String roundId, CandidateEvaluationStatus status) {
-        if (status == null || status == CandidateEvaluationStatus.COMPLETED
-                || status == CandidateEvaluationStatus.SCHEDULED || application.getEvaluationDecision() != null) {
+        if ((status != CandidateEvaluationStatus.PENDING && status != CandidateEvaluationStatus.AWAITING_FEEDBACK)
+                || application.getEvaluationDecision() != null) {
             throw stale();
         }
         CandidateEvaluationRound current = requireCurrent(application, rounds, roundId);
+        if (current.getStatus() == CandidateEvaluationStatus.CONFLICTING_FEEDBACK) throw stale();
         if (current.getStatus() != status) current.setStatusChangedAt(Instant.now());
         current.setStatus(status);
         return current;
@@ -95,6 +119,7 @@ public final class CandidateEvaluationWorkflow {
             String roundId, Instant scheduledAt) {
         if (scheduledAt == null || application.getEvaluationDecision() != null) throw stale();
         CandidateEvaluationRound current = requireCurrent(application, rounds, roundId);
+        if (current.getStatus() == CandidateEvaluationStatus.CONFLICTING_FEEDBACK) throw stale();
         current.setScheduledAt(scheduledAt);
         if (current.getStatus() != CandidateEvaluationStatus.SCHEDULED) current.setStatusChangedAt(Instant.now());
         current.setStatus(CandidateEvaluationStatus.SCHEDULED);
@@ -116,11 +141,6 @@ public final class CandidateEvaluationWorkflow {
         return status == CandidateEvaluationStatus.AWAITING_FEEDBACK;
     }
 
-    /**
-     * Completes the round once every current interviewer has submitted. The round result is the average of the
-     * interviewers' ratings (Strong Yes 2, Yes 1, No -1, Strong No -2); an average of 1.5 or more is Strong Yes,
-     * above 0 is Yes, down to above -1.5 is No, otherwise Strong No.
-     */
     public static boolean completeIfAllSubmitted(CandidateEvaluationRound round, List<CandidateEvaluationFeedback> feedbacks) {
         List<String> interviewers = round.getInterviewers();
         if (interviewers == null || interviewers.isEmpty()) return false;
@@ -133,23 +153,24 @@ public final class CandidateEvaluationWorkflow {
             if (feedback == null) return false;
             submitted.add(feedback);
         }
-        double average = submitted.stream().mapToInt(item -> weight(item.getResult())).average().orElseThrow();
-        round.setResult(average >= 1.5 ? CandidateEvaluationResult.STRONG_YES
-                : average > 0 ? CandidateEvaluationResult.YES
-                : average > -1.5 ? CandidateEvaluationResult.NO : CandidateEvaluationResult.STRONG_NO);
-        round.setStatus(CandidateEvaluationStatus.COMPLETED);
+        long strongYes = count(submitted, CandidateEvaluationResult.STRONG_YES);
+        long yes = count(submitted, CandidateEvaluationResult.YES);
+        long strongNo = count(submitted, CandidateEvaluationResult.STRONG_NO);
+        long no = count(submitted, CandidateEvaluationResult.NO);
+        if (strongYes + yes > 0 && strongNo + no > 0) {
+            round.setStatus(CandidateEvaluationStatus.CONFLICTING_FEEDBACK);
+        } else {
+            round.setResult(strongYes + yes > 0
+                    ? (strongYes > yes ? CandidateEvaluationResult.STRONG_YES : CandidateEvaluationResult.YES)
+                    : (strongNo > no ? CandidateEvaluationResult.STRONG_NO : CandidateEvaluationResult.NO));
+            round.setStatus(CandidateEvaluationStatus.COMPLETED);
+        }
         round.setStatusChangedAt(Instant.now());
         return true;
     }
 
-    private static int weight(CandidateEvaluationResult result) {
-        return switch (result) {
-            case STRONG_YES -> 2;
-            case YES -> 1;
-            case NO -> -1;
-            case STRONG_NO -> -2;
-            default -> throw stale();
-        };
+    private static long count(List<CandidateEvaluationFeedback> feedbacks, CandidateEvaluationResult result) {
+        return feedbacks.stream().filter(feedback -> feedback.getResult() == result).count();
     }
 
     public static void decide(JobApplication application, List<CandidateEvaluationRound> rounds,

@@ -38,6 +38,7 @@ public final class CandidateEvaluationDto {
     }
 
     public record Response(boolean initialized, CandidateEvaluationDecision decision, boolean canManage, boolean canDecide,
+            boolean canResolveConflict,
             List<Round> rounds, List<UserSummary> interviewers, String currentUserId) {}
 
     public record FeedbackRequest(CandidateEvaluationResult result, @Size(max = 1000) String overallFeedback,

@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import com.deepconnect.ats.candidatepipeline.enums.CandidateEvaluationDecision;
 import com.deepconnect.ats.candidatepipeline.enums.CandidateEvaluationResult;
 import com.deepconnect.ats.candidatepipeline.enums.CandidateEvaluationStatus;
+import com.deepconnect.ats.candidatepipeline.model.CandidateEvaluationFeedback;
 import com.deepconnect.ats.candidatepipeline.model.CandidateEvaluationRound;
 import com.deepconnect.ats.candidatepipeline.service.CandidateEvaluationWorkflow;
 import com.deepconnect.ats.common.exception.CustomException;
@@ -107,10 +108,62 @@ class CandidateEvaluationWorkflowTest {
         assertThrows(CustomException.class, () -> CandidateEvaluationWorkflow.changeInterviewers(application, rounds,
                 "first", List.of("new-user")));
         assertThrows(CustomException.class, () -> CandidateEvaluationWorkflow.changeStatus(application, rounds,
-                "second", CandidateEvaluationStatus.IN_PROGRESS));
+                "second", CandidateEvaluationStatus.AWAITING_FEEDBACK));
         assertThrows(CustomException.class, () -> CandidateEvaluationWorkflow.changeStatus(application, rounds,
                 "first", CandidateEvaluationStatus.COMPLETED));
         assertNull(rounds.get(0).getResult());
+    }
+
+    @Test
+    void advancesOnlyCurrentScheduledRoundAfterTheApplicableThreshold() {
+        JobApplication application = application();
+        List<CandidateEvaluationRound> rounds = CandidateEvaluationWorkflow.initialize(application,
+                List.of(template(10, 0), template(11, 1)), List.of());
+        CandidateEvaluationRound current = rounds.get(0);
+        CandidateEvaluationRound later = rounds.get(1);
+        Instant scheduledAt = Instant.parse("2026-11-25T10:00:00Z");
+        current.setStatus(CandidateEvaluationStatus.SCHEDULED);
+        current.setScheduledAt(scheduledAt);
+        current.setDurationMinutes(60);
+        later.setStatus(CandidateEvaluationStatus.SCHEDULED);
+        later.setScheduledAt(scheduledAt);
+        later.setDurationMinutes(10);
+
+        assertNull(CandidateEvaluationWorkflow.advanceScheduledRound(application, rounds, scheduledAt.plusSeconds(1800)));
+        assertEquals(CandidateEvaluationStatus.SCHEDULED, later.getStatus());
+        Instant afterThreshold = scheduledAt.plusSeconds(1801);
+        assertSame(current, CandidateEvaluationWorkflow.advanceScheduledRound(application, rounds, afterThreshold));
+        assertEquals(CandidateEvaluationStatus.AWAITING_FEEDBACK, current.getStatus());
+        assertEquals(afterThreshold, current.getStatusChangedAt());
+        assertEquals(CandidateEvaluationStatus.SCHEDULED, later.getStatus());
+        assertNull(CandidateEvaluationWorkflow.advanceScheduledRound(application, rounds, afterThreshold.plusSeconds(1)));
+        assertEquals(afterThreshold, current.getStatusChangedAt());
+
+        current.setStatus(CandidateEvaluationStatus.COMPLETED);
+        current.setResult(CandidateEvaluationResult.YES);
+        assertSame(later, CandidateEvaluationWorkflow.advanceScheduledRound(application, rounds, scheduledAt.plusSeconds(601)));
+        assertEquals(CandidateEvaluationStatus.AWAITING_FEEDBACK, later.getStatus());
+    }
+
+    @Test
+    void doesNotAdvanceAtShortOrThirtyMinuteBoundaryOrWithMissingDuration() {
+        JobApplication application = application();
+        List<CandidateEvaluationRound> rounds = CandidateEvaluationWorkflow.initialize(application, List.of(template(10, 0)), List.of());
+        CandidateEvaluationRound round = rounds.get(0);
+        Instant scheduledAt = Instant.parse("2026-11-25T10:00:00Z");
+        round.setStatus(CandidateEvaluationStatus.SCHEDULED);
+        round.setScheduledAt(scheduledAt);
+        round.setDurationMinutes(10);
+        assertNull(CandidateEvaluationWorkflow.advanceScheduledRound(application, rounds, scheduledAt.plusSeconds(600)));
+        assertSame(round, CandidateEvaluationWorkflow.advanceScheduledRound(application, rounds, scheduledAt.plusSeconds(601)));
+        round.setStatus(CandidateEvaluationStatus.SCHEDULED);
+        round.setDurationMinutes(30);
+        assertNull(CandidateEvaluationWorkflow.advanceScheduledRound(application, rounds, scheduledAt.plusSeconds(1800)));
+        assertSame(round, CandidateEvaluationWorkflow.advanceScheduledRound(application, rounds, scheduledAt.plusSeconds(1801)));
+        round.setStatus(CandidateEvaluationStatus.SCHEDULED);
+        round.setDurationMinutes(null);
+        assertNull(CandidateEvaluationWorkflow.advanceScheduledRound(application, rounds, scheduledAt.plusSeconds(3600)));
+        assertEquals(CandidateEvaluationStatus.SCHEDULED, round.getStatus());
     }
 
     @Test
@@ -156,5 +209,74 @@ class CandidateEvaluationWorkflowTest {
                 "first", List.of("new-user")));
         assertThrows(CustomException.class, () -> CandidateEvaluationWorkflow.changeInterviewers(application, rounds,
                 "extra", List.of("same", "same")));
+    }
+
+    @Test
+    void aggregatesSameSideRatingsWithTiesFavoringOrdinaryRatings() {
+        assertAggregate(CandidateEvaluationResult.STRONG_YES, CandidateEvaluationResult.STRONG_YES);
+        assertAggregate(CandidateEvaluationResult.NO, CandidateEvaluationResult.NO);
+        assertAggregate(CandidateEvaluationResult.YES, CandidateEvaluationResult.STRONG_YES, CandidateEvaluationResult.YES);
+        assertAggregate(CandidateEvaluationResult.NO, CandidateEvaluationResult.STRONG_NO, CandidateEvaluationResult.NO);
+        assertAggregate(CandidateEvaluationResult.STRONG_YES, CandidateEvaluationResult.STRONG_YES,
+                CandidateEvaluationResult.STRONG_YES, CandidateEvaluationResult.YES);
+        assertAggregate(CandidateEvaluationResult.NO, CandidateEvaluationResult.NO, CandidateEvaluationResult.NO,
+                CandidateEvaluationResult.NO, CandidateEvaluationResult.STRONG_NO);
+        assertAggregate(CandidateEvaluationResult.STRONG_NO, CandidateEvaluationResult.STRONG_NO,
+                CandidateEvaluationResult.STRONG_NO, CandidateEvaluationResult.NO);
+        assertAggregate(CandidateEvaluationResult.YES, CandidateEvaluationResult.YES, CandidateEvaluationResult.YES,
+                CandidateEvaluationResult.STRONG_YES);
+    }
+
+    private void assertAggregate(CandidateEvaluationResult expected, CandidateEvaluationResult... results) {
+        CandidateEvaluationRound round = new CandidateEvaluationRound();
+        round.setStatus(CandidateEvaluationStatus.AWAITING_FEEDBACK);
+        List<String> interviewers = new ArrayList<>();
+        List<CandidateEvaluationFeedback> feedbacks = new ArrayList<>();
+        for (int i = 0; i < results.length; i++) {
+            String id = "interviewer-" + i;
+            interviewers.add(id);
+            CandidateEvaluationFeedback feedback = new CandidateEvaluationFeedback();
+            feedback.setInterviewerId(id);
+            feedback.setSubmitted(true);
+            feedback.setResult(results[i]);
+            feedbacks.add(feedback);
+        }
+        round.setInterviewers(interviewers);
+        assertTrue(CandidateEvaluationWorkflow.completeIfAllSubmitted(round, feedbacks));
+        assertEquals(CandidateEvaluationStatus.COMPLETED, round.getStatus());
+        assertEquals(expected, round.getResult());
+    }
+
+    @Test
+    void conflictRequiresAllFeedbackAndCannotBeBypassed() {
+        JobApplication application = application();
+        JobEvaluationPlanRound template = template(10, 0);
+        template.setInterviewers(List.of("first", "second", "third"));
+        List<CandidateEvaluationRound> rounds = CandidateEvaluationWorkflow.initialize(application, List.of(template), List.of());
+        CandidateEvaluationRound round = rounds.get(0);
+        round.setPublicId("first");
+        round.setStatus(CandidateEvaluationStatus.AWAITING_FEEDBACK);
+        List<CandidateEvaluationFeedback> feedbacks = new ArrayList<>();
+        for (String id : template.getInterviewers()) {
+            CandidateEvaluationFeedback feedback = new CandidateEvaluationFeedback();
+            feedback.setInterviewerId(id);
+            feedback.setResult(id.equals("third") ? CandidateEvaluationResult.NO : CandidateEvaluationResult.STRONG_YES);
+            feedback.setSubmitted(!id.equals("third"));
+            feedbacks.add(feedback);
+        }
+        assertFalse(CandidateEvaluationWorkflow.completeIfAllSubmitted(round, feedbacks));
+        assertEquals(CandidateEvaluationStatus.AWAITING_FEEDBACK, round.getStatus());
+        feedbacks.get(2).setSubmitted(true);
+        assertTrue(CandidateEvaluationWorkflow.completeIfAllSubmitted(round, feedbacks));
+        assertEquals(CandidateEvaluationStatus.CONFLICTING_FEEDBACK, round.getStatus());
+        assertNull(round.getResult());
+        assertNotNull(round.getStatusChangedAt());
+        assertThrows(CustomException.class, () -> CandidateEvaluationWorkflow.schedule(application, rounds, "first", Instant.now()));
+        assertThrows(CustomException.class, () -> CandidateEvaluationWorkflow.changeStatus(application, rounds, "first", CandidateEvaluationStatus.PENDING));
+        assertThrows(CustomException.class, () -> CandidateEvaluationWorkflow.changeStatus(application, rounds, "first", CandidateEvaluationStatus.CONFLICTING_FEEDBACK));
+        assertThrows(CustomException.class, () -> CandidateEvaluationWorkflow.recordResult(application, rounds, "first", CandidateEvaluationResult.CANCELLED));
+        CandidateEvaluationWorkflow.recordResult(application, rounds, "first", CandidateEvaluationResult.NO);
+        assertEquals(CandidateEvaluationStatus.COMPLETED, round.getStatus());
+        assertEquals(CandidateEvaluationResult.NO, round.getResult());
     }
 }
