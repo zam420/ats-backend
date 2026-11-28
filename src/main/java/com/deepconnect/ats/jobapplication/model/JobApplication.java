@@ -8,6 +8,7 @@ import org.hibernate.validator.constraints.Length;
 import com.deepconnect.ats.common.model.BaseEntity;
 import com.deepconnect.ats.job.model.JobPosition;
 import com.deepconnect.ats.jobapplication.enums.JobApplicationCloseType;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.deepconnect.ats.candidatepipeline.enums.CandidateEvaluationDecision;
 
 import jakarta.persistence.Column;
@@ -40,6 +41,9 @@ public class JobApplication extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "job_position_id", insertable = false, updatable = false)
     private JobPosition jobPosition;
+
+    @Column(name = "job_position_public_id", nullable = false, length = 12, updatable = false)
+    private String jobPositionPublicId; // Public URL identifier
 
     /*The ID of the recruitment pipeline stage the application is currently in.
     It can be null when a closed application's stage was later deleted.
@@ -99,6 +103,11 @@ public class JobApplication extends BaseEntity {
     @Column(name = "preferred_name", length = 50)
     @Length(max = 50, message = "{field.jobApplication.preferredName}{validation.lengthMax}")
     private String preferredName;
+
+    @JsonIgnore
+    public String getName() {
+        return ((firstName == null ? "" : firstName) + " " + (lastName == null ? "" : lastName)).trim();
+    }
 
     @Column(nullable = false, length = 100)
     @NotBlank(message = "{field.jobApplication.email}{validation.notBlank}")

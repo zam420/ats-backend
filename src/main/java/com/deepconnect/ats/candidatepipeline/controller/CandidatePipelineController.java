@@ -40,14 +40,14 @@ public class CandidatePipelineController {
         return ApiResult.success(service.board(jobId));
     }
 
-    @PostMapping("/{jobId}/candidates/{candidateId}/move")
+    @PostMapping("/{jobId}/candidate/{candidateId}/move")
     public ApiResult<Boolean> move(@PathVariable @NotBlank String jobId,
             @PathVariable @NotBlank String candidateId, @RequestBody @Valid MoveCandidateReq request) {
         service.move(jobId, candidateId, request);
         return ApiResult.success(true);
     }
 
-    @PostMapping("/{jobId}/candidates/{candidateId}/reject")
+    @PostMapping("/{jobId}/candidate/{candidateId}/reject")
     public ApiResult<Boolean> reject(@PathVariable @NotBlank String jobId,
             @PathVariable @NotBlank String candidateId, @RequestBody @Valid RejectCandidateReq request) {
         service.reject(jobId, candidateId, request);

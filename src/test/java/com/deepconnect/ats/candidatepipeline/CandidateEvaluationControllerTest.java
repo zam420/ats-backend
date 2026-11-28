@@ -2,6 +2,7 @@ package com.deepconnect.ats.candidatepipeline;
 
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import java.time.Instant;
@@ -26,7 +27,7 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 class CandidateEvaluationControllerTest {
     private final CandidateEvaluationService service = mock(CandidateEvaluationService.class);
     private MockMvc mvc;
-    private final String base = "/api/pipeline/job/candidates/candidate/evaluations";
+    private final String base = "/api/pipeline/job/candidate/candidate/evaluation";
 
     @BeforeEach
     void setUp() {
@@ -37,6 +38,12 @@ class CandidateEvaluationControllerTest {
         mvc = MockMvcBuilders.standaloneSetup(new CandidateEvaluationController(service))
                 .setMessageConverters(new MappingJackson2HttpMessageConverter(mapper))
                 .setValidator(validator).build();
+    }
+
+    @Test
+    void readsEvaluationsAtSingularPath() throws Exception {
+        mvc.perform(get(base)).andExpect(status().isOk());
+        verify(service).get("job", "candidate");
     }
 
     @Test

@@ -134,6 +134,7 @@ public class JobApplicationService {
         });
         JobApplication application = new JobApplication();
         application.setJobPositionId(job.getId());
+        application.setJobPositionPublicId(job.getPublicId());
         application.setEvaluationPlanVersion(plan.get(0).getPlanVersion());
         application.setRecruitmentPipelineStage(rounds.get(0).getId());
         application.setCandidateUserId(AuthService.getLoggedInUser().getUserId());

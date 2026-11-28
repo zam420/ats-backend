@@ -26,6 +26,8 @@ public interface JobApplicationRepository extends JpaRepository<JobApplication, 
 
     boolean existsByRecruitmentPipelineStageAndClosedFalse(Long stageId);
 
+    List<JobApplication> findByJobPositionPublicId(String jobPositionPublicId);
+
     List<JobApplication> findByJobPositionIdOrderByCreatedAtDesc(Long jobPositionId);
 
     Optional<JobApplication> findByPublicIdAndJobPositionId(String publicId, Long jobPositionId);

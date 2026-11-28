@@ -23,7 +23,7 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/api/pipeline/{jobId}/candidates/{candidateId}")
+@RequestMapping("/api/pipeline/{jobId}/candidate/{candidateId}")
 @RequiredArgsConstructor
 @Validated
 @PreAuthorize("hasAuthority('jps')")

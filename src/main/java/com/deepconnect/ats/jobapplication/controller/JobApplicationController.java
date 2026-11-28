@@ -39,5 +39,4 @@ public class JobApplicationController {
         return ApiResult.success(jobApplicationService.findAllForCandidate(query));
     }
 
-
 }

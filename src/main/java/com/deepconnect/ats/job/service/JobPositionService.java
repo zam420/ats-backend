@@ -396,6 +396,11 @@ public class JobPositionService {
         return JobPositionDetailsRes.from(position);
     }
 
+    public void assertReadAccess(String publicId) {
+        JobPosition position = jobPositionRepository.findByPublicIdAndTenantIdAndDeactivatedFalse(publicId, AuthService.getLoggedInTenantId()).orElseThrow(() -> new InternalServerException(String.format("Job position not found: User: %s, Position: %s", AuthService.getLoggedInUser().getPublicId(), publicId)));
+        jobPositionAccessService.assertReadAccess(AuthService.getLoggedInUser(), position);
+    }
+
     @Transactional(readOnly = true)
     public AtsPageRsp<JobPositionRes> findAll(JobPositionSearchQuery query) {
         LoggedInUserDetails loggedInUser = AuthService.getLoggedInUser();
